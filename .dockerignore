@@ -1,0 +1,6 @@
+.git
+.pytest_cache
+pytest-cache-files-*
+sources
+frontend/node_modules
+frontend/dist

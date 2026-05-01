@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 
 from backend.app.api.admin import get_ingestion_service
 from backend.app.dependencies import build_retrieval_service, get_async_engine
-from backend.app.api.search import answer_evidence, get_retrieval_service
+from backend.app.api.search import answer_evidence, answer_links, get_retrieval_service, reader_url_for, synthesize_answer
 from backend.app.main import create_app
 from backend.app.retrieval.service import RankedHit, RetrievalWarning
 
@@ -250,6 +250,17 @@ def test_answer_endpoint_returns_structured_grounded_evidence() -> None:
     ]
 
 
+def test_docs_content_reader_url_resolution_from_markdown_path() -> None:
+    assert reader_url_for(
+        {
+            "repo": "elastic/docs-content",
+            "path": "solutions/search/ranking/semantic-reranking.mdx",
+            "heading_path": "Semantic reranking > Use cases",
+        },
+        "https://github.com/elastic/docs-content/blob/main/solutions/search/ranking/semantic-reranking.mdx",
+    ) == "https://www.elastic.co/docs/solutions/search/ranking/semantic-reranking#use-cases"
+
+
 def test_answer_evidence_uses_source_url_for_non_docs_repos() -> None:
     evidence = answer_evidence(
         "hybrid retrieval",
@@ -273,6 +284,117 @@ def test_answer_evidence_uses_source_url_for_non_docs_repos() -> None:
 
     assert evidence[0].reader_url == evidence[0].source_url
     assert evidence[0].link_label == "View source"
+
+
+def test_answer_evidence_prefers_docs_content_and_limits_counts() -> None:
+    hits = [
+        RankedHit(
+            id="lab-1",
+            score=0.99,
+            metadata={
+                "repo": "elastic/elasticsearch-labs",
+                "path": "supporting-blog-content/hybrid/README.md",
+                "title": "Lab hybrid retrieval example",
+                "heading_path": "Lab > Hybrid retrieval",
+                "final_rank": 1,
+            },
+            source_url="https://github.com/elastic/elasticsearch-labs/blob/abc/supporting-blog-content/hybrid/README.md#hybrid-retrieval",
+            text="Hybrid retrieval improvements can combine lexical matching, semantic recall, and application-specific examples.",
+            lexical_score=0.8,
+            dense_score=0.9,
+        ),
+        RankedHit(
+            id="docs-1",
+            score=0.88,
+            metadata={
+                "repo": "elastic/docs-content",
+                "path": "solutions/search/ranking.md",
+                "title": "Ranking and reranking",
+                "heading_path": "Ranking and reranking > Two-stage retrieval pipelines",
+                "final_rank": 2,
+            },
+            source_url="https://github.com/elastic/docs-content/blob/main/solutions/search/ranking.md#two-stage-retrieval-pipelines",
+            text="Hybrid retrieval improvements start with a first-stage candidate set and use reranking only on the strongest candidates.",
+            lexical_score=0.7,
+            dense_score=0.8,
+        ),
+        RankedHit(
+            id="docs-2",
+            score=0.82,
+            metadata={
+                "repo": "elastic/docs-content",
+                "path": "solutions/search/vector/knn.md",
+                "title": "kNN search in Elasticsearch",
+                "heading_path": "kNN search > Combine approximate kNN with other features",
+                "final_rank": 3,
+            },
+            source_url="https://github.com/elastic/docs-content/blob/main/solutions/search/vector/knn.md#combine-approximate-knn-with-other-features",
+            text="Hybrid retrieval improvements often combine approximate kNN with filters and keyword queries for better relevance.",
+            lexical_score=0.6,
+            dense_score=0.75,
+        ),
+        RankedHit(
+            id="docs-3",
+            score=0.7,
+            metadata={
+                "repo": "elastic/docs-content",
+                "path": "solutions/search/semantic-search.md",
+                "title": "Semantic search",
+                "heading_path": "Semantic search > Blogs",
+                "final_rank": 4,
+            },
+            source_url="https://github.com/elastic/docs-content/blob/main/solutions/search/semantic-search.md#blogs",
+            text="Semantic search can improve hybrid retrieval by adding dense vector matches to lexical results.",
+            lexical_score=0.5,
+            dense_score=0.7,
+        ),
+    ]
+
+    evidence = answer_evidence("hybrid retrieval improvements", hits, limit=3)
+
+    assert len(evidence) == 3
+    assert [item.repo for item in evidence] == [
+        "elastic/docs-content",
+        "elastic/docs-content",
+        "elastic/docs-content",
+    ]
+    assert evidence[0].title == "Ranking and reranking"
+    assert evidence[0].reader_url == (
+        "https://www.elastic.co/docs/solutions/search/ranking#two-stage-retrieval-pipelines"
+    )
+    assert [link.url for link in answer_links(evidence, limit=3)] == [
+        "https://www.elastic.co/docs/solutions/search/ranking#two-stage-retrieval-pipelines",
+        "https://www.elastic.co/docs/solutions/search/vector/knn#combine-approximate-knn-with-other-features",
+        "https://www.elastic.co/docs/solutions/search/semantic-search#blogs",
+    ]
+
+
+def test_answer_summary_uses_grounded_evidence_text() -> None:
+    evidence = answer_evidence(
+        "hybrid retrieval improvements",
+        [
+            RankedHit(
+                id="docs-1",
+                score=0.9,
+                metadata={
+                    "repo": "elastic/docs-content",
+                    "path": "solutions/search/ranking.md",
+                    "title": "Ranking and reranking",
+                    "heading_path": "Ranking and reranking > Two-stage retrieval pipelines",
+                    "final_rank": 1,
+                },
+                source_url="https://github.com/elastic/docs-content/blob/main/solutions/search/ranking.md#two-stage-retrieval-pipelines",
+                text="Hybrid retrieval improvements should merge lexical and semantic candidates before reranking the strongest evidence.",
+                lexical_score=0.6,
+                dense_score=0.7,
+            )
+        ],
+    )
+
+    summary = synthesize_answer("hybrid retrieval improvements", evidence)
+
+    assert "Hybrid retrieval improvements should merge lexical and semantic candidates" in summary
+    assert "Ranking and reranking" not in summary
 
 
 def test_analyze_endpoint_returns_recommendations_with_evidence() -> None:
