@@ -36,7 +36,12 @@ a {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+  gap: 16px;
   margin-bottom: 20px;
+}
+
+.sync-button {
+  flex: 0 0 auto;
 }
 
 .eyebrow {
@@ -289,6 +294,12 @@ button:disabled {
   font-weight: 700;
 }
 
+.alert-success {
+  border-color: #a7dfc1;
+  color: #14532d;
+  background: #effaf3;
+}
+
 .spin {
   animation: spin 0.9s linear infinite;
 }
@@ -304,11 +315,17 @@ button:disabled {
     padding: 18px;
   }
 
+  .topbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .filter-row,
   .workspace-grid {
     grid-template-columns: 1fr;
   }
 
+  .sync-button,
   .filter-row button {
     width: 100%;
   }

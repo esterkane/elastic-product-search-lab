@@ -31,7 +31,7 @@ class EmbeddingClient:
 def parse_embedding_response(data: Any, expected_count: int) -> list[list[float]]:
     embeddings: Any
     if isinstance(data, dict):
-        embeddings = data.get("embeddings", data.get("data"))
+        embeddings = data.get("embeddings", data.get("value", data.get("data")))
     else:
         embeddings = data
 
@@ -47,4 +47,3 @@ def parse_embedding_response(data: Any, expected_count: int) -> list[list[float]
             raise ValueError("Embedding endpoint returned a malformed vector")
         vectors.append([float(value) for value in embedding])
     return vectors
-

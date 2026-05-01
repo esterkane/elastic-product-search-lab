@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 
 from backend.app.api.admin import get_ingestion_service
+from backend.app.dependencies import build_retrieval_service, get_async_engine
 from backend.app.api.search import get_retrieval_service
 from backend.app.main import create_app
 from backend.app.retrieval.service import RankedHit
@@ -136,12 +137,12 @@ def test_ingest_repo_endpoint() -> None:
     )
 
     assert response.status_code == 200
-    assert response.json() == {
-        "status": "completed",
-        "repo_url": "https://github.com/elastic/docs-content.git",
-        "branch": "main",
-        "message": "Ingested for test.",
-    }
+    body = response.json()
+    assert body["status"] == "completed"
+    assert body["repo_url"] == "https://github.com/elastic/docs-content.git"
+    assert body["branch"] == "main"
+    assert body["message"] == "Ingested for test."
+    assert body["new_chunks"] == 0
 
 
 def test_structured_validation_error() -> None:
@@ -153,11 +154,15 @@ def test_structured_validation_error() -> None:
     assert response.json()["error"]["code"] == "validation_error"
 
 
-def test_unconfigured_retrieval_returns_structured_error() -> None:
+def test_unconfigured_retrieval_returns_structured_error(monkeypatch) -> None:
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.delenv("QDRANT_URL", raising=False)
+    monkeypatch.delenv("TEI_EMBED_URL", raising=False)
+    get_async_engine.cache_clear()
+    build_retrieval_service.cache_clear()
     client = TestClient(create_app())
 
     response = client.post("/api/v1/search", json={"query": "hybrid retrieval"})
 
     assert response.status_code == 503
     assert response.json()["error"]["code"] == "retrieval_not_configured"
-

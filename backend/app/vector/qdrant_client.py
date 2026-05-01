@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Protocol
+from uuid import NAMESPACE_URL, uuid5
 
 import httpx
 
@@ -38,6 +39,21 @@ class QdrantVectorRepository:
         self.timeout = timeout
         self.headers = {"api-key": api_key} if api_key else {}
 
+    async def ensure_collection(self, vector_size: int) -> None:
+        collection_url = f"{self.base_url}/collections/{self.collection}"
+        async with httpx.AsyncClient(timeout=self.timeout, headers=self.headers) as client:
+            response = await client.get(collection_url)
+            if response.status_code == 200:
+                return
+            if response.status_code != 404:
+                response.raise_for_status()
+
+            create_response = await client.put(
+                collection_url,
+                json={"vectors": {"size": vector_size, "distance": "Cosine"}},
+            )
+            create_response.raise_for_status()
+
     async def upsert(self, points: list[VectorPoint]) -> None:
         if not points:
             return
@@ -45,9 +61,9 @@ class QdrantVectorRepository:
         payload = {
             "points": [
                 {
-                    "id": point.id,
+                    "id": qdrant_point_id(point.id),
                     "vector": point.vector,
-                    "payload": {**point.payload, "source_url": point.source_url},
+                    "payload": {**point.payload, "chunk_id": point.id, "source_url": point.source_url},
                 }
                 for point in points
             ]
@@ -87,11 +103,15 @@ def qdrant_hit_to_search_hit(hit: dict) -> SearchHit:
     payload = dict(hit.get("payload") or {})
     source_url = str(payload.get("source_url") or "")
     return SearchHit(
-        id=str(hit.get("id")),
+        id=str(payload.get("chunk_id") or hit.get("id")),
         score=float(hit.get("score", 0.0)),
         metadata=payload,
         source_url=source_url,
     )
+
+
+def qdrant_point_id(chunk_id: str) -> str:
+    return str(uuid5(NAMESPACE_URL, f"elastic-repo-inventory:{chunk_id}"))
 
 
 def vector_payload(

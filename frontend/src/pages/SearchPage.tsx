@@ -1,15 +1,17 @@
 import { FormEvent, useMemo, useState } from "react";
-import { AlertCircle, Loader2, Search } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, RefreshCw, Search } from "lucide-react";
 import { ResultCard } from "../components/ResultCard";
 import { RecommendationPanel } from "../components/RecommendationPanel";
 import { SourceList } from "../components/SourceList";
 import {
   analyze,
   answer,
+  ingestRepo,
   search,
   type AnalyzeResponse,
   type AnswerResponse,
   type Category,
+  type IngestRepoResponse,
   type SearchResponse
 } from "../lib/api";
 
@@ -44,6 +46,8 @@ export function SearchPage() {
   const [analysisData, setAnalysisData] = useState<AnalyzeResponse | null>(null);
   const [answerData, setAnswerData] = useState<AnswerResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isIndexing, setIsIndexing] = useState(false);
+  const [indexStatus, setIndexStatus] = useState<IngestRepoResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const categories = useMemo(
@@ -86,6 +90,25 @@ export function SearchPage() {
     }
   }
 
+  async function handleIndexChanges() {
+    setIsIndexing(true);
+    setError(null);
+    setIndexStatus(null);
+
+    try {
+      const result = await ingestRepo({
+        ...(repo ? { repo } : {}),
+        force: false,
+        update_sources: true
+      });
+      setIndexStatus(result);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Indexing failed.");
+    } finally {
+      setIsIndexing(false);
+    }
+  }
+
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -93,6 +116,10 @@ export function SearchPage() {
           <p className="eyebrow">Elastic repo intelligence</p>
           <h1>Search, Explain, Improve</h1>
         </div>
+        <button className="sync-button" type="button" onClick={handleIndexChanges} disabled={isIndexing}>
+          {isIndexing ? <Loader2 aria-hidden="true" className="spin" size={18} /> : <RefreshCw aria-hidden="true" size={18} />}
+          <span>{isIndexing ? "Indexing" : "Sync & index changes"}</span>
+        </button>
       </header>
 
       <form className="search-form" onSubmit={handleSubmit}>
@@ -141,6 +168,16 @@ export function SearchPage() {
         <div className="alert" role="alert">
           <AlertCircle aria-hidden="true" size={18} />
           <span>{error}</span>
+        </div>
+      )}
+
+      {indexStatus && (
+        <div className="alert alert-success" role="status">
+          <CheckCircle2 aria-hidden="true" size={18} />
+          <span>
+            {indexStatus.message} {indexStatus.repos_scanned} repos, {indexStatus.documents_scanned} docs,{" "}
+            {indexStatus.new_chunks} new chunks, {indexStatus.updated_chunks} updated chunks.
+          </span>
         </div>
       )}
 

@@ -49,6 +49,29 @@ export type QueryRequest = {
   filters?: SearchFilters;
 };
 
+export type IngestRepoRequest = {
+  repo_url?: string;
+  repo?: string;
+  branch?: string;
+  force?: boolean;
+  update_sources?: boolean;
+  max_files?: number;
+};
+
+export type IngestRepoResponse = {
+  status: string;
+  repo_url: string;
+  branch?: string | null;
+  message: string;
+  repos_scanned: number;
+  documents_scanned: number;
+  chunks_indexed: number;
+  new_chunks: number;
+  updated_chunks: number;
+  unchanged_chunks: number;
+  errors: string[];
+};
+
 const JSON_HEADERS = { "Content-Type": "application/json" };
 
 export async function search(request: QueryRequest): Promise<SearchResponse> {
@@ -61,6 +84,10 @@ export async function analyze(request: QueryRequest): Promise<AnalyzeResponse> {
 
 export async function answer(request: QueryRequest): Promise<AnswerResponse> {
   return postJson<AnswerResponse>("/api/v1/answer", request);
+}
+
+export async function ingestRepo(request: IngestRepoRequest): Promise<IngestRepoResponse> {
+  return postJson<IngestRepoResponse>("/api/v1/ingest/repo", request);
 }
 
 async function postJson<T>(url: string, body: unknown): Promise<T> {

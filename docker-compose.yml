@@ -86,8 +86,11 @@ services:
       TEI_EMBED_URL: http://tei-embed/embed
       TEI_RERANK_URL: http://tei-rerank/rerank
       LLM_URL: http://llm:11434
+      SOURCES_DIR: /app/sources
     ports:
       - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./sources:/app/sources
     depends_on:
       postgres:
         condition: service_healthy
@@ -116,9 +119,13 @@ services:
       APP_ENV: ${APP_ENV:-local}
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-repo_inventory}:${POSTGRES_PASSWORD:-repo_inventory}@postgres:5432/${POSTGRES_DB:-repo_inventory}
       QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION:-repo-docs}
       TEI_EMBED_URL: http://tei-embed/embed
       TEI_RERANK_URL: http://tei-rerank/rerank
+      SOURCES_DIR: /app/sources
       WORKER_READY_FILE: /tmp/worker-ready
+    volumes:
+      - ./sources:/app/sources
     depends_on:
       postgres:
         condition: service_healthy
