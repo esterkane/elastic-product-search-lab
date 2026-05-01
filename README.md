@@ -381,6 +381,102 @@ Backward compatibility and migration:
 - Existing vector points should continue to return results, but Qdrant filters only match fields present in the payload. Re-run **Sync & index changes** after this patch to refresh vector payloads with normalized `repo`, `path`, `heading_path`, `content_type`, and `license_family`.
 - A full rebuild is only needed if old vector payloads were created before metadata normalization and filtered Qdrant searches appear incomplete.
 
+## Operational Reliability Guide
+
+Current excerpt from this README:
+
+> The local reranker profile uses conservative request and batch limits by default. Override `TEI_RERANK_MAX_CONCURRENT_REQUESTS`, `TEI_RERANK_MAX_BATCH_REQUESTS`, or `TEI_RERANK_TOKENIZATION_WORKERS` only if the machine has enough spare CPU and memory.
+
+Current improvement suggestion emitted by the app:
+
+> Add retries and partial-result handling so recommendations still return evidence when one retrieval backend is unavailable.
+
+The reliability contract should keep the application useful whenever at least one grounded retrieval path is healthy. Users should see evidence, source links, and a clear degraded-mode warning instead of a blank answer when Qdrant, TEI reranking, OCR, or one ingestion source has a temporary failure.
+
+### Cache Policy
+
+| Cache | Current behavior | Recommended policy |
+| --- | --- | --- |
+| TEI model cache | Compose mounts `tei_embed_cache` and `tei_rerank_cache` volumes under `/data`, so model files survive container restarts. | Keep these named volumes. Do not delete them during normal troubleshooting because re-downloading models increases startup time and failure risk. |
+| Embeddings | Ingestion stores vectors in Qdrant and avoids re-embedding unchanged chunks by comparing deterministic chunk IDs and content hashes. | Continue using content hashes as the cache key. For query embeddings, add a small TTL cache keyed by normalized query plus model ID if repeated UI queries become expensive. |
+| Reranker inputs | No application-level reranker cache is implemented today. | Cache reranker scores by `query`, `chunk_id`, `content_hash`, and reranker model ID. Invalidate when content hash or model changes. |
+| OCR output | OCR is not implemented today. | If PDF or scanned-document OCR is added, cache extracted page text by file hash, page number, OCR engine, language list, and DPI. Store OCR confidence and page provenance beside the extracted text. |
+
+### Timeouts And Retries
+
+| Operation | Current timeout source | Retry guidance |
+| --- | --- | --- |
+| Git sync | `run_git` uses a 300 second subprocess timeout; metadata git reads use 60 seconds. | Retry transient network failures once with backoff. Do not retry permanent checkout or unknown-repository errors. |
+| Embedding requests | `EmbeddingClient` uses a 30 second HTTP timeout. | Retry idempotent batch embedding requests on timeout, 429, and 5xx. Keep `INGEST_EMBED_BATCH_SIZE` small on CPU-only machines. |
+| Qdrant search/upsert | `QdrantVectorRepository` uses a 30 second HTTP timeout. | Retry vector upserts because point IDs are deterministic and idempotent. For search, retry once, then continue with lexical-only results if PostgreSQL succeeded. |
+| PostgreSQL lexical search | SQLAlchemy connection and statement behavior comes from `DATABASE_URL` and the async engine. | Treat PostgreSQL failure as severe because lexical search, chunk text, and metadata live there. If Qdrant still works, return vector-only evidence with a warning. |
+| Reranking | `RerankerClient` uses a 30 second HTTP timeout and only runs when `TEI_RERANK_URL` is configured. | Retry once for timeout or 5xx. If reranking still fails, keep fused hybrid results, set rerank to skipped in explain mode, and show a warning badge. |
+| OCR | Not implemented. | If OCR is unavailable, skip scanned/PDF-only files, record ingestion warnings, and keep Markdown ingestion running. |
+
+### Fallback Order
+
+Search should degrade in this order:
+
+1. Run PostgreSQL lexical retrieval and Qdrant dense retrieval in parallel where possible.
+2. If both retrieval stages succeed, merge with RRF, apply metadata boosts, then optionally rerank.
+3. If dense retrieval fails but lexical succeeds, return lexical-only results with direct source links and a warning such as `Semantic retrieval unavailable; showing lexical results.`
+4. If lexical retrieval fails but dense retrieval succeeds, return vector-only results with source links and a warning such as `Lexical retrieval unavailable; showing semantic results.`
+5. If reranking fails, return fused results and show `Reranker unavailable; ranking uses hybrid fusion.`
+6. If OCR is unavailable during ingestion, index Markdown and text sources, mark OCR-backed files as skipped, and show the skipped count in the ingestion response.
+7. If no retrieval backend succeeds, return the structured error response instead of fabricating an answer.
+
+The current implementation already supports a safe configured-off reranker path: when `TEI_RERANK_URL` is unset, results use RRF and explain mode shows `rerank` as skipped. Broader partial search warnings are the next implementation step; add a `warnings` array to search, analyze, and answer responses before changing the UI.
+
+### Partial-Result Semantics
+
+| Failure | User-visible behavior | Answer behavior | Recommendation behavior |
+| --- | --- | --- | --- |
+| Lexical works, semantic fails | Show lexical results, direct source links, and a warning badge. Score breakdown should show BM25 values and zero or null semantic values. | Generate answers only from lexical evidence and say the result is lexical-only. | Still emit recommendations, but include a resiliency recommendation to restore dense retrieval. |
+| Semantic works, lexical fails | Show semantic results and a warning badge. Score breakdown should show semantic values and zero or null BM25 values. | Generate answers only from semantic evidence and say exact-term matching is unavailable. | Recommend checking PostgreSQL health and full-text indexes. |
+| Reranker fails | Show fused hybrid results; explain mode displays `rerank: skipped`. | Use top fused evidence. Do not fail answer generation only because reranking failed. | Recommend lowering rerank concurrency or disabling the reranker profile on constrained machines. |
+| OCR unavailable | Keep indexing Markdown and already-extracted text. Show skipped OCR document count in ingestion status. | Do not cite unavailable scanned content. | Recommend enabling OCR only after documenting engine URL, language list, DPI/page limits, timeout, and confidence threshold. |
+
+Example degraded but still useful response:
+
+```json
+{
+  "hits": [
+    {
+      "id": "4f7b0a9d0e7e2f2a8e6c6d4b1a0c2f8d6a7b3c1e9f0a4d5c6b7a8e9f1d2c3b4a",
+      "score": 0.53,
+      "title": "Semantic reranking [semantic-reranking]",
+      "repo": "elastic/docs-content",
+      "path": "solutions/search/ranking/semantic-reranking.md",
+      "content_type": "documentation",
+      "license_family": "elastic-license",
+      "source_url": "https://github.com/elastic/docs-content/blob/<commit_sha>/solutions/search/ranking/semantic-reranking.md#semantic-reranking",
+      "score_breakdown": {
+        "bm25": 0.42,
+        "semantic": 0.61,
+        "fusion": 0.53,
+        "rerank": null,
+        "final_rank": 1,
+        "final_score": 0.53
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "code": "reranker_unavailable",
+      "message": "Reranker unavailable; ranking uses hybrid fusion."
+    }
+  ],
+  "degraded": true
+}
+```
+
+Operational checks:
+
+- Use `/api/v1/health` for API liveness and `/api/v1/metrics` for the current endpoint/category surface.
+- Use `docker compose ps` and `docker stats --no-stream` when TEI containers exit or memory pressure is suspected.
+- Use `docker compose logs --tail=120 api`, `qdrant`, `tei-embed`, or `tei-rerank` to identify the failing stage.
+- Monitor top-k latency separately for lexical retrieval, query embedding, vector retrieval, RRF, reranking, and answer synthesis before increasing candidate or rerank windows.
+
 ## Source Attribution And Licensing
 
 Every indexed chunk must retain:
