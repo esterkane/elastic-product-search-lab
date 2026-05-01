@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 import httpx
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
@@ -55,8 +56,13 @@ class PostgresFTSRepository:
             LIMIT :limit
             """
         )
-        async with self.engine.connect() as connection:
-            result = await connection.execute(statement, params)
+        try:
+            async with self.engine.connect() as connection:
+                result = await connection.execute(statement, params)
+        except SQLAlchemyError as exc:
+            if is_missing_relation(exc):
+                return []
+            raise
 
         hits: list[RankedHit] = []
         for row in result.mappings():
@@ -195,7 +201,7 @@ def reciprocal_rank_fusion(
 def parse_rerank_scores(data: object, expected_count: int) -> list[float]:
     scores: object
     if isinstance(data, dict):
-        scores = data.get("scores", data.get("data"))
+        scores = data.get("scores", data.get("results", data.get("data")))
     else:
         scores = data
 
@@ -234,3 +240,7 @@ def postgres_filter_clause(filters: dict) -> tuple[str, dict[str, str]]:
         params[value_param] = str(value)
     return ("\n".join(clauses), params)
 
+
+def is_missing_relation(exc: SQLAlchemyError) -> bool:
+    message = str(exc).lower()
+    return "undefinedtable" in message or "does not exist" in message or "undefined table" in message

@@ -65,6 +65,8 @@ class QdrantVectorRepository:
         url = f"{self.base_url}/collections/{self.collection}/points/search"
         async with httpx.AsyncClient(timeout=self.timeout, headers=self.headers) as client:
             response = await client.post(url, json=payload)
+            if response.status_code == 404:
+                return []
             response.raise_for_status()
             data = response.json()
 
@@ -111,4 +113,3 @@ def vector_payload(
         "license_family": license_family,
         "source_url": source_url,
     }
-

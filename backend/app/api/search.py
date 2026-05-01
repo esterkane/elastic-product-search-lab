@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
+from backend.app.dependencies import get_retrieval_service
 from backend.app.retrieval.service import RankedHit, RetrievalService
 
 
@@ -61,16 +62,6 @@ class AnswerRequest(SearchRequest):
 class AnswerResponse(BaseModel):
     answer: str
     sources: list[SourceAttribution]
-
-
-async def get_retrieval_service() -> RetrievalService:
-    raise HTTPException(
-        status_code=503,
-        detail={
-            "code": "retrieval_not_configured",
-            "message": "Retrieval service is not configured for this environment.",
-        },
-    )
 
 
 RetrievalDependency = Annotated[RetrievalService, Depends(get_retrieval_service)]
@@ -148,4 +139,3 @@ def synthesize_answer(query: str, hits: list[RankedHit]) -> str:
     if len(hits) > 1:
         return f"The strongest improvement is to use {title} as the primary source and validate it against the other retrieved evidence."
     return f"The strongest improvement is to use {title} as the primary grounded source."
-
