@@ -1,5 +1,3 @@
-export type Category = "relevance" | "ingestion" | "mapping" | "performance" | "resiliency";
-
 export type SearchFilters = {
   repo?: string;
   path?: string;
@@ -51,22 +49,8 @@ export type RetrievalWarning = {
   stage: string;
 };
 
-export type Recommendation = {
-  category: Category;
-  recommendation: string;
-  evidence: Source[];
-};
-
 export type SearchResponse = {
   hits: SearchHit[];
-  recommendation_categories: Category[];
-  warnings?: RetrievalWarning[];
-  degraded?: boolean;
-};
-
-export type AnalyzeResponse = {
-  query: string;
-  recommendations: Recommendation[];
   warnings?: RetrievalWarning[];
   degraded?: boolean;
 };
@@ -124,10 +108,6 @@ const JSON_HEADERS = { "Content-Type": "application/json" };
 
 export async function search(request: QueryRequest): Promise<SearchResponse> {
   return postJson<SearchResponse>("/api/v1/search", request);
-}
-
-export async function analyze(request: QueryRequest): Promise<AnalyzeResponse> {
-  return postJson<AnalyzeResponse>("/api/v1/analyze", request);
 }
 
 export async function answer(request: QueryRequest): Promise<AnswerResponse> {

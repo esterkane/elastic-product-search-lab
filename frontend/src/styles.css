@@ -67,8 +67,7 @@ h1 {
 
 .search-form,
 .panel,
-.result-card,
-.recommendation {
+.result-card {
   border: 1px solid #d9dee7;
   background: #ffffff;
   border-radius: 8px;
@@ -190,8 +189,7 @@ button:disabled {
   box-shadow: 0 12px 28px rgb(8 54 66 / 8%);
 }
 
-.result-stack,
-.recommendation-stack {
+.result-stack {
   display: grid;
   gap: 12px;
 }
@@ -206,14 +204,12 @@ button:disabled {
   gap: 12px;
 }
 
-.result-card h3,
-.recommendation h3 {
+.result-card h3 {
   margin-bottom: 5px;
   font-size: 1rem;
 }
 
 .result-card p,
-.recommendation p,
 .answer-summary {
   color: #536274;
   line-height: 1.48;
@@ -307,8 +303,7 @@ button:disabled {
   font-variant-numeric: tabular-nums;
 }
 
-.source-link,
-.source-list a {
+.source-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -317,20 +312,10 @@ button:disabled {
   text-decoration: none;
 }
 
-.source-link:hover,
-.source-list a:hover {
+.source-link:hover {
   text-decoration: underline;
 }
 
-.source-list {
-  display: grid;
-  gap: 8px;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-
-.source-list__label,
 .important-links__label {
   flex: 0 0 auto;
   border: 1px solid #d9dee7;
@@ -443,33 +428,6 @@ button:disabled {
 
 .important-links a:hover {
   text-decoration: underline;
-}
-
-.segmented-control {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.segmented-control button {
-  min-height: 34px;
-  color: #344255;
-  background: #eef2f6;
-  padding: 0 12px;
-}
-
-.segmented-control button.active {
-  color: #ffffff;
-  background: #0b6f85;
-}
-
-.recommendation {
-  padding: 14px;
-}
-
-.recommendation p {
-  margin-bottom: 12px;
 }
 
 .empty-state {

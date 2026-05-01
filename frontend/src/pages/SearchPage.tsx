@@ -2,15 +2,11 @@ import { FormEvent, useMemo, useState } from "react";
 import { AlertCircle, CheckCircle2, Loader2, RefreshCw, Search } from "lucide-react";
 import { AnswerPanel } from "../components/AnswerPanel";
 import { ResultCard } from "../components/ResultCard";
-import { RecommendationPanel } from "../components/RecommendationPanel";
 import {
-  analyze,
   answer,
   ingestRepo,
   search,
-  type AnalyzeResponse,
   type AnswerResponse,
-  type Category,
   type IngestRepoResponse,
   type RetrievalWarning,
   type SearchResponse
@@ -35,8 +31,6 @@ const CONTENT_TYPES = [
 
 const LICENSE_FAMILIES = ["elastic-license", "apache-2.0", "unknown"];
 
-const DEFAULT_CATEGORIES: Category[] = ["relevance", "ingestion", "mapping", "performance", "resiliency"];
-
 export function SearchPage() {
   const [query, setQuery] = useState("hybrid retrieval improvements");
   const [repo, setRepo] = useState("");
@@ -46,26 +40,19 @@ export function SearchPage() {
   const [licenseFamily, setLicenseFamily] = useState("");
   const [boostDocumentation, setBoostDocumentation] = useState(false);
   const [explainScores, setExplainScores] = useState(false);
-  const [category, setCategory] = useState<Category | "all">("all");
   const [searchData, setSearchData] = useState<SearchResponse | null>(null);
-  const [analysisData, setAnalysisData] = useState<AnalyzeResponse | null>(null);
   const [answerData, setAnswerData] = useState<AnswerResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isIndexing, setIsIndexing] = useState(false);
   const [indexStatus, setIndexStatus] = useState<IngestRepoResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const categories = useMemo(
-    () => searchData?.recommendation_categories ?? DEFAULT_CATEGORIES,
-    [searchData]
-  );
   const retrievalWarnings = useMemo(
     () => uniqueWarnings([
       ...(searchData?.warnings ?? []),
-      ...(analysisData?.warnings ?? []),
       ...(answerData?.warnings ?? [])
     ]),
-    [searchData, analysisData, answerData]
+    [searchData, answerData]
   );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -93,13 +80,11 @@ export function SearchPage() {
     };
 
     try {
-      const [searchResult, analysisResult, answerResult] = await Promise.all([
+      const [searchResult, answerResult] = await Promise.all([
         search(request),
-        analyze(request),
         answer(request)
       ]);
       setSearchData(searchResult);
-      setAnalysisData(analysisResult);
       setAnswerData(answerResult);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Search failed.");
@@ -132,7 +117,7 @@ export function SearchPage() {
       <header className="topbar">
         <div>
           <p className="eyebrow">Elastic repo intelligence</p>
-          <h1>Search, Explain, Improve</h1>
+          <h1>Search and Explain</h1>
         </div>
         <button className="sync-button" type="button" onClick={handleIndexChanges} disabled={isIndexing}>
           {isIndexing ? <Loader2 aria-hidden="true" className="spin" size={18} /> : <RefreshCw aria-hidden="true" size={18} />}
@@ -279,13 +264,6 @@ export function SearchPage() {
           )}
         </section>
       </div>
-
-      <RecommendationPanel
-        categories={categories}
-        recommendations={analysisData?.recommendations ?? []}
-        selectedCategory={category}
-        onCategoryChange={setCategory}
-      />
     </main>
   );
 }

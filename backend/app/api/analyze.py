@@ -41,7 +41,7 @@ RetrievalDependency = Annotated[RetrievalService, Depends(get_retrieval_service)
 RecommendationDependency = Annotated[RecommendationEngine, Depends(get_recommendation_engine)]
 
 
-@router.post("/analyze", response_model=AnalyzeResponse)
+@router.post("/analyze", response_model=AnalyzeResponse, include_in_schema=False)
 async def analyze(
     request: AnalyzeRequest,
     retrieval_service: RetrievalDependency,
