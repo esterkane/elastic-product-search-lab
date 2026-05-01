@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: repo-inventory-config
+data:
+  APP_ENV: "kubernetes"
+  POSTGRES_DB: "repo_inventory"
+  POSTGRES_USER: "repo_inventory"
+  QDRANT_COLLECTION: "repo-docs"
+  QDRANT_URL: "http://qdrant:6333"
+  TEI_EMBED_URL: "http://tei-embed/embed"
+  TEI_RERANK_URL: "http://tei-rerank/rerank"
+  LLM_URL: "http://llm:11434"
+  TEI_EMBED_MODEL: "BAAI/bge-small-en-v1.5"
+  TEI_RERANK_MODEL: "BAAI/bge-reranker-base"

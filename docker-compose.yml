@@ -1,0 +1,175 @@
+name: elastic-repo-inventory
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-repo_inventory}
+      POSTGRES_USER: ${POSTGRES_USER:-repo_inventory}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-repo_inventory}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "${QDRANT_HTTP_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:6333/healthz >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  tei-embed:
+    image: ${TEI_IMAGE:-ghcr.io/huggingface/text-embeddings-inference:cpu-latest}
+    command: ["--model-id", "${TEI_EMBED_MODEL:-BAAI/bge-small-en-v1.5}", "--port", "80"]
+    environment:
+      HF_HOME: /data
+    ports:
+      - "${TEI_EMBED_PORT:-8081}:80"
+    volumes:
+      - tei_embed_cache:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/health >/dev/null 2>&1 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 20
+
+  tei-rerank:
+    image: ${TEI_IMAGE:-ghcr.io/huggingface/text-embeddings-inference:cpu-latest}
+    command: ["--model-id", "${TEI_RERANK_MODEL:-BAAI/bge-reranker-base}", "--port", "80"]
+    environment:
+      HF_HOME: /data
+    ports:
+      - "${TEI_RERANK_PORT:-8082}:80"
+    volumes:
+      - tei_rerank_cache:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/health >/dev/null 2>&1 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 20
+
+  llm:
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-repo_inventory}:${POSTGRES_PASSWORD:-repo_inventory}@postgres:5432/${POSTGRES_DB:-repo_inventory}
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION:-repo-docs}
+      TEI_EMBED_URL: http://tei-embed/embed
+      TEI_RERANK_URL: http://tei-rerank/rerank
+      LLM_URL: http://llm:11434
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      tei-embed:
+        condition: service_started
+      tei-rerank:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=2).read()\""
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    command: ["python", "-m", "backend.app.worker"]
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-repo_inventory}:${POSTGRES_PASSWORD:-repo_inventory}@postgres:5432/${POSTGRES_DB:-repo_inventory}
+      QDRANT_URL: http://qdrant:6333
+      TEI_EMBED_URL: http://tei-embed/embed
+      TEI_RERANK_URL: http://tei-rerank/rerank
+      WORKER_READY_FILE: /tmp/worker-ready
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/worker-ready"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9090/-/healthy >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
+  qdrant_storage:
+  tei_embed_cache:
+  tei_rerank_cache:
+  ollama_data:
+  prometheus_data:
