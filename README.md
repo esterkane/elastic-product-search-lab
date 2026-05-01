@@ -1,4 +1,4 @@
-﻿# Elasticsearch Product Search Lab
+# Elasticsearch Product Search Lab
 
 This project is a compact Elasticsearch product-search lab. It indexes product data, models product fields for search, supports keyword and hybrid retrieval, simulates catalog change events, and evaluates relevance with offline metrics such as nDCG@k, MRR, and Precision@k.
 
@@ -29,7 +29,7 @@ sample product data -> ingestion pipeline -> Elasticsearch index
 
 ## Planned Features
 
-- Local Elasticsearch stack with Docker Compose.
+- Local Elasticsearch and Kibana stack with Docker Compose.
 - Product index mappings for titles, descriptions, brands, categories, attributes, prices, availability, and behavioral ranking signals.
 - Keyword retrieval with analyzers, boosts, filters, facets, and sorting.
 - Hybrid retrieval experiments using embeddings and vector search.
@@ -49,34 +49,38 @@ Optional for later implementation work:
 - Node.js and npm for the planned API and search experiments.
 - Python and pip for the planned ingestion and relevance evaluation utilities.
 
-## Start Elasticsearch
+## Start Elasticsearch and Kibana
 
-From the repository root, start the local single-node Elasticsearch runtime:
+From the repository root, start the local single-node Elasticsearch runtime and Kibana:
 
 ```powershell
 .\scripts\dev-up.ps1
 ```
 
-The script uses `ELASTIC_VERSION` when it is set, otherwise it defaults to Elasticsearch `9.3.0` through Docker Compose.
+The script uses `ELASTIC_VERSION` when it is set, otherwise it defaults to Elasticsearch and Kibana `9.3.0` through Docker Compose.
 
-## Verify Elasticsearch Is Reachable
+## Verify Elasticsearch and Kibana Are Reachable
 
-Check the local cluster health endpoint:
+Check the local Elasticsearch cluster health endpoint and Kibana status endpoint:
 
 ```powershell
 .\scripts\check-es.ps1
+.\scripts\check-kibana.ps1
 ```
 
-You can also call Elasticsearch directly:
+You can also call the services directly:
 
 ```powershell
 Invoke-RestMethod http://localhost:9200
 Invoke-RestMethod http://localhost:9200/_cluster/health
+Invoke-RestMethod http://localhost:5601/api/status
 ```
 
-## Stop Elasticsearch
+Kibana is available in the browser at `http://localhost:5601`.
 
-Stop the local runtime while keeping the named Docker volume:
+## Stop Elasticsearch and Kibana
+
+Stop the local runtime while keeping the named Elasticsearch Docker volume:
 
 ```powershell
 .\scripts\dev-down.ps1
@@ -95,6 +99,7 @@ The first local runtime is available through Docker Compose. The intended develo
 ```powershell
 .\scripts\dev-up.ps1
 .\scripts\check-es.ps1
+.\scripts\check-kibana.ps1
 # install API and Python dependencies as implementation lands
 # load sample products
 # run search examples
@@ -124,6 +129,7 @@ The ingestion workflow will include repeatable scripts that simulate catalog lif
 ## Tech Stack
 
 - Elasticsearch 9.3.0
+- Kibana 9.3.0
 - Docker Compose
 - Node.js / TypeScript for API and search experiments
 - Python for ingestion, evaluation, and analysis utilities
@@ -132,6 +138,7 @@ The ingestion workflow will include repeatable scripts that simulate catalog lif
 ## Roadmap
 
 - [x] Add Docker Compose Elasticsearch service and health checks.
+- [x] Add Kibana to the local development runtime.
 - [ ] Define product mappings and analyzer strategy.
 - [ ] Add sample product catalog fixtures.
 - [ ] Implement ingestion scripts.
@@ -143,4 +150,3 @@ The ingestion workflow will include repeatable scripts that simulate catalog lif
 ## Portfolio Note
 
 This is an educational/search-engineering lab, not a production marketplace backend. It is intentionally compact so the search architecture, relevance decisions, and evaluation workflow remain easy to inspect.
-
