@@ -32,12 +32,18 @@ const CONTENT_TYPES = [
   "release_metadata"
 ];
 
+const LICENSE_FAMILIES = ["elastic-license", "apache-2.0", "unknown"];
+
 const DEFAULT_CATEGORIES: Category[] = ["relevance", "ingestion", "mapping", "performance", "resiliency"];
 
 export function SearchPage() {
   const [query, setQuery] = useState("hybrid retrieval improvements");
   const [repo, setRepo] = useState("");
+  const [path, setPath] = useState("");
+  const [headingPath, setHeadingPath] = useState("");
   const [contentType, setContentType] = useState("");
+  const [licenseFamily, setLicenseFamily] = useState("");
+  const [boostDocumentation, setBoostDocumentation] = useState(false);
   const [explainScores, setExplainScores] = useState(false);
   const [category, setCategory] = useState<Category | "all">("all");
   const [searchData, setSearchData] = useState<SearchResponse | null>(null);
@@ -64,13 +70,17 @@ export function SearchPage() {
     setError(null);
     const filters = {
       ...(repo ? { repo } : {}),
-      ...(contentType ? { content_type: contentType } : {})
+      ...(path ? { path } : {}),
+      ...(headingPath ? { heading_path: headingPath } : {}),
+      ...(contentType ? { content_type: contentType } : {}),
+      ...(licenseFamily ? { license_family: licenseFamily } : {})
     };
     const request = {
       query: query.trim(),
       limit: 10,
       explain: explainScores,
-      filters: Object.keys(filters).length > 0 ? filters : undefined
+      filters: Object.keys(filters).length > 0 ? filters : undefined,
+      boosts: boostDocumentation ? { content_type: { documentation: 0.15 } } : undefined
     };
 
     try {
@@ -145,6 +155,18 @@ export function SearchPage() {
           </label>
 
           <label>
+            <span>License</span>
+            <select value={licenseFamily} onChange={(event) => setLicenseFamily(event.target.value)}>
+              <option value="">All licenses</option>
+              {LICENSE_FAMILIES.map((item) => (
+                <option value={item} key={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
             <span>Content type</span>
             <select value={contentType} onChange={(event) => setContentType(event.target.value)}>
               <option value="">All types</option>
@@ -165,10 +187,39 @@ export function SearchPage() {
             <span>Explain scores</span>
           </label>
 
+          <label className="checkbox-field">
+            <input
+              type="checkbox"
+              checked={boostDocumentation}
+              onChange={(event) => setBoostDocumentation(event.target.checked)}
+            />
+            <span>Boost docs</span>
+          </label>
+
           <button type="submit" disabled={isLoading}>
             {isLoading ? <Loader2 aria-hidden="true" className="spin" size={18} /> : <Search aria-hidden="true" size={18} />}
             <span>{isLoading ? "Searching" : "Search"}</span>
           </button>
+        </div>
+
+        <div className="metadata-row">
+          <label>
+            <span>Path</span>
+            <input
+              value={path}
+              onChange={(event) => setPath(event.target.value)}
+              placeholder="solutions/search/ranking/semantic-reranking.md"
+            />
+          </label>
+
+          <label>
+            <span>Heading</span>
+            <input
+              value={headingPath}
+              onChange={(event) => setHeadingPath(event.target.value)}
+              placeholder="Semantic reranking [semantic-reranking]"
+            />
+          </label>
         </div>
       </form>
 

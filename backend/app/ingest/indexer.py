@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from backend.app.embeddings.client import EmbeddingClient
 from backend.app.ingest.chunker import IngestedDocument, SourceMetadata, build_source_url, ingest_markdown
+from backend.app.ingest.metadata import normalize_metadata
 from backend.app.vector.qdrant_client import QdrantVectorRepository, VectorPoint, vector_payload
 
 logger = logging.getLogger(__name__)
@@ -341,6 +342,7 @@ def vectors_for_ingested_document(ingested: IngestedDocument) -> list[PendingVec
             source_url=chunk.source_url,
         )
         payload["commit_sha"] = chunk.commit_sha
+        payload = normalize_metadata(payload, source_url=chunk.source_url, repo=chunk.repo, path=chunk.path)
         vectors.append(
             PendingVector(
                 point=VectorPoint(id=chunk.chunk_id, vector=[], payload=payload, source_url=chunk.source_url),
@@ -367,6 +369,7 @@ def chunk_rows(ingested: IngestedDocument) -> list[dict[str, object]]:
         metadata["commit_sha"] = chunk.commit_sha
         metadata["anchor"] = chunk.anchor
         metadata["chunk_index"] = chunk.chunk_index
+        metadata = normalize_metadata(metadata, source_url=chunk.source_url, repo=chunk.repo, path=chunk.path)
         rows.append(
             {
                 "id": chunk.chunk_id,

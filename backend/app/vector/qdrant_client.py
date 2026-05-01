@@ -6,6 +6,8 @@ from uuid import NAMESPACE_URL, uuid5
 
 import httpx
 
+from backend.app.ingest.metadata import normalize_filters, normalize_metadata
+
 
 VectorPayload = dict[str, str | int | float | bool | None]
 
@@ -63,7 +65,11 @@ class QdrantVectorRepository:
                 {
                     "id": qdrant_point_id(point.id),
                     "vector": point.vector,
-                    "payload": {**point.payload, "chunk_id": point.id, "source_url": point.source_url},
+                    "payload": {
+                        **normalize_metadata(point.payload, source_url=point.source_url),
+                        "chunk_id": point.id,
+                        "source_url": point.source_url,
+                    },
                 }
                 for point in points
             ]
@@ -75,8 +81,9 @@ class QdrantVectorRepository:
 
     async def search(self, vector: list[float], limit: int, filters: dict | None = None) -> list[SearchHit]:
         payload: dict[str, object] = {"vector": vector, "limit": limit, "with_payload": True}
-        if filters:
-            payload["filter"] = qdrant_filter(filters)
+        normalized_filters = normalize_filters(filters)
+        if normalized_filters:
+            payload["filter"] = qdrant_filter(normalized_filters)
 
         url = f"{self.base_url}/collections/{self.collection}/points/search"
         async with httpx.AsyncClient(timeout=self.timeout, headers=self.headers) as client:
@@ -90,19 +97,20 @@ class QdrantVectorRepository:
 
 
 def qdrant_filter(filters: dict) -> dict:
+    normalized_filters = normalize_filters(filters) or {}
     return {
         "must": [
             {"key": key, "match": {"any": list(value)}}
             if isinstance(value, list | tuple | set)
             else {"key": key, "match": {"value": value}}
-            for key, value in sorted(filters.items())
+            for key, value in sorted(normalized_filters.items())
             if value is not None
         ]
     }
 
 
 def qdrant_hit_to_search_hit(hit: dict) -> SearchHit:
-    payload = dict(hit.get("payload") or {})
+    payload = normalize_metadata(dict(hit.get("payload") or {}))
     source_url = str(payload.get("source_url") or "")
     return SearchHit(
         id=str(payload.get("chunk_id") or hit.get("id")),
@@ -126,7 +134,7 @@ def vector_payload(
     license_family: str,
     source_url: str,
 ) -> VectorPayload:
-    return {
+    return normalize_metadata({
         "repo": repo,
         "path": path,
         "title": title,
@@ -134,4 +142,4 @@ def vector_payload(
         "content_type": content_type,
         "license_family": license_family,
         "source_url": source_url,
-    }
+    })

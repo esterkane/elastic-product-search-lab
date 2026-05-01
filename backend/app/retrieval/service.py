@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from backend.app.embeddings.client import EmbeddingClient
 from backend.app.ingest.indexer import ACTIVE_REPOSITORY_SLUGS
+from backend.app.ingest.metadata import metadata_boost_score, normalize_boosts, normalize_filters, normalize_metadata
 from backend.app.vector.qdrant_client import SearchHit, VectorPayload, VectorRepository
 
 
@@ -50,7 +51,7 @@ class PostgresFTSRepository:
         params.update({"query": query, "limit": limit})
         statement = text(
             f"""
-            SELECT id, content, metadata, source_url,
+            SELECT id, content, metadata, source_url, repo, path,
                    ts_rank_cd(search_vector, websearch_to_tsquery('english', :query)) AS score
             FROM {self.table_name}
             WHERE search_vector @@ websearch_to_tsquery('english', :query)
@@ -69,7 +70,12 @@ class PostgresFTSRepository:
 
         hits: list[RankedHit] = []
         for row in result.mappings():
-            metadata = dict(row["metadata"] or {})
+            metadata = normalize_metadata(
+                dict(row["metadata"] or {}),
+                source_url=str(row["source_url"]),
+                repo=str(row["repo"] or ""),
+                path=str(row["path"] or ""),
+            )
             score = float(row["score"] or 0.0)
             hits.append(
                 RankedHit(
@@ -139,8 +145,15 @@ class RetrievalService:
         self.reranker_client = reranker_client
         self.default_repos = default_repos
 
-    async def retrieve(self, query: str, limit: int = 10, filters: dict | None = None) -> dict[str, object]:
+    async def retrieve(
+        self,
+        query: str,
+        limit: int = 10,
+        filters: dict | None = None,
+        boosts: dict[str, dict[str, object]] | None = None,
+    ) -> dict[str, object]:
         effective_filters = active_repo_filters(filters, self.default_repos)
+        effective_boosts = normalize_boosts(boosts)
         lexical_hits = await self.lexical_repository.search(query, limit=50, filters=effective_filters)
         vectors = await self.embedding_client.embed([query])
         dense_hits = [
@@ -148,7 +161,7 @@ class RetrievalService:
             for hit in await self.vector_repository.search(vectors[0], limit=50, filters=effective_filters)
         ]
 
-        fused = reciprocal_rank_fusion(lexical_hits, dense_hits)[:20]
+        fused = boost_ranked_hits(reciprocal_rank_fusion(lexical_hits, dense_hits), effective_boosts)[:20]
         ranked = await self.reranker_client.rerank(query, fused) if self.reranker_client else fused
         hits = with_final_ranks(diversify_hits(ranked, limit))
         return {
@@ -158,13 +171,14 @@ class RetrievalService:
 
 
 def vector_hit_to_ranked_hit(hit: SearchHit) -> RankedHit:
+    metadata = normalize_metadata(hit.metadata, source_url=hit.source_url)
     return RankedHit(
         id=hit.id,
         score=hit.score,
         dense_score=hit.score,
-        metadata=hit.metadata,
+        metadata=metadata,
         source_url=hit.source_url,
-        text=metadata_text(hit.metadata),
+        text=metadata_text(metadata),
     )
 
 
@@ -233,16 +247,18 @@ def metadata_text(metadata: VectorPayload) -> str:
 
 
 def postgres_filter_clause(filters: dict) -> tuple[str, dict[str, object]]:
-    if not filters:
+    normalized_filters = normalize_filters(filters)
+    if not normalized_filters:
         return "", {}
 
     clauses: list[str] = []
     params: dict[str, object] = {}
-    for index, (key, value) in enumerate(sorted(filters.items())):
+    for index, (key, value) in enumerate(sorted(normalized_filters.items())):
         if value is None:
             continue
         key_param = f"filter_key_{index}"
         params[key_param] = str(key)
+        expression = postgres_metadata_expression(str(key), key_param)
         if isinstance(value, list | tuple | set):
             value_params: list[str] = []
             for value_index, item in enumerate(value):
@@ -251,19 +267,51 @@ def postgres_filter_clause(filters: dict) -> tuple[str, dict[str, object]]:
                 params[value_param] = str(item)
             if not value_params:
                 continue
-            clauses.append(f"AND (metadata ->> :{key_param}) IN ({', '.join(value_params)})")
+            clauses.append(f"AND {expression} IN ({', '.join(value_params)})")
         else:
             value_param = f"filter_value_{index}"
-            clauses.append(f"AND (metadata ->> :{key_param}) = :{value_param}")
+            clauses.append(f"AND {expression} = :{value_param}")
             params[value_param] = str(value)
     return ("\n".join(clauses), params)
 
 
 def active_repo_filters(filters: dict | None, default_repos: tuple[str, ...]) -> dict[str, object] | None:
-    merged: dict[str, object] = dict(filters or {})
+    merged: dict[str, object] = dict(normalize_filters(filters) or {})
     if default_repos and not merged.get("repo"):
         merged["repo"] = list(default_repos)
     return merged or None
+
+
+def postgres_metadata_expression(key: str, key_param: str) -> str:
+    if key == "repo":
+        return f"COALESCE(metadata ->> :{key_param}, repo)"
+    if key == "path":
+        return f"COALESCE(metadata ->> :{key_param}, path)"
+    return f"metadata ->> :{key_param}"
+
+
+def boost_ranked_hits(hits: list[RankedHit], boosts: dict[str, dict[str, float]]) -> list[RankedHit]:
+    if not boosts:
+        return hits
+
+    boosted: list[RankedHit] = []
+    for hit in hits:
+        boost = metadata_boost_score(hit.metadata, boosts)
+        score = hit.score * (1.0 + boost)
+        boosted.append(
+            RankedHit(
+                id=hit.id,
+                score=score,
+                metadata=hit.metadata,
+                source_url=hit.source_url,
+                text=hit.text,
+                lexical_score=hit.lexical_score,
+                dense_score=hit.dense_score,
+                fusion_score=score,
+                rerank_score=hit.rerank_score,
+            )
+        )
+    return sorted(boosted, key=lambda hit: (-hit.score, hit.id))
 
 
 def diversify_hits(hits: list[RankedHit], limit: int) -> list[RankedHit]:

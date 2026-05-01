@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from backend.app.dependencies import get_retrieval_service
+from backend.app.ingest.metadata import normalize_boosts, normalize_filters, normalize_metadata
 from backend.app.retrieval.service import RankedHit, RetrievalService, canonical_source_key
 
 
@@ -15,23 +16,51 @@ router = APIRouter(prefix="/api/v1", tags=["search"])
 
 class SearchFilters(BaseModel):
     repo: str | None = None
+    path: str | None = None
+    heading_path: str | None = None
     content_type: str | None = None
+    license_family: str | None = None
 
     def as_dict(self) -> dict[str, str]:
-        return {
+        return normalize_filters({
             key: value
             for key, value in {
                 "repo": self.repo,
+                "path": self.path,
+                "heading_path": self.heading_path,
                 "content_type": self.content_type,
+                "license_family": self.license_family,
             }.items()
             if value
-        }
+        }) or {}
+
+
+class SearchBoosts(BaseModel):
+    repo: dict[str, float] | None = None
+    path: dict[str, float] | None = None
+    heading_path: dict[str, float] | None = None
+    content_type: dict[str, float] | None = None
+    license_family: dict[str, float] | None = None
+
+    def as_dict(self) -> dict[str, dict[str, float]]:
+        return normalize_boosts({
+            key: value
+            for key, value in {
+                "repo": self.repo,
+                "path": self.path,
+                "heading_path": self.heading_path,
+                "content_type": self.content_type,
+                "license_family": self.license_family,
+            }.items()
+            if value
+        })
 
 
 class SearchRequest(BaseModel):
     query: str = Field(min_length=1)
     limit: int = Field(default=10, ge=1, le=50)
     filters: SearchFilters | None = None
+    boosts: SearchBoosts | None = None
     explain: bool = False
 
 
@@ -85,6 +114,7 @@ async def search(request: SearchRequest, retrieval_service: RetrievalDependency)
         request.query,
         limit=request.limit,
         filters=request.filters.as_dict() if request.filters else None,
+        boosts=request.boosts.as_dict() if request.boosts else None,
     )
     return SearchResponse(
         hits=[hit_response(hit, include_debug=request.explain) for hit in result.get("hits", [])],
@@ -98,6 +128,7 @@ async def answer(request: AnswerRequest, retrieval_service: RetrievalDependency)
         request.query,
         limit=request.limit,
         filters=request.filters.as_dict() if request.filters else None,
+        boosts=request.boosts.as_dict() if request.boosts else None,
     )
     hits = [hit for hit in result.get("hits", []) if isinstance(hit, RankedHit)]
     sources = source_attributions(hits)
@@ -109,22 +140,23 @@ def hit_response(hit: object, include_debug: bool = False) -> SearchHitResponse:
         raise TypeError("retrieval result contains an unsupported hit")
 
     score_breakdown = score_breakdown_response(hit) if include_debug else None
+    metadata = normalize_metadata(hit.metadata, source_url=hit.source_url)
     return SearchHitResponse(
         id=hit.id,
         score=hit.score,
-        title=metadata_value(hit, "title"),
-        repo=metadata_value(hit, "repo"),
-        path=metadata_value(hit, "path"),
-        heading_path=metadata_value(hit, "heading_path"),
-        content_type=metadata_value(hit, "content_type"),
-        license_family=metadata_value(hit, "license_family"),
+        title=metadata_value(metadata, "title"),
+        repo=metadata_value(metadata, "repo"),
+        path=metadata_value(metadata, "path"),
+        heading_path=metadata_value(metadata, "heading_path"),
+        content_type=metadata_value(metadata, "content_type"),
+        license_family=metadata_value(metadata, "license_family"),
         source_url=hit.source_url,
         score_breakdown=score_breakdown,
     )
 
 
-def metadata_value(hit: RankedHit, key: str) -> str | None:
-    value = hit.metadata.get(key)
+def metadata_value(metadata: dict, key: str) -> str | None:
+    value = metadata.get(key)
     return str(value) if value is not None else None
 
 
@@ -149,7 +181,7 @@ def source_attributions(hits: list[RankedHit]) -> list[SourceAttribution]:
         seen.add(source_key)
         sources.append(
             SourceAttribution(
-                title=metadata_value(hit, "title") or metadata_value(hit, "heading_path") or hit.id,
+                title=metadata_value(hit.metadata, "title") or metadata_value(hit.metadata, "heading_path") or hit.id,
                 url=hit.source_url,
             )
         )
@@ -163,7 +195,7 @@ def synthesize_answer(query: str, hits: list[RankedHit]) -> str:
     evidence = evidence_points(query, hits)
     if not evidence:
         top = hits[0]
-        title = metadata_value(top, "title") or metadata_value(top, "heading_path") or "the top source"
+        title = metadata_value(top.metadata, "title") or metadata_value(top.metadata, "heading_path") or "the top source"
         return f"The best grounded answer is in {title}. Open the cited source for the exact implementation details."
 
     thematic = thematic_answer(query, evidence)
@@ -196,7 +228,7 @@ def evidence_points(query: str, hits: list[RankedHit]) -> list[tuple[str, str]]:
     points: list[tuple[str, str]] = []
     seen_sentences: set[str] = set()
     for hit in hits:
-        title = metadata_value(hit, "title") or metadata_value(hit, "heading_path") or "source"
+        title = metadata_value(hit.metadata, "title") or metadata_value(hit.metadata, "heading_path") or "source"
         for sentence in split_sentences(hit.text):
             sentence = clean_sentence(sentence)
             if query_terms and not any(term in sentence.lower() for term in query_terms):

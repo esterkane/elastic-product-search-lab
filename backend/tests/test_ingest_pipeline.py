@@ -2,6 +2,7 @@ import hashlib
 
 from backend.app.ingest.chunker import SourceMetadata, ingest_markdown, make_chunk_id
 from backend.app.ingest.license import license_family_for_repo
+from backend.app.ingest.metadata import metadata_boost_score, normalize_filters, normalize_metadata
 from backend.app.ingest.parser import classify_content_type, extract_headings, parse_markdown
 from backend.app.models import Base, Chunk, Document, EvidenceLink, Recommendation
 
@@ -89,6 +90,63 @@ def test_deterministic_chunk_ids_use_repo_path_anchor_and_index() -> None:
     expected = hashlib.sha256("elastic/docs-content:guide/page.md:intro:2".encode()).hexdigest()
 
     assert make_chunk_id("elastic/docs-content", "guide/page.md", "intro", 2) == expected
+
+
+def test_missing_metadata_gets_backward_compatible_defaults() -> None:
+    normalized = normalize_metadata(
+        None,
+        source_url="https://example.test/source",
+        repo="Elastic/Docs-Content",
+        path="\\guide\\page.md",
+    )
+
+    assert normalized["repo"] == "elastic/docs-content"
+    assert normalized["path"] == "guide/page.md"
+    assert normalized["content_type"] == "unknown"
+    assert normalized["license_family"] == "unknown"
+    assert normalized["source_url"] == "https://example.test/source"
+
+
+def test_partial_metadata_is_normalized_without_losing_optional_fields() -> None:
+    normalized = normalize_metadata(
+        {
+            "repo": " Elastic/Docs-Content ",
+            "path": "solutions\\search\\ranking.md",
+            "content_type": "Release Note",
+            "license_family": "Elastic License",
+            "title": " Semantic reranking ",
+            "chunk_index": "2",
+        }
+    )
+
+    assert normalized["repo"] == "elastic/docs-content"
+    assert normalized["path"] == "solutions/search/ranking.md"
+    assert normalized["content_type"] == "release_note"
+    assert normalized["license_family"] == "elastic-license"
+    assert normalized["title"] == "Semantic reranking"
+    assert normalized["chunk_index"] == 2
+
+
+def test_metadata_filters_and_boosts_are_stable() -> None:
+    filters = normalize_filters(
+        {
+            "license_family": " Elastic License ",
+            "ignored": "value",
+            "repo": ["elastic/labs-releases", "Elastic/Docs-Content"],
+        }
+    )
+
+    assert filters == {
+        "license_family": "elastic-license",
+        "repo": ["elastic/docs-content", "elastic/labs-releases"],
+    }
+    assert round(
+        metadata_boost_score(
+            {"repo": "elastic/docs-content", "content_type": "Documentation"},
+            {"repo": {"elastic/docs-content": 0.2}, "content_type": {"documentation": 0.1}},
+        ),
+        2,
+    ) == 0.3
 
 
 def test_classification_and_license_defaults_are_deterministic() -> None:

@@ -2,7 +2,18 @@ export type Category = "relevance" | "ingestion" | "mapping" | "performance" | "
 
 export type SearchFilters = {
   repo?: string;
+  path?: string;
+  heading_path?: string;
   content_type?: string;
+  license_family?: string;
+};
+
+export type SearchBoosts = {
+  repo?: Record<string, number>;
+  path?: Record<string, number>;
+  heading_path?: Record<string, number>;
+  content_type?: Record<string, number>;
+  license_family?: Record<string, number>;
 };
 
 export type SearchHit = {
@@ -55,6 +66,7 @@ export type QueryRequest = {
   query: string;
   limit?: number;
   filters?: SearchFilters;
+  boosts?: SearchBoosts;
   explain?: boolean;
 };
 

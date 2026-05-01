@@ -5,6 +5,7 @@ import json
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 
+from backend.app.ingest.metadata import normalize_filters, normalize_metadata
 from backend.app.vector.qdrant_client import SearchHit, VectorPoint
 
 
@@ -37,7 +38,7 @@ class PgVectorRepository:
                 {
                     "id": point.id,
                     "embedding": vector_literal(point.vector),
-                    "metadata": json.dumps(point.payload, sort_keys=True),
+                    "metadata": json.dumps(normalize_metadata(point.payload, source_url=point.source_url), sort_keys=True),
                     "source_url": point.source_url,
                 }
                 for point in points
@@ -62,7 +63,7 @@ class PgVectorRepository:
 
         hits: list[SearchHit] = []
         for row in result.mappings():
-            metadata = dict(row["metadata"] or {})
+            metadata = normalize_metadata(dict(row["metadata"] or {}), source_url=str(row["source_url"]))
             hits.append(
                 SearchHit(
                     id=str(row["id"]),
@@ -79,19 +80,34 @@ def vector_literal(vector: list[float]) -> str:
 
 
 def pgvector_filter_clause(filters: dict) -> tuple[str, dict[str, str]]:
-    if not filters:
+    normalized_filters = normalize_filters(filters)
+    if not normalized_filters:
         return "", {}
 
     clauses: list[str] = []
     params: dict[str, str] = {}
-    for index, (key, value) in enumerate(sorted(filters.items())):
+    for index, (key, value) in enumerate(sorted(normalized_filters.items())):
         if value is None:
             continue
         key_param = f"filter_key_{index}"
-        value_param = f"filter_value_{index}"
-        clauses.append(f"metadata ->> :{key_param} = :{value_param}")
         params[key_param] = str(key)
-        params[value_param] = str(value)
+        expression = metadata_expression(key_param)
+        if isinstance(value, list | tuple | set):
+            value_params: list[str] = []
+            for value_index, item in enumerate(value):
+                value_param = f"filter_value_{index}_{value_index}"
+                value_params.append(f":{value_param}")
+                params[value_param] = str(item)
+            if not value_params:
+                continue
+            clauses.append(f"{expression} IN ({', '.join(value_params)})")
+        else:
+            value_param = f"filter_value_{index}"
+            clauses.append(f"{expression} = :{value_param}")
+            params[value_param] = str(value)
 
     return ("WHERE " + " AND ".join(clauses), params) if clauses else ("", params)
 
+
+def metadata_expression(key_param: str) -> str:
+    return f"metadata ->> :{key_param}"

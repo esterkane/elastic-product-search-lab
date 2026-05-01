@@ -8,6 +8,7 @@ from backend.app.retrieval.service import (
     RankedHit,
     RerankerClient,
     RetrievalService,
+    boost_ranked_hits,
     reciprocal_rank_fusion,
 )
 from backend.app.vector.qdrant_client import SearchHit
@@ -81,6 +82,31 @@ def test_reciprocal_rank_fusion_merges_duplicate_candidates() -> None:
     assert [candidate.id for candidate in fused] == ["b", "a", "c"]
     assert fused[0].lexical_score == 2.0
     assert fused[0].dense_score == 0.9
+
+
+def test_metadata_boosts_change_final_fusion_order() -> None:
+    boosted = boost_ranked_hits(
+        [
+            RankedHit(
+                id="a",
+                score=0.2,
+                fusion_score=0.2,
+                metadata=metadata("A", "example"),
+                source_url="https://example.test/a",
+            ),
+            RankedHit(
+                id="b",
+                score=0.19,
+                fusion_score=0.19,
+                metadata=metadata("B", "documentation"),
+                source_url="https://example.test/b",
+            ),
+        ],
+        {"content_type": {"documentation": 0.2}},
+    )
+
+    assert [hit.id for hit in boosted] == ["b", "a"]
+    assert boosted[0].fusion_score == boosted[0].score
 
 
 @pytest.mark.anyio

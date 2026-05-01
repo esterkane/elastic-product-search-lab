@@ -170,3 +170,18 @@ def test_qdrant_filter_is_deterministic() -> None:
             {"key": "repo", "match": {"any": ["elastic/docs-content", "elastic/elasticsearch-labs"]}},
         ]
     }
+
+
+def test_qdrant_filter_normalizes_partial_metadata_values() -> None:
+    assert qdrant_filter(
+        {
+            "license_family": " Elastic License ",
+            "path": "\\solutions\\search.md",
+            "ignored": "value",
+        }
+    ) == {
+        "must": [
+            {"key": "license_family", "match": {"value": "elastic-license"}},
+            {"key": "path", "match": {"value": "solutions/search.md"}},
+        ]
+    }

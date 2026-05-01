@@ -350,6 +350,37 @@ Evidence provenance rules:
 - De-duplication should prefer one displayed card per canonical source URL and heading, while preserving distinct chunks when they support different answer evidence.
 - The current UI does not expose `commit_sha` as a separate field. The canonical `source_url` is commit-pinned, but expose `commit_sha` in `SearchHitResponse` if reviewers need an explicit audit column.
 
+### Query-Time Filters And Boosts
+
+Metadata is normalized before indexing and again when older rows are read back from storage. The backend treats `repo`, `path`, `heading_path`, `content_type`, and `license_family` as the filterable and boostable evidence fields. Normalization lowercases repository, content-type, and license values, converts Windows path separators to `/`, trims empty values, and fills older rows with `unknown` for missing `content_type` or `license_family`.
+
+Example search request with exact metadata filters and a documentation boost:
+
+```json
+{
+  "query": "When should I use reranking after hybrid retrieval?",
+  "filters": {
+    "repo": "elastic/docs-content",
+    "content_type": "documentation",
+    "license_family": "elastic-license"
+  },
+  "boosts": {
+    "content_type": {
+      "documentation": 0.15
+    }
+  },
+  "explain": true
+}
+```
+
+Filters are strict. Use them when the user intentionally limits the evidence pool, such as one repository, one exact path, or one license family. Boosts are soft. Use them when matching evidence should remain eligible but normalized metadata should influence final ordering. Boosting currently applies after reciprocal rank fusion and before optional reranking, so the reranker can still reorder the boosted candidate pool based on query-document fit.
+
+Backward compatibility and migration:
+
+- Existing `document_chunks` rows can still be queried because `repo` and `path` fall back to their top-level database columns when JSON metadata is missing those keys.
+- Existing vector points should continue to return results, but Qdrant filters only match fields present in the payload. Re-run **Sync & index changes** after this patch to refresh vector payloads with normalized `repo`, `path`, `heading_path`, `content_type`, and `license_family`.
+- A full rebuild is only needed if old vector payloads were created before metadata normalization and filtered Qdrant searches appear incomplete.
+
 ## Source Attribution And Licensing
 
 Every indexed chunk must retain:
