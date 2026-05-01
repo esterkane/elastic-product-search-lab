@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+﻿import { afterEach, describe, expect, it } from "vitest";
 import { buildTestApp } from "./helpers.js";
 
 let app: ReturnType<typeof buildTestApp> | undefined;
@@ -65,5 +65,22 @@ describe("GET /search", () => {
       products: [{ productId: "P100002", title: "Sony Headphones" }],
       debug: { query: { size: 10 } },
     });
+  });
+
+  it("returns a sanitized backend error shape", async () => {
+    const error = Object.assign(new Error("connect ETIMEDOUT including internal host details"), {
+      code: "UND_ERR_CONNECT_TIMEOUT",
+    });
+    app = buildTestApp({ search: async () => Promise.reject(error) });
+
+    const response = await app.inject({ method: "GET", url: "/search?q=headphones" });
+
+    expect(response.statusCode).toBe(503);
+    expect(response.json()).toEqual({
+      error: "Service Unavailable",
+      message: "Search backend is temporarily unavailable",
+    });
+    expect(response.body).not.toContain("ETIMEDOUT");
+    expect(response.body).not.toContain("stack");
   });
 });

@@ -1,9 +1,10 @@
-import { Client } from "@elastic/elasticsearch";
+﻿import { Client } from "@elastic/elasticsearch";
 import type { ApiConfig } from "./config.js";
 
 export function createElasticsearchClient(config: ApiConfig): Client {
   const options: ConstructorParameters<typeof Client>[0] = {
     node: config.elasticsearchUrl,
+    requestTimeout: config.elasticsearchRequestTimeoutMs,
   };
 
   if (config.elasticsearchUseAuth && config.elasticsearchUsername && config.elasticsearchPassword) {
