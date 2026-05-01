@@ -17,7 +17,9 @@ esci = [
   "pyarrow"
 ]
 vector = [
-  "sentence-transformers"
+  "sentence-transformers",
+  "scikit-learn",
+  "rank-bm25"
 ]
 
 [tool.pytest.ini_options]
