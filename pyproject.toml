@@ -1,0 +1,16 @@
+[project]
+name = "elastic-product-search-lab"
+version = "0.1.0"
+description = "A compact Elasticsearch product-search lab for relevance, ingestion, and hybrid retrieval experiments."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "elasticsearch",
+  "python-dotenv",
+  "pytest",
+  "pydantic"
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]
+pythonpath = ["."]
