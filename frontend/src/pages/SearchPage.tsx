@@ -1,8 +1,8 @@
 import { FormEvent, useMemo, useState } from "react";
 import { AlertCircle, CheckCircle2, Loader2, RefreshCw, Search } from "lucide-react";
+import { AnswerPanel } from "../components/AnswerPanel";
 import { ResultCard } from "../components/ResultCard";
 import { RecommendationPanel } from "../components/RecommendationPanel";
-import { SourceList } from "../components/SourceList";
 import {
   analyze,
   answer,
@@ -260,8 +260,10 @@ export function SearchPage() {
         </div>
       )}
 
-      <div className="workspace-grid">
-        <section className="panel" aria-labelledby="results-heading">
+      <div className="answer-results-grid">
+        <AnswerPanel answer={answerData} isLoading={isLoading} />
+
+        <section className="panel results-panel" aria-labelledby="results-heading">
           <div className="panel-heading">
             <Search aria-hidden="true" size={18} />
             <h2 id="results-heading">Search Results</h2>
@@ -274,38 +276,6 @@ export function SearchPage() {
             </div>
           ) : (
             <p className="empty-state">Run a search to see ranked evidence.</p>
-          )}
-        </section>
-
-        <section className="panel answer-panel" aria-labelledby="answer-heading">
-          <h2 id="answer-heading">Answer With Evidence</h2>
-          <p className="answer-text">
-            {answerData?.summary ?? "Answers will appear here with direct source attributions."}
-          </p>
-          {answerData?.evidence?.length ? (
-            <div className="answer-evidence" aria-label="Grounded evidence">
-              {answerData.evidence.map((item) => (
-                <article className="answer-evidence__item" key={`${item.title}-${item.source_url}`}>
-                  <h3>{item.title}</h3>
-                  <p className="result-location">
-                    {[item.heading_path, item.path, item.repo].filter(Boolean).join(" - ")}
-                  </p>
-                  <blockquote className="evidence-snippet">
-                    {renderEvidenceExcerpt(item.excerpt, item.highlight_terms)}
-                  </blockquote>
-                  <div className="answer-evidence__links">
-                    <a href={item.reader_url} target="_blank" rel="noreferrer">
-                      {item.link_label}
-                    </a>
-                    <a href={item.source_url} target="_blank" rel="noreferrer">
-                      View source
-                    </a>
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <SourceList sources={answerData?.links ?? []} />
           )}
         </section>
       </div>
@@ -330,19 +300,4 @@ function uniqueWarnings(warnings: RetrievalWarning[]): RetrievalWarning[] {
     seen.add(key);
     return true;
   });
-}
-
-function renderEvidenceExcerpt(excerpt: string, highlights: string[]) {
-  if (highlights.length === 0) {
-    return excerpt;
-  }
-  const pattern = new RegExp(`(${highlights.map(escapeRegExp).join("|")})`, "gi");
-  return excerpt.split(pattern).map((part, index) => {
-    const marked = highlights.some((term) => term.toLowerCase() === part.toLowerCase());
-    return marked ? <mark key={`${part}-${index}`}>{part}</mark> : part;
-  });
-}
-
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

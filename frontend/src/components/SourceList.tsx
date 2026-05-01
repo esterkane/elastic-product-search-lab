@@ -16,6 +16,7 @@ export function SourceList({ sources }: SourceListProps) {
         <li key={`${source.title}-${source.url}`}>
           <a href={source.url} target="_blank" rel="noreferrer">
             <span>{source.title}</span>
+            {source.link_label && <span className="source-list__label">{source.link_label}</span>}
             <ExternalLink aria-hidden="true" size={15} />
           </a>
         </li>
