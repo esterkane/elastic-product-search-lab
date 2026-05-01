@@ -48,9 +48,26 @@ services:
   tei-rerank:
     image: ${TEI_IMAGE:-ghcr.io/huggingface/text-embeddings-inference:cpu-latest}
     profiles: ["rerank"]
-    command: ["--model-id", "${TEI_RERANK_MODEL:-BAAI/bge-reranker-base}", "--port", "80"]
+    command:
+      [
+        "--model-id",
+        "${TEI_RERANK_MODEL:-BAAI/bge-reranker-base}",
+        "--port",
+        "80",
+        "--tokenization-workers",
+        "${TEI_RERANK_TOKENIZATION_WORKERS:-2}",
+        "--max-concurrent-requests",
+        "${TEI_RERANK_MAX_CONCURRENT_REQUESTS:-16}",
+        "--max-batch-requests",
+        "${TEI_RERANK_MAX_BATCH_REQUESTS:-4}",
+        "--max-client-batch-size",
+        "${TEI_RERANK_MAX_CLIENT_BATCH_SIZE:-8}",
+        "--max-batch-tokens",
+        "${TEI_RERANK_MAX_BATCH_TOKENS:-2048}"
+      ]
     environment:
       HF_HOME: /data
+    restart: unless-stopped
     ports:
       - "${TEI_RERANK_PORT:-8082}:80"
     volumes:

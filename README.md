@@ -31,7 +31,10 @@ The reranker model is optional in local development because it can reserve sever
 ```powershell
 $env:TEI_RERANK_URL="http://tei-rerank/rerank"
 docker compose --profile rerank up -d
+docker compose up -d --force-recreate api
 ```
+
+The local reranker profile uses conservative request and batch limits by default. Override `TEI_RERANK_MAX_CONCURRENT_REQUESTS`, `TEI_RERANK_MAX_BATCH_REQUESTS`, or `TEI_RERANK_TOKENIZATION_WORKERS` only if the machine has enough spare CPU and memory.
 
 ## Inventory CLI
 
