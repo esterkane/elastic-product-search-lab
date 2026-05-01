@@ -107,6 +107,32 @@ The first local runtime is available through Docker Compose. The intended develo
 .\scripts\dev-down.ps1
 ```
 
+## API Quickstart
+
+Start Elasticsearch and load the sample catalog first:
+
+```powershell
+.\scripts\dev-up.ps1
+.\.venv\Scripts\python.exe scripts\create_index.py --recreate
+.\.venv\Scripts\python.exe scripts\load_sample_data.py
+```
+
+Then run the TypeScript product search API:
+
+```powershell
+cd apps/api
+npm install
+npm run dev
+```
+
+Useful local endpoints:
+
+```text
+GET http://localhost:3000/health
+GET http://localhost:3000/search?q=headphones&brand=Sony&debug=true
+GET http://localhost:3000/product/P100002
+GET http://localhost:3000/metrics/search-latency-demo
+```
 ## Relevance Evaluation
 
 The evaluation module will compare retrieval strategies against curated query judgments. Planned metrics include:
@@ -142,7 +168,7 @@ The ingestion workflow will include repeatable scripts that simulate catalog lif
 - [ ] Define product mappings and analyzer strategy.
 - [ ] Add sample product catalog fixtures.
 - [ ] Implement ingestion scripts.
-- [ ] Implement keyword search API.
+- [x] Implement keyword search API.
 - [ ] Add hybrid retrieval experiments.
 - [ ] Build offline relevance evaluation fixtures and reports.
 - [ ] Add performance and resilience notes from local experiments.

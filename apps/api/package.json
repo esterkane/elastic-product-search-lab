@@ -1,0 +1,29 @@
+{
+  "name": "elastic-product-search-lab-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@elastic/elasticsearch": "^9.3.0",
+    "dotenv": "^17.2.3",
+    "fastify": "^5.6.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.2",
+    "eslint": "^9.39.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vitest": "^4.0.15"
+  }
+}
