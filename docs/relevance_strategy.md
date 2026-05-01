@@ -1,6 +1,6 @@
 # Relevance Strategy
 
-Product search relevance starts with a simple question: did the product match the user's intent in the fields where intent is most likely to appear? This lab keeps the first ranking strategy explicit and testable so future experiments can be compared instead of guessed.
+Product search relevance starts with a simple question: did the product match the shopper's intent in the fields where intent is most likely to appear? This lab keeps ranking decisions explicit and testable so experiments can be compared instead of guessed.
 
 ## Baseline Query
 
@@ -23,28 +23,32 @@ The tuned query wraps the baseline BM25 query in a mild `function_score`:
 
 These boosts are intentionally small. Their job is to break ties and prefer healthy, fresh catalog records, not to overpower textual relevance.
 
-## Why Title Matches Matter
+## Filters Versus Scoring
 
-Product titles usually contain the highest-density description of what the item is: `wireless mouse`, `usb c charger`, `running shoes`, or `noise cancelling headphones`. A title match should usually beat the same term appearing only in a long description because the title is closer to the customer's explicit shopping intent.
-
-Brand and category matches also matter, but they are less specific. A brand filter or boost can help a query like `sony headphones`, while a category match can help separate `running shoes` from general clothing. Description and combined catalog text are useful recall fields, but they can contain broad language that should not dominate ranking.
-
-## Filters Versus Scores
-
-Availability should usually be a filter, not a scoring field. If a shopper asks for in-stock items, unavailable products should be excluded rather than merely ranked lower. Treating availability as a score can leak out-of-stock products into top results and create a poor marketplace experience.
+Availability should usually be a filter, not a scoring field. If a shopper asks for in-stock items, unavailable products should be excluded rather than merely ranked lower. Treating availability as a score can leak out-of-stock products into top results.
 
 Price range, brand, and category behave similarly when the user chooses them as facets. Once the user asks for a constraint, respecting the constraint is more important than treating it as soft relevance evidence.
 
+## Why Title Matches Matter
+
+Product titles usually contain the highest-density description of what the item is: `wireless mouse`, `usb c charger`, `running shoes`, or `noise cancelling headphones`. A title match should usually beat the same term appearing only in a long description because the title is closer to explicit shopping intent.
+
+Brand and category matches also matter, but they are less specific. Description and combined catalog text are useful recall fields, but they can contain broad language that should not dominate ranking.
+
 ## Popularity Risk
 
-Popularity is useful but dangerous. If it is overweighted, popular generic products can hide exact niche matches. For example, a best-selling USB-C wall charger should not outrank a precise `anker 737 power bank` match just because it sells more often. Popularity should be capped, transformed, or used gently until offline and online evidence proves it helps.
+Popularity is useful but dangerous. If it is overweighted, popular generic products can hide exact niche matches. Popularity should be capped, transformed, or used gently until offline and online evidence proves it helps.
+
+## Hybrid and Reranking Experiments
+
+Hybrid retrieval adds dense-vector recall to the lexical baseline. Reranking optionally reorders a smaller candidate window after broad retrieval. Both features can improve semantic relevance for some queries and regress exact-match behavior for others, so they remain optional experiments in this lab.
 
 ## Offline Metrics
 
-Offline metrics reduce guesswork by comparing query changes against a stable judgment set. This lab will use metrics such as nDCG@k, MRR, and Precision@k to identify whether a ranking change improves relevant top results or simply looks better in a few hand-picked examples.
+Offline metrics reduce guesswork by comparing query changes against a stable judgment set. This lab uses nDCG@k, MRR, and Precision@k to identify whether a ranking change improves relevant top results or only looks better in a few hand-picked examples.
 
-Good offline evaluation also exposes query-level regressions. A change can improve average nDCG while damaging important head or long-tail queries, so reports should include both aggregate and per-query views.
+Reports should include aggregate metrics and per-query rows. A change can improve average nDCG while damaging important head or long-tail queries.
 
 ## A/B Tests
 
-A/B tests complement offline evaluation. Offline metrics tell us whether a change aligns with known judgments; online experiments show whether real users search, click, add to cart, and recover from bad results differently. Strong search engineering uses both: offline tests for safe iteration and A/B tests for behavioral validation.
+A/B tests complement offline evaluation. Offline metrics tell us whether a change aligns with known judgments; online experiments show whether real users search, click, add to cart, and recover from bad results differently. This lab does not implement A/B testing, but it prepares the offline evidence that should come before an online experiment.

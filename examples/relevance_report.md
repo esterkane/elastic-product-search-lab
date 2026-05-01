@@ -2,13 +2,17 @@
 
 Offline evaluation for the local sample product catalog using graded relevance judgments.
 
+## Why This Matters
+
+This report gives a hiring reviewer a quick view of how search quality is measured. It shows per-query behavior, not just an aggregate score, because product search changes often help one query class while hurting another.
+
 ## Aggregate Metrics
 
-| Metric | Value |
-| --- | ---: |
-| Precision@10 | 0.750 |
-| MRR | 0.750 |
-| nDCG@10 | 0.576 |
+| Metric | Value | What It Indicates |
+| --- | ---: | --- |
+| Precision@10 | 0.750 | Share of returned top-10 products judged relevant. |
+| MRR | 0.750 | How quickly the first relevant product appears. |
+| nDCG@10 | 0.576 | Ranking quality with graded relevance. |
 
 ## Per-Query Metrics
 
@@ -25,6 +29,6 @@ Offline evaluation for the local sample product catalog using graded relevance j
 
 ## Notes
 
-Precision@10 counts relevant products in the top results but does not care where they appear.
-MRR rewards the first relevant product appearing early.
-nDCG@10 uses graded relevance, so exact matches are worth more than substitutes or complements.
+Precision@10 counts relevant products in the top results but does not care where they appear. MRR rewards the first relevant product appearing early. nDCG@10 uses graded relevance, so exact matches are worth more than substitutes or complements.
+
+The zero-result rows are useful, not embarrassing: they show where the sample catalog or query strategy needs more coverage.
