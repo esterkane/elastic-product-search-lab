@@ -168,6 +168,19 @@ Then generate embeddings and evaluate hybrid retrieval:
 
 If `sentence-transformers` is not installed, the scripts use deterministic hash embeddings as a lightweight local fallback. See `docs/hybrid_search.md` for tradeoffs.
 
+
+## Advanced: Reranking
+
+Reranking is available as an optional advanced workflow after baseline and hybrid retrieval. It demonstrates the pattern of retrieving a broader candidate set, reranking a smaller window, and measuring both relevance improvement and latency cost.
+
+The local reranker is a deterministic text-similarity placeholder for workflow testing. It is not a real ML reranker and is not required for the MVP.
+
+```powershell
+.\.venv\Scripts\python.exe scripts\evaluate_reranking.py
+```
+
+See `docs/reranking.md` for the tradeoffs and the future path for wiring Elastic semantic reranking.
+
 ## Relevance Evaluation
 
 The evaluation module will compare retrieval strategies against curated query judgments. Planned metrics include:
