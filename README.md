@@ -40,6 +40,8 @@ The local reranker profile uses conservative request and batch limits by default
 
 This project currently uses environment variables from `docker-compose.yml`; there is no checked-in `config.example.yaml` or `Makefile`.
 
+For dependency hygiene, version ranges, optional OCR/reranker/Gradio guidance, and upgrade policy, see [Dependency Strategy](docs/dependency-strategy.md).
+
 Required runtime dependencies:
 
 - Docker Desktop with Compose, used to run PostgreSQL, Qdrant, TEI, the API, worker, frontend, and Prometheus.
