@@ -12,6 +12,7 @@ import {
   type AnswerResponse,
   type Category,
   type IngestRepoResponse,
+  type RetrievalWarning,
   type SearchResponse
 } from "../lib/api";
 
@@ -57,6 +58,14 @@ export function SearchPage() {
   const categories = useMemo(
     () => searchData?.recommendation_categories ?? DEFAULT_CATEGORIES,
     [searchData]
+  );
+  const retrievalWarnings = useMemo(
+    () => uniqueWarnings([
+      ...(searchData?.warnings ?? []),
+      ...(analysisData?.warnings ?? []),
+      ...(answerData?.warnings ?? [])
+    ]),
+    [searchData, analysisData, answerData]
   );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -240,6 +249,17 @@ export function SearchPage() {
         </div>
       )}
 
+      {retrievalWarnings.length > 0 && (
+        <div className="warning-stack" role="status" aria-label="Retrieval warnings">
+          {retrievalWarnings.map((warning) => (
+            <div className="alert alert-warning" key={`${warning.stage}-${warning.code}`}>
+              <AlertCircle aria-hidden="true" size={18} />
+              <span>{warning.message}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="workspace-grid">
         <section className="panel" aria-labelledby="results-heading">
           <div className="panel-heading">
@@ -274,4 +294,16 @@ export function SearchPage() {
       />
     </main>
   );
+}
+
+function uniqueWarnings(warnings: RetrievalWarning[]): RetrievalWarning[] {
+  const seen = new Set<string>();
+  return warnings.filter((warning) => {
+    const key = `${warning.stage}:${warning.code}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
 }

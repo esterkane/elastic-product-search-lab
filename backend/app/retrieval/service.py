@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import asyncio
+import logging
+import time
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Awaitable, Callable, Protocol, TypeVar
 from urllib.parse import urldefrag
 
 import httpx
@@ -14,6 +17,9 @@ from backend.app.ingest.indexer import ACTIVE_REPOSITORY_SLUGS
 from backend.app.ingest.metadata import metadata_boost_score, normalize_boosts, normalize_filters, normalize_metadata
 from backend.app.vector.qdrant_client import SearchHit, VectorPayload, VectorRepository
 
+logger = logging.getLogger(__name__)
+T = TypeVar("T")
+
 
 RECOMMENDATION_CATEGORIES: tuple[str, ...] = (
     "relevance",
@@ -22,6 +28,31 @@ RECOMMENDATION_CATEGORIES: tuple[str, ...] = (
     "performance",
     "resiliency",
 )
+
+
+@dataclass(frozen=True)
+class RetryPolicy:
+    attempts: int = 2
+    backoff_seconds: float = 0.2
+
+
+@dataclass(frozen=True)
+class RetrievalWarning:
+    code: str
+    message: str
+    stage: str
+
+
+@dataclass(frozen=True)
+class RetrievalTelemetryEvent:
+    stage: str
+    status: str
+    attempts: int
+    duration_ms: float
+    error: str | None = None
+
+
+TelemetryHook = Callable[[RetrievalTelemetryEvent], None]
 
 
 @dataclass(frozen=True)
@@ -138,12 +169,16 @@ class RetrievalService:
         embedding_client: EmbeddingClient,
         reranker_client: RerankerClient | None = None,
         default_repos: tuple[str, ...] = ACTIVE_REPOSITORY_SLUGS,
+        retry_policy: RetryPolicy | None = None,
+        telemetry_hook: TelemetryHook | None = None,
     ) -> None:
         self.lexical_repository = lexical_repository
         self.vector_repository = vector_repository
         self.embedding_client = embedding_client
         self.reranker_client = reranker_client
         self.default_repos = default_repos
+        self.retry_policy = retry_policy or RetryPolicy()
+        self.telemetry_hook = telemetry_hook
 
     async def retrieve(
         self,
@@ -154,20 +189,166 @@ class RetrievalService:
     ) -> dict[str, object]:
         effective_filters = active_repo_filters(filters, self.default_repos)
         effective_boosts = normalize_boosts(boosts)
-        lexical_hits = await self.lexical_repository.search(query, limit=50, filters=effective_filters)
-        vectors = await self.embedding_client.embed([query])
-        dense_hits = [
-            vector_hit_to_ranked_hit(hit)
-            for hit in await self.vector_repository.search(vectors[0], limit=50, filters=effective_filters)
-        ]
+        warnings: list[RetrievalWarning] = []
+        telemetry: list[RetrievalTelemetryEvent] = []
+
+        lexical_hits: list[RankedHit] = []
+        dense_hits: list[RankedHit] = []
+        lexical_failed = False
+        dense_failed = False
+
+        try:
+            lexical_hits = await retryable_stage(
+                "lexical_retrieval",
+                lambda: self.lexical_repository.search(query, limit=50, filters=effective_filters),
+                self.retry_policy,
+                telemetry,
+                self.telemetry_hook,
+            )
+        except Exception:
+            lexical_failed = True
+            logger.warning("lexical retrieval unavailable", exc_info=True)
+            warnings.append(
+                RetrievalWarning(
+                    code="lexical_unavailable",
+                    message="Lexical retrieval unavailable; showing semantic results when available.",
+                    stage="lexical_retrieval",
+                )
+            )
+
+        try:
+            dense_hits = await retryable_stage(
+                "semantic_retrieval",
+                lambda: dense_retrieval(self.embedding_client, self.vector_repository, query, effective_filters),
+                self.retry_policy,
+                telemetry,
+                self.telemetry_hook,
+            )
+        except Exception:
+            dense_failed = True
+            logger.warning("semantic retrieval unavailable", exc_info=True)
+            warnings.append(
+                RetrievalWarning(
+                    code="semantic_unavailable",
+                    message="Semantic retrieval unavailable; showing lexical results when available.",
+                    stage="semantic_retrieval",
+                )
+            )
 
         fused = boost_ranked_hits(reciprocal_rank_fusion(lexical_hits, dense_hits), effective_boosts)[:20]
-        ranked = await self.reranker_client.rerank(query, fused) if self.reranker_client else fused
+        ranked = fused
+        if self.reranker_client and fused:
+            try:
+                ranked = await retryable_stage(
+                    "reranking",
+                    lambda: self.reranker_client.rerank(query, fused),
+                    self.retry_policy,
+                    telemetry,
+                    self.telemetry_hook,
+                )
+            except Exception:
+                logger.warning("reranker unavailable", exc_info=True)
+                warnings.append(
+                    RetrievalWarning(
+                        code="reranker_unavailable",
+                        message="Reranker unavailable; ranking uses hybrid fusion.",
+                        stage="reranking",
+                    )
+                )
+
+        if lexical_failed and dense_failed:
+            warnings.append(
+                RetrievalWarning(
+                    code="retrieval_unavailable",
+                    message="No retrieval backend returned evidence for this request.",
+                    stage="retrieval",
+                )
+            )
+
         hits = with_final_ranks(diversify_hits(ranked, limit))
         return {
             "hits": hits,
             "recommendation_categories": list(RECOMMENDATION_CATEGORIES),
+            "warnings": warnings,
+            "degraded": bool(warnings),
+            "telemetry": telemetry,
         }
+
+
+async def dense_retrieval(
+    embedding_client: EmbeddingClient,
+    vector_repository: VectorRepository,
+    query: str,
+    filters: dict[str, object] | None,
+) -> list[RankedHit]:
+    vectors = await embedding_client.embed([query])
+    return [
+        vector_hit_to_ranked_hit(hit)
+        for hit in await vector_repository.search(vectors[0], limit=50, filters=filters)
+    ]
+
+
+async def retryable_stage(
+    stage: str,
+    operation: Callable[[], Awaitable[T]],
+    retry_policy: RetryPolicy,
+    telemetry: list[RetrievalTelemetryEvent],
+    telemetry_hook: TelemetryHook | None = None,
+) -> T:
+    attempts = max(1, retry_policy.attempts)
+    started = time.perf_counter()
+    last_error: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            result = await operation()
+            event = RetrievalTelemetryEvent(
+                stage=stage,
+                status="success",
+                attempts=attempt,
+                duration_ms=elapsed_ms(started),
+            )
+            record_telemetry(event, telemetry, telemetry_hook)
+            return result
+        except Exception as exc:
+            last_error = exc
+            if attempt < attempts:
+                await asyncio.sleep(retry_policy.backoff_seconds * attempt)
+
+    event = RetrievalTelemetryEvent(
+        stage=stage,
+        status="failed",
+        attempts=attempts,
+        duration_ms=elapsed_ms(started),
+        error=last_error.__class__.__name__ if last_error else "unknown",
+    )
+    record_telemetry(event, telemetry, telemetry_hook)
+    if last_error:
+        raise last_error
+    raise RuntimeError(f"{stage} failed")
+
+
+def record_telemetry(
+    event: RetrievalTelemetryEvent,
+    telemetry: list[RetrievalTelemetryEvent],
+    telemetry_hook: TelemetryHook | None,
+) -> None:
+    telemetry.append(event)
+    logger.info(
+        "retrieval stage completed",
+        extra={
+            "stage": event.stage,
+            "status": event.status,
+            "attempts": event.attempts,
+            "duration_ms": event.duration_ms,
+            "error": event.error,
+        },
+    )
+    if telemetry_hook:
+        telemetry_hook(event)
+
+
+def elapsed_ms(started: float) -> float:
+    return round((time.perf_counter() - started) * 1000, 3)
 
 
 def vector_hit_to_ranked_hit(hit: SearchHit) -> RankedHit:

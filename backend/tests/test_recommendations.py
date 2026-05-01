@@ -8,6 +8,7 @@ from backend.app.retrieval.service import (
     RankedHit,
     RerankerClient,
     RetrievalService,
+    RetryPolicy,
     boost_ranked_hits,
     reciprocal_rank_fusion,
 )
@@ -49,6 +50,27 @@ class FakeVectorRepository:
                 source_url="https://example.test/dense-1",
             ),
         ]
+
+
+class FailingLexicalRepository:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    async def search(self, query: str, limit: int, filters: dict | None = None) -> list[RankedHit]:
+        self.calls += 1
+        raise RuntimeError("postgres unavailable")
+
+
+class FailingVectorRepository:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    async def upsert(self, points: list) -> None:
+        return None
+
+    async def search(self, vector: list[float], limit: int, filters: dict | None = None) -> list[SearchHit]:
+        self.calls += 1
+        raise RuntimeError("qdrant unavailable")
 
 
 def metadata(title: str, content_type: str) -> dict:
@@ -170,6 +192,81 @@ async def test_retrieval_service_score_breakdown_without_reranker(monkeypatch: p
     assert hits[0].rerank_score is None
     assert hits[0].score == hits[0].fusion_score
     assert hits[0].metadata["final_rank"] == 1
+
+
+@pytest.mark.anyio
+async def test_retrieval_service_returns_partial_results_when_vector_fails(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def fake_post(self: httpx.AsyncClient, url: str, json: dict) -> httpx.Response:
+        return httpx.Response(200, json={"embeddings": [[0.1, 0.2]]}, request=httpx.Request("POST", url))
+
+    monkeypatch.setattr(httpx.AsyncClient, "post", fake_post)
+    telemetry = []
+    vector_repository = FailingVectorRepository()
+    service = RetrievalService(
+        lexical_repository=FakeLexicalRepository(),
+        vector_repository=vector_repository,
+        embedding_client=EmbeddingClient("http://tei.local/embed"),
+        retry_policy=RetryPolicy(attempts=2, backoff_seconds=0),
+        telemetry_hook=telemetry.append,
+    )
+
+    result = await service.retrieve("changed source identifiers", limit=2)
+
+    assert [hit.id for hit in result["hits"]] == ["lex-1", "shared"]
+    assert result["degraded"] is True
+    assert [warning.code for warning in result["warnings"]] == ["semantic_unavailable"]
+    assert vector_repository.calls == 2
+    assert any(event.stage == "semantic_retrieval" and event.status == "failed" for event in telemetry)
+
+
+@pytest.mark.anyio
+async def test_retrieval_service_returns_semantic_results_when_lexical_fails(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def fake_post(self: httpx.AsyncClient, url: str, json: dict) -> httpx.Response:
+        return httpx.Response(200, json={"embeddings": [[0.1, 0.2]]}, request=httpx.Request("POST", url))
+
+    monkeypatch.setattr(httpx.AsyncClient, "post", fake_post)
+    lexical_repository = FailingLexicalRepository()
+    service = RetrievalService(
+        lexical_repository=lexical_repository,
+        vector_repository=FakeVectorRepository(),
+        embedding_client=EmbeddingClient("http://tei.local/embed"),
+        retry_policy=RetryPolicy(attempts=2, backoff_seconds=0),
+    )
+
+    result = await service.retrieve("changed source identifiers", limit=2)
+
+    assert [hit.id for hit in result["hits"]] == ["shared", "dense-1"]
+    assert result["degraded"] is True
+    assert [warning.code for warning in result["warnings"]] == ["lexical_unavailable"]
+    assert lexical_repository.calls == 2
+
+
+@pytest.mark.anyio
+async def test_retrieval_service_falls_back_to_fused_results_when_reranker_fails(monkeypatch: pytest.MonkeyPatch) -> None:
+    requests: list[str] = []
+
+    async def fake_post(self: httpx.AsyncClient, url: str, json: dict) -> httpx.Response:
+        requests.append(url)
+        if "embed" in url:
+            return httpx.Response(200, json={"embeddings": [[0.1, 0.2]]}, request=httpx.Request("POST", url))
+        return httpx.Response(503, json={"error": "loading"}, request=httpx.Request("POST", url))
+
+    monkeypatch.setattr(httpx.AsyncClient, "post", fake_post)
+    service = RetrievalService(
+        lexical_repository=FakeLexicalRepository(),
+        vector_repository=FakeVectorRepository(),
+        embedding_client=EmbeddingClient("http://tei.local/embed"),
+        reranker_client=RerankerClient("http://tei.local/rerank"),
+        retry_policy=RetryPolicy(attempts=2, backoff_seconds=0),
+    )
+
+    result = await service.retrieve("changed source identifiers", limit=2)
+
+    assert [hit.id for hit in result["hits"]] == ["shared", "lex-1"]
+    assert result["degraded"] is True
+    assert [warning.code for warning in result["warnings"]] == ["reranker_unavailable"]
+    assert requests.count("http://tei.local/rerank") == 2
+    assert all(hit.rerank_score is None for hit in result["hits"])
 
 
 def test_recommendation_engine_outputs_grounded_category_dicts() -> None:

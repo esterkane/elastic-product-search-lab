@@ -81,6 +81,8 @@ Optional runtime dependencies:
 | `TEI_RERANK_MAX_BATCH_REQUESTS` | Optional | `4` | Positive integer | TEI rerank service | Too high can increase latency and memory use. |
 | `TEI_RERANK_MAX_CLIENT_BATCH_SIZE` | Optional | `8` | Positive integer | TEI rerank service | Large values can overload CPU-only reranking. |
 | `TEI_RERANK_MAX_BATCH_TOKENS` | Optional | `2048` | Positive integer token budget | TEI rerank service | Too low truncates useful context; too high can exhaust memory. |
+| `RETRIEVAL_RETRY_ATTEMPTS` | Optional | `2` | Positive integer | Retrieval wrappers | Too low exposes transient failures; too high increases request latency during outages. |
+| `RETRIEVAL_RETRY_BACKOFF_SECONDS` | Optional | `0.2` | Non-negative seconds | Retrieval wrappers | Too low can hammer unhealthy services; too high slows degraded responses. |
 | `LLM_URL` | Optional | `http://llm:11434` | HTTP URL | Future/local LLM backend integration | No current answer-path symptom; future LLM calls would fail if unreachable. |
 | `OLLAMA_PORT` | Optional | `11434` | TCP port `1-65535` | Host access to Ollama | Host cannot reach Ollama directly. |
 | `API_PORT` | Optional | `8000` | TCP port `1-65535` | Host access to FastAPI | Frontend proxy/API calls fail if mapped differently without matching client config. |
@@ -425,7 +427,7 @@ Search should degrade in this order:
 6. If OCR is unavailable during ingestion, index Markdown and text sources, mark OCR-backed files as skipped, and show the skipped count in the ingestion response.
 7. If no retrieval backend succeeds, return the structured error response instead of fabricating an answer.
 
-The current implementation already supports a safe configured-off reranker path: when `TEI_RERANK_URL` is unset, results use RRF and explain mode shows `rerank` as skipped. Broader partial search warnings are the next implementation step; add a `warnings` array to search, analyze, and answer responses before changing the UI.
+The implementation supports a safe configured-off reranker path: when `TEI_RERANK_URL` is unset, results use RRF and explain mode shows `rerank` as skipped. Search, analyze, and answer responses also return `warnings` and `degraded` fields when a retrieval stage fails after retries. The UI displays those warnings above the results instead of hiding missing evidence.
 
 ### Partial-Result Semantics
 

@@ -41,6 +41,12 @@ export type Source = {
   url: string;
 };
 
+export type RetrievalWarning = {
+  code: string;
+  message: string;
+  stage: string;
+};
+
 export type Recommendation = {
   category: Category;
   recommendation: string;
@@ -50,16 +56,22 @@ export type Recommendation = {
 export type SearchResponse = {
   hits: SearchHit[];
   recommendation_categories: Category[];
+  warnings?: RetrievalWarning[];
+  degraded?: boolean;
 };
 
 export type AnalyzeResponse = {
   query: string;
   recommendations: Recommendation[];
+  warnings?: RetrievalWarning[];
+  degraded?: boolean;
 };
 
 export type AnswerResponse = {
   answer: string;
   sources: Source[];
+  warnings?: RetrievalWarning[];
+  degraded?: boolean;
 };
 
 export type QueryRequest = {

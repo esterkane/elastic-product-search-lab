@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
 from backend.app.embeddings.client import EmbeddingClient
-from backend.app.retrieval.service import PostgresFTSRepository, RerankerClient, RetrievalService
+from backend.app.retrieval.service import PostgresFTSRepository, RerankerClient, RetrievalService, RetryPolicy
 from backend.app.vector.qdrant_client import QdrantVectorRepository
 
 
@@ -37,6 +37,10 @@ def build_retrieval_service() -> RetrievalService:
         ),
         embedding_client=EmbeddingClient(tei_embed_url, model=os.getenv("TEI_EMBED_MODEL")),
         reranker_client=RerankerClient(rerank_url, model=os.getenv("TEI_RERANK_MODEL")) if rerank_url else None,
+        retry_policy=RetryPolicy(
+            attempts=int(os.getenv("RETRIEVAL_RETRY_ATTEMPTS", "2")),
+            backoff_seconds=float(os.getenv("RETRIEVAL_RETRY_BACKOFF_SECONDS", "0.2")),
+        ),
     )
 
 

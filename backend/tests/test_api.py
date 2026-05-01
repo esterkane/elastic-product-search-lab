@@ -4,7 +4,7 @@ from backend.app.api.admin import get_ingestion_service
 from backend.app.dependencies import build_retrieval_service, get_async_engine
 from backend.app.api.search import get_retrieval_service
 from backend.app.main import create_app
-from backend.app.retrieval.service import RankedHit
+from backend.app.retrieval.service import RankedHit, RetrievalWarning
 
 
 class FakeRetrievalService:
@@ -80,6 +80,8 @@ class FakeRetrievalService:
                 ),
             ],
             "recommendation_categories": ["relevance", "ingestion", "mapping", "performance", "resiliency"],
+            "warnings": [],
+            "degraded": False,
         }
 
 
@@ -128,6 +130,8 @@ def test_search_endpoint_supports_optional_filters() -> None:
     assert body["hits"][0]["title"] == "Hybrid search notebook"
     assert body["hits"][0]["source_url"] == "https://example.test/hybrid#combine"
     assert "score_breakdown" not in body["hits"][0]
+    assert body["warnings"] == []
+    assert body["degraded"] is False
     assert retrieval.calls[0]["filters"] == {"repo": "elastic/docs-content", "content_type": "guide"}
     assert retrieval.calls[0]["boosts"] == {"content_type": {"documentation": 0.15}}
 
@@ -175,6 +179,37 @@ def test_search_endpoint_explain_mode_returns_score_breakdown() -> None:
         "final_rank": 1,
         "final_score": 0.97,
     }
+
+
+def test_search_endpoint_returns_degraded_warnings() -> None:
+    client, retrieval = make_client()
+
+    async def degraded_retrieve(query: str, limit: int = 10, filters: dict | None = None, boosts: dict | None = None):
+        result = await FakeRetrievalService().retrieve(query, limit, filters, boosts)
+        result["warnings"] = [
+            RetrievalWarning(
+                code="reranker_unavailable",
+                message="Reranker unavailable; ranking uses hybrid fusion.",
+                stage="reranking",
+            )
+        ]
+        result["degraded"] = True
+        return result
+
+    retrieval.retrieve = degraded_retrieve  # type: ignore[method-assign]
+
+    response = client.post("/api/v1/search", json={"query": "hybrid retrieval"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["degraded"] is True
+    assert body["warnings"] == [
+        {
+            "code": "reranker_unavailable",
+            "message": "Reranker unavailable; ranking uses hybrid fusion.",
+            "stage": "reranking",
+        }
+    ]
 
 
 def test_answer_endpoint_returns_source_attributions() -> None:

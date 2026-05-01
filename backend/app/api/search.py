@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 from backend.app.dependencies import get_retrieval_service
 from backend.app.ingest.metadata import normalize_boosts, normalize_filters, normalize_metadata
-from backend.app.retrieval.service import RankedHit, RetrievalService, canonical_source_key
+from backend.app.retrieval.service import RankedHit, RetrievalService, RetrievalWarning, canonical_source_key
 
 
 router = APIRouter(prefix="/api/v1", tags=["search"])
@@ -78,6 +78,12 @@ class SourceAttribution(BaseModel):
     url: str
 
 
+class WarningResponse(BaseModel):
+    code: str
+    message: str
+    stage: str
+
+
 class SearchHitResponse(BaseModel):
     id: str
     score: float
@@ -94,6 +100,8 @@ class SearchHitResponse(BaseModel):
 class SearchResponse(BaseModel):
     hits: list[SearchHitResponse]
     recommendation_categories: list[str]
+    warnings: list[WarningResponse] = Field(default_factory=list)
+    degraded: bool = False
 
 
 class AnswerRequest(SearchRequest):
@@ -103,6 +111,8 @@ class AnswerRequest(SearchRequest):
 class AnswerResponse(BaseModel):
     answer: str
     sources: list[SourceAttribution]
+    warnings: list[WarningResponse] = Field(default_factory=list)
+    degraded: bool = False
 
 
 RetrievalDependency = Annotated[RetrievalService, Depends(get_retrieval_service)]
@@ -119,6 +129,8 @@ async def search(request: SearchRequest, retrieval_service: RetrievalDependency)
     return SearchResponse(
         hits=[hit_response(hit, include_debug=request.explain) for hit in result.get("hits", [])],
         recommendation_categories=[str(category) for category in result.get("recommendation_categories", [])],
+        warnings=warning_responses(result.get("warnings", [])),
+        degraded=bool(result.get("degraded", False)),
     )
 
 
@@ -132,7 +144,12 @@ async def answer(request: AnswerRequest, retrieval_service: RetrievalDependency)
     )
     hits = [hit for hit in result.get("hits", []) if isinstance(hit, RankedHit)]
     sources = source_attributions(hits)
-    return AnswerResponse(answer=synthesize_answer(request.query, hits), sources=sources)
+    return AnswerResponse(
+        answer=synthesize_answer(request.query, hits),
+        sources=sources,
+        warnings=warning_responses(result.get("warnings", [])),
+        degraded=bool(result.get("degraded", False)),
+    )
 
 
 def hit_response(hit: object, include_debug: bool = False) -> SearchHitResponse:
@@ -186,6 +203,24 @@ def source_attributions(hits: list[RankedHit]) -> list[SourceAttribution]:
             )
         )
     return sources
+
+
+def warning_responses(warnings: object) -> list[WarningResponse]:
+    output: list[WarningResponse] = []
+    if not isinstance(warnings, list):
+        return output
+    for warning in warnings:
+        if isinstance(warning, RetrievalWarning):
+            output.append(WarningResponse(code=warning.code, message=warning.message, stage=warning.stage))
+        elif isinstance(warning, dict):
+            output.append(
+                WarningResponse(
+                    code=str(warning.get("code") or "warning"),
+                    message=str(warning.get("message") or "Retrieval warning."),
+                    stage=str(warning.get("stage") or "retrieval"),
+                )
+            )
+    return output
 
 
 def synthesize_answer(query: str, hits: list[RankedHit]) -> str:

@@ -353,6 +353,18 @@ button:disabled {
   background: #effaf3;
 }
 
+.warning-stack {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.alert-warning {
+  border-color: #f4cf7a;
+  color: #6b4e00;
+  background: #fff8e6;
+}
+
 .spin {
   animation: spin 0.9s linear infinite;
 }

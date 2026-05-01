@@ -5,7 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
-from backend.app.api.search import SearchFilters, SourceAttribution, get_retrieval_service
+from backend.app.api.search import SearchBoosts, SearchFilters, SourceAttribution, WarningResponse, get_retrieval_service, warning_responses
 from backend.app.recommend.service import RecommendationEngine
 from backend.app.retrieval.service import RankedHit, RetrievalService
 
@@ -17,6 +17,7 @@ class AnalyzeRequest(BaseModel):
     query: str = Field(min_length=1)
     limit: int = Field(default=10, ge=1, le=50)
     filters: SearchFilters | None = None
+    boosts: SearchBoosts | None = None
 
 
 class RecommendationResponse(BaseModel):
@@ -28,6 +29,8 @@ class RecommendationResponse(BaseModel):
 class AnalyzeResponse(BaseModel):
     query: str
     recommendations: list[RecommendationResponse]
+    warnings: list[WarningResponse] = Field(default_factory=list)
+    degraded: bool = False
 
 
 def get_recommendation_engine() -> RecommendationEngine:
@@ -48,6 +51,7 @@ async def analyze(
         request.query,
         limit=request.limit,
         filters=request.filters.as_dict() if request.filters else None,
+        boosts=request.boosts.as_dict() if request.boosts else None,
     )
     hits = [hit for hit in result.get("hits", []) if isinstance(hit, RankedHit)]
     recommendations = recommendation_engine.generate(request.query, hits)
@@ -64,5 +68,6 @@ async def analyze(
             )
             for item in recommendations
         ],
+        warnings=warning_responses(result.get("warnings", [])),
+        degraded=bool(result.get("degraded", False)),
     )
-
