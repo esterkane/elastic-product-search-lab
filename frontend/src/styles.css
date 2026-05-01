@@ -113,9 +113,24 @@ a:focus-visible {
 
 .filter-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto auto;
   gap: 12px;
   align-items: end;
+}
+
+.checkbox-field {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: end;
+  white-space: nowrap;
+}
+
+.checkbox-field input {
+  min-height: 0;
+  width: 18px;
+  height: 18px;
 }
 
 button {
@@ -221,6 +236,36 @@ button:disabled {
   font-weight: 700;
 }
 
+.score-breakdown {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(72px, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.score-breakdown div {
+  border: 1px solid #d9dee7;
+  border-radius: 6px;
+  padding: 7px 8px;
+  background: #f7f8fa;
+}
+
+.score-breakdown dt {
+  margin-bottom: 3px;
+  color: #536274;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.score-breakdown dd {
+  margin: 0;
+  color: #17202a;
+  font-size: 0.86rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
 .source-link,
 .source-list a {
   display: inline-flex;
@@ -323,6 +368,10 @@ button:disabled {
   .filter-row,
   .workspace-grid {
     grid-template-columns: 1fr;
+  }
+
+  .score-breakdown {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .sync-button,

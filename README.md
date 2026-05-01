@@ -163,6 +163,60 @@ flowchart LR
 
 In practice, the query `When should I use reranking after hybrid retrieval?` should retrieve broad BM25 and semantic candidates first, then use reranking only on the smaller merged candidate set when better ordering is worth the extra latency and memory. The UI should show both the answer and the specific documentation or lab sources that support it.
 
+## When To Rerank After Hybrid Retrieval
+
+Current excerpt from this README:
+
+> In practice, the query `When should I use reranking after hybrid retrieval?` should retrieve broad BM25 and semantic candidates first, then use reranking only on the smaller merged candidate set when better ordering is worth the extra latency and memory.
+
+Current behavior in `backend/app/retrieval/service.py`:
+
+> The service retrieves up to 50 lexical hits and 50 dense hits, merges them with reciprocal rank fusion, keeps the top 20 fused candidates, and reranks those 20 only when `TEI_RERANK_URL` is configured.
+
+Use reranking when you have a small merged candidate set and relevance quality matters more than raw latency. Do not run the reranker over the whole corpus. The first stage should be cheap and broad: BM25 catches exact terms, dense retrieval catches semantic matches, and reciprocal rank fusion creates a balanced candidate pool without requiring score calibration between lexical and vector systems. The reranker is the second stage: it spends more compute on the top candidates by comparing the user query directly with candidate text.
+
+For the query `When should I use reranking after hybrid retrieval?`, the decision rule is:
+
+1. Run first-stage retrieval with both lexical and dense search.
+2. Merge candidates with RRF so documents that rank well in either channel can survive.
+3. Keep a bounded rerank window. This repo uses 20 fused candidates today; Elastic examples commonly show explicit rerank windows such as `rank_window_size` to control the cost of the second stage.
+4. Rerank only when the query is ambiguous, answer quality matters, or the top results will feed an evidence-backed answer or recommendation.
+5. Skip reranking when latency, CPU, or memory is the bottleneck, or when hybrid results are already stable and easy to explain.
+
+| Mode | What happens | Best for | Cost and latency | Score explanation |
+| --- | --- | --- | --- | --- |
+| Hybrid only | PostgreSQL full-text search and Qdrant dense search run first-stage retrieval, then RRF merges lexical and semantic rankings. | Fast exploration, broad recall, local development, and queries where exact matches are already strong. | Lower latency. No reranker container required. | Explain that ranking comes from fused lexical and dense rank positions; raw BM25 and vector scores are not directly comparable. |
+| Hybrid plus rerank | Hybrid retrieval creates the candidate set, then the reranker reorders the top fused candidates by query-document semantic fit. | Ambiguous natural-language questions, answer generation, RAG-style evidence selection, and cases where top results look plausible but not best ordered. | Higher latency and memory use. Keep the rerank window small and monitor `tei-rerank` CPU and memory. | Explain that final order may change because the reranker reads the query and candidate text together; show source links and, when exposed, lexical, dense, fused, and rerank scores. |
+
+Candidate limits are the main control knob. Larger first-stage pools can improve recall, but they also create more work before fusion. Larger rerank windows can improve ordering, but cost grows with each query-candidate pair sent to the reranker. For this app, start with the current behavior: retrieve 50 lexical plus 50 dense candidates, fuse to 20, then return the requested limit after source de-duplication. Increase the rerank window only after measuring answer quality and latency on pinned queries.
+
+Skip reranking when:
+
+- The query is navigational, such as an exact title, path, repo, or API name.
+- The UI needs the fastest possible results and answer synthesis is not required.
+- The reranker service is unhealthy, memory-constrained, or adding timeouts.
+- The result set is already dominated by one clearly correct source.
+- You cannot explain the changed ordering to the user with source links and score metadata.
+
+Score transparency matters because reranking can move a result that was not first in BM25 or vector search to the top. The backend already tracks `lexical_score`, `dense_score`, and `rerank_score` on `RankedHit`, while the API response currently exposes only the final `score`. If users need to understand why rankings changed, extend the response model to include the component scores, the retrieval channels that found each hit, and whether the final score came from RRF or reranking.
+
+Use query explain mode when validating ranking changes. Set `explain: true` on `POST /api/v1/search` or enable **Explain scores** in the UI. Result cards then show `bm25`, `semantic`, `fusion`, `rerank`, and `final rank` for each returned hit. When reranking is disabled, `rerank` is shown as skipped and the final score remains the fusion score. This directly answers the reranking decision question: rerank after hybrid retrieval when the first-stage candidate pool is already good and you need better final precision, especially for user-facing evidence or RAG contexts.
+
+Example debug response shape:
+
+```json
+{
+  "score_breakdown": {
+    "bm25": 0.42,
+    "semantic": 0.61,
+    "fusion": 0.53,
+    "rerank": 0.88,
+    "final_rank": 1,
+    "final_score": 0.88
+  }
+}
+```
+
 ## Source Attribution And Licensing
 
 Every indexed chunk must retain:

@@ -32,6 +32,16 @@ class SearchRequest(BaseModel):
     query: str = Field(min_length=1)
     limit: int = Field(default=10, ge=1, le=50)
     filters: SearchFilters | None = None
+    explain: bool = False
+
+
+class ScoreBreakdown(BaseModel):
+    bm25: float
+    semantic: float
+    fusion: float
+    rerank: float | None = None
+    final_rank: int
+    final_score: float
 
 
 class SourceAttribution(BaseModel):
@@ -49,6 +59,7 @@ class SearchHitResponse(BaseModel):
     content_type: str | None = None
     license_family: str | None = None
     source_url: str
+    score_breakdown: ScoreBreakdown | None = None
 
 
 class SearchResponse(BaseModel):
@@ -68,7 +79,7 @@ class AnswerResponse(BaseModel):
 RetrievalDependency = Annotated[RetrievalService, Depends(get_retrieval_service)]
 
 
-@router.post("/search", response_model=SearchResponse)
+@router.post("/search", response_model=SearchResponse, response_model_exclude_none=True)
 async def search(request: SearchRequest, retrieval_service: RetrievalDependency) -> SearchResponse:
     result = await retrieval_service.retrieve(
         request.query,
@@ -76,7 +87,7 @@ async def search(request: SearchRequest, retrieval_service: RetrievalDependency)
         filters=request.filters.as_dict() if request.filters else None,
     )
     return SearchResponse(
-        hits=[hit_response(hit) for hit in result.get("hits", [])],
+        hits=[hit_response(hit, include_debug=request.explain) for hit in result.get("hits", [])],
         recommendation_categories=[str(category) for category in result.get("recommendation_categories", [])],
     )
 
@@ -93,10 +104,11 @@ async def answer(request: AnswerRequest, retrieval_service: RetrievalDependency)
     return AnswerResponse(answer=synthesize_answer(request.query, hits), sources=sources)
 
 
-def hit_response(hit: object) -> SearchHitResponse:
+def hit_response(hit: object, include_debug: bool = False) -> SearchHitResponse:
     if not isinstance(hit, RankedHit):
         raise TypeError("retrieval result contains an unsupported hit")
 
+    score_breakdown = score_breakdown_response(hit) if include_debug else None
     return SearchHitResponse(
         id=hit.id,
         score=hit.score,
@@ -107,12 +119,24 @@ def hit_response(hit: object) -> SearchHitResponse:
         content_type=metadata_value(hit, "content_type"),
         license_family=metadata_value(hit, "license_family"),
         source_url=hit.source_url,
+        score_breakdown=score_breakdown,
     )
 
 
 def metadata_value(hit: RankedHit, key: str) -> str | None:
     value = hit.metadata.get(key)
     return str(value) if value is not None else None
+
+
+def score_breakdown_response(hit: RankedHit) -> ScoreBreakdown:
+    return ScoreBreakdown(
+        bm25=hit.lexical_score,
+        semantic=hit.dense_score,
+        fusion=hit.fusion_score,
+        rerank=hit.rerank_score,
+        final_rank=int(hit.metadata.get("final_rank") or 0),
+        final_score=hit.score,
+    )
 
 
 def source_attributions(hits: list[RankedHit]) -> list[SourceAttribution]:

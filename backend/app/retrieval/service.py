@@ -32,6 +32,7 @@ class RankedHit:
     text: str = ""
     lexical_score: float = 0.0
     dense_score: float = 0.0
+    fusion_score: float = 0.0
     rerank_score: float | None = None
 
 
@@ -115,6 +116,7 @@ class RerankerClient:
                 text=hit.text,
                 lexical_score=hit.lexical_score,
                 dense_score=hit.dense_score,
+                fusion_score=hit.fusion_score,
                 rerank_score=float(score),
             )
             for hit, score in zip(hits, scores, strict=True)
@@ -148,7 +150,7 @@ class RetrievalService:
 
         fused = reciprocal_rank_fusion(lexical_hits, dense_hits)[:20]
         ranked = await self.reranker_client.rerank(query, fused) if self.reranker_client else fused
-        hits = diversify_hits(ranked, limit)
+        hits = with_final_ranks(diversify_hits(ranked, limit))
         return {
             "hits": hits,
             "recommendation_categories": list(RECOMMENDATION_CATEGORIES),
@@ -197,6 +199,7 @@ def reciprocal_rank_fusion(
                 text=hit.text,
                 lexical_score=lexical_scores.get(hit.id, 0.0),
                 dense_score=dense_scores.get(hit.id, 0.0),
+                fusion_score=score,
             )
         )
 
@@ -293,6 +296,27 @@ def diversify_hits(hits: list[RankedHit], limit: int) -> list[RankedHit]:
 
 def canonical_source_key(source_url: str) -> str:
     return urldefrag(source_url)[0].rstrip("/")
+
+
+def with_final_ranks(hits: list[RankedHit]) -> list[RankedHit]:
+    ranked: list[RankedHit] = []
+    for index, hit in enumerate(hits, start=1):
+        metadata = dict(hit.metadata)
+        metadata["final_rank"] = index
+        ranked.append(
+            RankedHit(
+                id=hit.id,
+                score=hit.score,
+                metadata=metadata,
+                source_url=hit.source_url,
+                text=hit.text,
+                lexical_score=hit.lexical_score,
+                dense_score=hit.dense_score,
+                fusion_score=hit.fusion_score,
+                rerank_score=hit.rerank_score,
+            )
+        )
+    return ranked
 
 
 def is_missing_relation(exc: SQLAlchemyError) -> bool:

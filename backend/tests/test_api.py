@@ -25,9 +25,14 @@ class FakeRetrievalService:
                         "heading_path": "Guide > Hybrid",
                         "content_type": "guide",
                         "license_family": "elastic-license",
+                        "final_rank": 1,
                     },
                     source_url="https://example.test/hybrid#combine",
                     text="Combine lexical and dense retrieval, then rerank the merged candidate set before presenting evidence.",
+                    lexical_score=0.42,
+                    dense_score=0.61,
+                    fusion_score=0.53,
+                    rerank_score=0.88,
                 ),
                 RankedHit(
                     id="chunk-2",
@@ -39,9 +44,14 @@ class FakeRetrievalService:
                         "heading_path": "Guide > Rules",
                         "content_type": "guide",
                         "license_family": "elastic-license",
+                        "final_rank": 2,
                     },
                     source_url="https://example.test/rules",
                     text="Use query rules for curated boosts.",
+                    lexical_score=0.35,
+                    dense_score=0.22,
+                    fusion_score=0.41,
+                    rerank_score=0.72,
                 ),
                 RankedHit(
                     id="chunk-3",
@@ -53,9 +63,14 @@ class FakeRetrievalService:
                         "heading_path": "Guide > Hybrid follow-up",
                         "content_type": "guide",
                         "license_family": "elastic-license",
+                        "final_rank": 3,
                     },
                     source_url="https://example.test/hybrid#rerank",
                     text="Reranking helps choose the most useful evidence after hybrid retrieval returns overlapping candidates.",
+                    lexical_score=0.2,
+                    dense_score=0.58,
+                    fusion_score=0.39,
+                    rerank_score=0.68,
                 ),
             ],
             "recommendation_categories": ["relevance", "ingestion", "mapping", "performance", "resiliency"],
@@ -105,7 +120,28 @@ def test_search_endpoint_supports_optional_filters() -> None:
     body = response.json()
     assert body["hits"][0]["title"] == "Hybrid search notebook"
     assert body["hits"][0]["source_url"] == "https://example.test/hybrid#combine"
+    assert "score_breakdown" not in body["hits"][0]
     assert retrieval.calls[0]["filters"] == {"repo": "elastic/docs-content", "content_type": "guide"}
+
+
+def test_search_endpoint_explain_mode_returns_score_breakdown() -> None:
+    client, _ = make_client()
+
+    response = client.post(
+        "/api/v1/search",
+        json={"query": "hybrid retrieval", "limit": 2, "explain": True},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["hits"][0]["score_breakdown"] == {
+        "bm25": 0.42,
+        "semantic": 0.61,
+        "fusion": 0.53,
+        "rerank": 0.88,
+        "final_rank": 1,
+        "final_score": 0.97,
+    }
 
 
 def test_answer_endpoint_returns_source_attributions() -> None:

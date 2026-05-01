@@ -118,6 +118,32 @@ async def test_retrieval_service_embeds_searches_fuses_and_reranks(monkeypatch: 
         "repo": ["elastic/docs-content", "elastic/elasticsearch-labs", "elastic/labs-releases"]
     }
     assert vector_repository.filters == lexical_repository.filters
+    assert hits[0].rerank_score == 0.95
+    assert hits[0].metadata["final_rank"] == 1
+
+
+@pytest.mark.anyio
+async def test_retrieval_service_score_breakdown_without_reranker(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def fake_post(self: httpx.AsyncClient, url: str, json: dict) -> httpx.Response:
+        return httpx.Response(200, json={"embeddings": [[0.1, 0.2]]}, request=httpx.Request("POST", url))
+
+    monkeypatch.setattr(httpx.AsyncClient, "post", fake_post)
+
+    service = RetrievalService(
+        lexical_repository=FakeLexicalRepository(),
+        vector_repository=FakeVectorRepository(),
+        embedding_client=EmbeddingClient("http://tei.local/embed"),
+    )
+    result = await service.retrieve("changed source identifiers", limit=2)
+
+    hits = result["hits"]
+    assert hits[0].id == "shared"
+    assert hits[0].lexical_score == 6.0
+    assert hits[0].dense_score == 0.91
+    assert hits[0].fusion_score > 0
+    assert hits[0].rerank_score is None
+    assert hits[0].score == hits[0].fusion_score
+    assert hits[0].metadata["final_rank"] == 1
 
 
 def test_recommendation_engine_outputs_grounded_category_dicts() -> None:

@@ -38,6 +38,7 @@ export function SearchPage() {
   const [query, setQuery] = useState("hybrid retrieval improvements");
   const [repo, setRepo] = useState("");
   const [contentType, setContentType] = useState("");
+  const [explainScores, setExplainScores] = useState(false);
   const [category, setCategory] = useState<Category | "all">("all");
   const [searchData, setSearchData] = useState<SearchResponse | null>(null);
   const [analysisData, setAnalysisData] = useState<AnalyzeResponse | null>(null);
@@ -68,6 +69,7 @@ export function SearchPage() {
     const request = {
       query: query.trim(),
       limit: 10,
+      explain: explainScores,
       filters: Object.keys(filters).length > 0 ? filters : undefined
     };
 
@@ -152,6 +154,15 @@ export function SearchPage() {
                 </option>
               ))}
             </select>
+          </label>
+
+          <label className="checkbox-field">
+            <input
+              type="checkbox"
+              checked={explainScores}
+              onChange={(event) => setExplainScores(event.target.checked)}
+            />
+            <span>Explain scores</span>
           </label>
 
           <button type="submit" disabled={isLoading}>

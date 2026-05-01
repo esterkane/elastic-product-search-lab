@@ -15,6 +15,14 @@ export type SearchHit = {
   content_type?: string | null;
   license_family?: string | null;
   source_url: string;
+  score_breakdown?: {
+    bm25: number;
+    semantic: number;
+    fusion: number;
+    rerank?: number | null;
+    final_rank: number;
+    final_score: number;
+  };
 };
 
 export type Source = {
@@ -47,6 +55,7 @@ export type QueryRequest = {
   query: string;
   limit?: number;
   filters?: SearchFilters;
+  explain?: boolean;
 };
 
 export type IngestRepoRequest = {
