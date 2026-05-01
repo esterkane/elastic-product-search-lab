@@ -11,6 +11,12 @@ dependencies = [
   "pydantic"
 ]
 
+[project.optional-dependencies]
+esci = [
+  "pandas",
+  "pyarrow"
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests/python"]
 pythonpath = ["."]

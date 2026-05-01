@@ -39,7 +39,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Load sample products into Elasticsearch.")
     parser.add_argument("--batch-size", type=int, default=10, help="Bulk indexing batch size.")
     parser.add_argument("--index", default=os.getenv("PRODUCT_INDEX", DEFAULT_INDEX))
-    parser.add_argument("--sample-path", type=Path, default=DEFAULT_SAMPLE_PATH)
+    parser.add_argument("--input", "--sample-path", dest="input", type=Path, default=DEFAULT_SAMPLE_PATH)
     return parser.parse_args()
 
 
@@ -51,7 +51,7 @@ def main() -> int:
     try:
         ensure_reachable(client)
         create_index(client, args.index, recreate=False)
-        products = load_products(args.sample_path)
+        products = load_products(args.input)
         summary = bulk_index_products(client, products, args.index, batch_size=args.batch_size)
         client.indices.refresh(index=args.index)
         count = client.count(index=args.index, query={"match_all": {}})["count"]

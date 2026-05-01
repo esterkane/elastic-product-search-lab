@@ -107,6 +107,22 @@ The first local runtime is available through Docker Compose. The intended develo
 .\scripts\dev-down.ps1
 ```
 
+## Using the Amazon ESCI Dataset
+
+The lab can optionally prepare a small local sample from the public Amazon ESCI product-search dataset. ESCI provides query-product pairs with relevance labels: Exact, Substitute, Complement, and Irrelevant, which makes it directly relevant for product search relevance evaluation.
+
+The full dataset is not committed because it is large raw benchmark data. Download it separately and keep it under `data/raw/`, which is ignored by Git.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[esci]"
+.\.venv\Scripts\python.exe scripts\prepare_esci_sample.py `
+  --products data\raw\esci\shopping_queries_dataset_products.parquet `
+  --examples data\raw\esci\shopping_queries_dataset_examples.parquet
+.\.venv\Scripts\python.exe scripts\load_sample_data.py --input data\generated\esci_products.jsonl
+.\.venv\Scripts\python.exe scripts\evaluate_search.py --judgments data\generated\esci_judgments.jsonl
+```
+
+See `docs/esci_dataset.md` for details.
 ## API Quickstart
 
 Start Elasticsearch and load the sample catalog first:
