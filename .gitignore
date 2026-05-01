@@ -11,3 +11,5 @@ coverage/
 .DS_Store
 *.egg-info/
 pytest-cache-files-*/
+!data/generated/.gitkeep
+!data/generated/relevance_report.json

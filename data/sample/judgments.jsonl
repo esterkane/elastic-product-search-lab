@@ -1,0 +1,29 @@
+{"query":"wireless mouse","product_id":"P100008","label":"exact","grade":3}
+{"query":"wireless mouse","product_id":"P100002","label":"complement","grade":1}
+{"query":"wireless mouse","product_id":"P100013","label":"complement","grade":1}
+{"query":"wireless mouse","product_id":"P100010","label":"substitute","grade":2}
+{"query":"wireless mouse","product_id":"P100025","label":"irrelevant","grade":0}
+{"query":"noise cancelling headphones","product_id":"P100002","label":"exact","grade":3}
+{"query":"noise cancelling headphones","product_id":"P100022","label":"substitute","grade":2}
+{"query":"noise cancelling headphones","product_id":"P100018","label":"irrelevant","grade":0}
+{"query":"noise cancelling headphones","product_id":"P100013","label":"irrelevant","grade":0}
+{"query":"usb c charger","product_id":"P100018","label":"exact","grade":3}
+{"query":"usb c charger","product_id":"P100013","label":"substitute","grade":2}
+{"query":"usb c charger","product_id":"P100008","label":"complement","grade":1}
+{"query":"usb c charger","product_id":"P100010","label":"complement","grade":1}
+{"query":"running shoes waterproof","product_id":"P100024","label":"substitute","grade":2}
+{"query":"running shoes waterproof","product_id":"P100003","label":"complement","grade":1}
+{"query":"running shoes waterproof","product_id":"P100015","label":"complement","grade":1}
+{"query":"running shoes waterproof","product_id":"P100021","label":"irrelevant","grade":0}
+{"query":"espresso machine","product_id":"P100017","label":"exact","grade":3}
+{"query":"espresso machine","product_id":"P100001","label":"substitute","grade":2}
+{"query":"espresso machine","product_id":"P100004","label":"irrelevant","grade":0}
+{"query":"cast iron skillet","product_id":"P100023","label":"exact","grade":3}
+{"query":"cast iron skillet","product_id":"P100014","label":"complement","grade":1}
+{"query":"cast iron skillet","product_id":"P100004","label":"complement","grade":1}
+{"query":"portable bluetooth speaker","product_id":"P100022","label":"exact","grade":3}
+{"query":"portable bluetooth speaker","product_id":"P100002","label":"substitute","grade":2}
+{"query":"portable bluetooth speaker","product_id":"P100018","label":"complement","grade":1}
+{"query":"water bottle insulated","product_id":"P100007","label":"exact","grade":3}
+{"query":"water bottle insulated","product_id":"P100019","label":"substitute","grade":2}
+{"query":"water bottle insulated","product_id":"P100023","label":"irrelevant","grade":0}

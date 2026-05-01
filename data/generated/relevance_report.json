@@ -1,0 +1,78 @@
+{
+  "k": 10,
+  "per_query": [
+    {
+      "query": "cast iron skillet",
+      "precision_at_10": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_10": 0.8609101556836468,
+      "ranked_product_ids": [
+        "P100023"
+      ]
+    },
+    {
+      "query": "espresso machine",
+      "precision_at_10": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_10": 0.7871546029909718,
+      "ranked_product_ids": [
+        "P100017"
+      ]
+    },
+    {
+      "query": "noise cancelling headphones",
+      "precision_at_10": 0.0,
+      "mrr": 0.0,
+      "ndcg_at_10": 0.0,
+      "ranked_product_ids": []
+    },
+    {
+      "query": "portable bluetooth speaker",
+      "precision_at_10": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_10": 0.7452525342261976,
+      "ranked_product_ids": [
+        "P100022"
+      ]
+    },
+    {
+      "query": "running shoes waterproof",
+      "precision_at_10": 0.0,
+      "mrr": 0.0,
+      "ndcg_at_10": 0.0,
+      "ranked_product_ids": []
+    },
+    {
+      "query": "usb c charger",
+      "precision_at_10": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_10": 0.7125794632086186,
+      "ranked_product_ids": [
+        "P100018"
+      ]
+    },
+    {
+      "query": "water bottle insulated",
+      "precision_at_10": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_10": 0.7871546029909718,
+      "ranked_product_ids": [
+        "P100007"
+      ]
+    },
+    {
+      "query": "wireless mouse",
+      "precision_at_10": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_10": 0.7125794632086186,
+      "ranked_product_ids": [
+        "P100008"
+      ]
+    }
+  ],
+  "aggregate": {
+    "precision_at_10": 0.75,
+    "mrr": 0.75,
+    "ndcg_at_10": 0.5757038527886282
+  }
+}
