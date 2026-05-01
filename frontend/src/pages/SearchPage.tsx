@@ -126,95 +126,101 @@ export function SearchPage() {
       </header>
 
       <form className="search-form" onSubmit={handleSubmit}>
-        <label className="query-field">
-          <span>Query</span>
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Ask about search, ingestion, mappings, or resiliency"
-          />
-        </label>
-
-        <div className="filter-row">
-          <label>
-            <span>Repo</span>
-            <select value={repo} onChange={(event) => setRepo(event.target.value)}>
-              <option value="">All repos</option>
-              {REPOS.map((item) => (
-                <option value={item} key={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>License</span>
-            <select value={licenseFamily} onChange={(event) => setLicenseFamily(event.target.value)}>
-              <option value="">All licenses</option>
-              {LICENSE_FAMILIES.map((item) => (
-                <option value={item} key={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Content type</span>
-            <select value={contentType} onChange={(event) => setContentType(event.target.value)}>
-              <option value="">All types</option>
-              {CONTENT_TYPES.map((item) => (
-                <option value={item} key={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="checkbox-field">
+        <div className="query-row">
+          <label className="query-field">
+            <span>Query</span>
             <input
-              type="checkbox"
-              checked={explainScores}
-              onChange={(event) => setExplainScores(event.target.checked)}
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Ask a documentation question"
             />
-            <span>Explain scores</span>
           </label>
-
-          <label className="checkbox-field">
-            <input
-              type="checkbox"
-              checked={boostDocumentation}
-              onChange={(event) => setBoostDocumentation(event.target.checked)}
-            />
-            <span>Boost docs</span>
-          </label>
-
           <button type="submit" disabled={isLoading}>
             {isLoading ? <Loader2 aria-hidden="true" className="spin" size={18} /> : <Search aria-hidden="true" size={18} />}
             <span>{isLoading ? "Searching" : "Search"}</span>
           </button>
         </div>
 
-        <div className="metadata-row">
-          <label>
-            <span>Path</span>
-            <input
-              value={path}
-              onChange={(event) => setPath(event.target.value)}
-              placeholder="solutions/search/ranking/semantic-reranking.md"
-            />
-          </label>
+        <details className="advanced-options">
+          <summary>Advanced options</summary>
+          <div className="advanced-options__content">
+            <div className="filter-row">
+              <label>
+                <span>Repo</span>
+                <select value={repo} onChange={(event) => setRepo(event.target.value)}>
+                  <option value="">All repos</option>
+                  {REPOS.map((item) => (
+                    <option value={item} key={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-          <label>
-            <span>Heading</span>
-            <input
-              value={headingPath}
-              onChange={(event) => setHeadingPath(event.target.value)}
-              placeholder="Semantic reranking [semantic-reranking]"
-            />
-          </label>
-        </div>
+              <label>
+                <span>License</span>
+                <select value={licenseFamily} onChange={(event) => setLicenseFamily(event.target.value)}>
+                  <option value="">All licenses</option>
+                  {LICENSE_FAMILIES.map((item) => (
+                    <option value={item} key={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                <span>Content type</span>
+                <select value={contentType} onChange={(event) => setContentType(event.target.value)}>
+                  <option value="">All types</option>
+                  {CONTENT_TYPES.map((item) => (
+                    <option value={item} key={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="checkbox-field">
+                <input
+                  type="checkbox"
+                  checked={explainScores}
+                  onChange={(event) => setExplainScores(event.target.checked)}
+                />
+                <span>Explain scores</span>
+              </label>
+
+              <label className="checkbox-field">
+                <input
+                  type="checkbox"
+                  checked={boostDocumentation}
+                  onChange={(event) => setBoostDocumentation(event.target.checked)}
+                />
+                <span>Boost docs</span>
+              </label>
+            </div>
+
+            <div className="metadata-row">
+              <label>
+                <span>Path</span>
+                <input
+                  value={path}
+                  onChange={(event) => setPath(event.target.value)}
+                  placeholder="solutions/search/ranking/semantic-reranking.md"
+                />
+              </label>
+
+              <label>
+                <span>Heading</span>
+                <input
+                  value={headingPath}
+                  onChange={(event) => setHeadingPath(event.target.value)}
+                  placeholder="Semantic reranking [semantic-reranking]"
+                />
+              </label>
+            </div>
+          </div>
+        </details>
       </form>
 
       {error && (
