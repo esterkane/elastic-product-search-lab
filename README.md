@@ -217,6 +217,139 @@ Example debug response shape:
 }
 ```
 
+## Chunk Metadata And Evidence Schema
+
+Current excerpt from this README:
+
+> Every indexed chunk must retain: source repository slug, repository URL, relative path, commit SHA, canonical source URL, content type, license family.
+
+Current behavior in `frontend/src/components/ResultCard.tsx`:
+
+> Result cards choose `title`, `heading_path`, `path`, or `id` as the visible title, then show the score, content type, license family, and direct source link.
+
+The ingestion pipeline treats metadata as part of the evidence contract, not decoration. Every chunk must be traceable back to a repository, path, heading anchor, commit, license family, and canonical source URL. That contract is what lets the answer panel explain a query such as `When should I use reranking after hybrid retrieval?` with grounded links instead of only returning plausible text.
+
+### Indexed Chunk Schema
+
+Required stored fields:
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `id` | Yes | Deterministic chunk ID generated from `sha256(repo:path:anchor:chunk_index)`. |
+| `content` | Yes | Markdown section text that is embedded, searched, and shown as evidence context. |
+| `repo` | Yes | Repository slug, such as `elastic/docs-content`. |
+| `path` | Yes | Repository-relative source path. |
+| `source_url` | Yes | Canonical GitHub URL pinned to the indexed commit and heading anchor when available. |
+| `commit_sha` | Yes | Source commit used for the indexed content. |
+| `content_hash` | Yes | Hash used to detect changed chunks during incremental ingestion. |
+| `metadata` | Yes | JSON payload shared with vector search and API responses. |
+| `search_vector` | Yes | PostgreSQL full-text search vector derived from `content`. |
+| `updated_at` | Yes | Database timestamp for the stored chunk row. |
+
+Required metadata keys:
+
+| Metadata key | Required | Meaning |
+| --- | --- | --- |
+| `repo` | Yes | Normalized repository filter and evidence provenance field. |
+| `path` | Yes | Normalized path filter and source attribution field. |
+| `source_url` | Yes | Direct evidence link for answers, recommendations, and result cards. |
+| `commit_sha` | Yes | Commit provenance for reproducible evidence. |
+| `content_type` | Yes | Classified type, for example `documentation`, `notebook`, or `release`. |
+| `license_family` | Yes | License family inferred from the source repository. |
+| `anchor` | Yes | Stable heading anchor, or `document` for unheaded content. |
+| `chunk_index` | Yes | Zero-based chunk number within the heading section. |
+
+Optional metadata keys:
+
+| Metadata key | Required | Meaning |
+| --- | --- | --- |
+| `title` | No | Document title from frontmatter or the first heading. |
+| `heading_path` | No | Display heading path used by result cards and answer evidence. |
+| `default_branch` | No | Repository default branch, useful for diagnostics and inventory output. |
+| `frontmatter_json` | No | Parsed frontmatter stored at the document level. |
+
+Example indexed chunk:
+
+```json
+{
+  "id": "4f7b0a9d0e7e2f2a8e6c6d4b1a0c2f8d6a7b3c1e9f0a4d5c6b7a8e9f1d2c3b4a",
+  "content": "Semantic reranking improves the order of a smaller candidate set after first-stage retrieval.",
+  "repo": "elastic/docs-content",
+  "path": "solutions/search/ranking/semantic-reranking.md",
+  "source_url": "https://github.com/elastic/docs-content/blob/<commit_sha>/solutions/search/ranking/semantic-reranking.md#use-cases-semantic-reranking-use-cases",
+  "commit_sha": "<commit_sha>",
+  "content_hash": "sha256:<content_hash>",
+  "metadata": {
+    "repo": "elastic/docs-content",
+    "path": "solutions/search/ranking/semantic-reranking.md",
+    "title": "Semantic reranking [semantic-reranking]",
+    "heading_path": "Semantic reranking [semantic-reranking] > Use cases [semantic-reranking-use-cases]",
+    "content_type": "documentation",
+    "license_family": "elastic-license",
+    "source_url": "https://github.com/elastic/docs-content/blob/<commit_sha>/solutions/search/ranking/semantic-reranking.md#use-cases-semantic-reranking-use-cases",
+    "commit_sha": "<commit_sha>",
+    "anchor": "use-cases-semantic-reranking-use-cases",
+    "chunk_index": 0
+  }
+}
+```
+
+### UI Evidence Card Schema
+
+The API response for `POST /api/v1/search` becomes the result-card and answer evidence schema. The UI must preserve source attribution even when a title or heading is missing.
+
+Required displayed-result fields:
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `id` | Yes | Chunk ID returned by lexical or vector retrieval. |
+| `score` | Yes | Final score after fusion or reranking. |
+| `source_url` | Yes | Direct link used by the `Open source` action and answer citations. |
+
+Optional displayed-result fields:
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `title` | No | Preferred visible title. |
+| `repo` | No | Repository badge and filter context. |
+| `path` | No | Repository-relative source path shown under the title. |
+| `heading_path` | No | Heading breadcrumb shown under the title. |
+| `content_type` | No | Content type badge. |
+| `license_family` | No | License badge used for provenance review. |
+| `score_breakdown` | No | Explain-mode details for `bm25`, `semantic`, `fusion`, `rerank`, `final_rank`, and `final_score`. |
+
+Example displayed result:
+
+```json
+{
+  "id": "4f7b0a9d0e7e2f2a8e6c6d4b1a0c2f8d6a7b3c1e9f0a4d5c6b7a8e9f1d2c3b4a",
+  "score": 0.88,
+  "title": "Semantic reranking [semantic-reranking]",
+  "repo": "elastic/docs-content",
+  "path": "solutions/search/ranking/semantic-reranking.md",
+  "heading_path": "Semantic reranking [semantic-reranking] > Use cases [semantic-reranking-use-cases]",
+  "content_type": "documentation",
+  "license_family": "elastic-license",
+  "source_url": "https://github.com/elastic/docs-content/blob/<commit_sha>/solutions/search/ranking/semantic-reranking.md#use-cases-semantic-reranking-use-cases",
+  "score_breakdown": {
+    "bm25": 0.42,
+    "semantic": 0.61,
+    "fusion": 0.53,
+    "rerank": 0.88,
+    "final_rank": 1,
+    "final_score": 0.88
+  }
+}
+```
+
+Evidence provenance rules:
+
+- Answers must cite `source_url` values from returned hits, not generated URLs.
+- Result cards must keep `repo`, `path`, `heading_path`, `content_type`, and `license_family` visible when those fields are available.
+- Incremental indexing must compare `content_hash` and `commit_sha` before reusing an existing chunk.
+- De-duplication should prefer one displayed card per canonical source URL and heading, while preserving distinct chunks when they support different answer evidence.
+- The current UI does not expose `commit_sha` as a separate field. The canonical `source_url` is commit-pinned, but expose `commit_sha` in `SearchHitResponse` if reviewers need an explicit audit column.
+
 ## Source Attribution And Licensing
 
 Every indexed chunk must retain:
