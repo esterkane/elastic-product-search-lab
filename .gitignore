@@ -1,0 +1,11 @@
+﻿node_modules/
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+data/raw/*
+!data/raw/.gitkeep
+data/generated/*
+dist/
+coverage/
+.DS_Store

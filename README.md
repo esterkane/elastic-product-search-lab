@@ -1,0 +1,93 @@
+﻿# Elasticsearch Product Search Lab
+
+This project is a compact Elasticsearch product-search lab. It indexes product data, models product fields for search, supports keyword and hybrid retrieval, simulates catalog change events, and evaluates relevance with offline metrics such as nDCG@k, MRR, and Precision@k.
+
+## Why This Project Exists
+
+Product search sits at the intersection of search relevance, data modeling, ingestion reliability, and user intent. This lab exists to make those tradeoffs concrete in a small, inspectable codebase: the goal is to show how catalog data can be shaped for Elasticsearch, how retrieval strategies can be compared, and how relevance improvements can be measured instead of guessed.
+
+The project is designed as a portfolio-grade search-engineering workspace. It favors clear architecture notes, reproducible local setup, and explicit evaluation practices over a thin demo UI.
+
+## Architecture Overview
+
+The planned system is organized around four search-engineering workflows:
+
+1. **Catalog ingestion** reads product records, normalizes fields, validates required attributes, and writes product documents to Elasticsearch.
+2. **Index modeling** defines mappings, analyzers, multilingual fields, ranking signals, and index-versioning conventions.
+3. **Retrieval** supports keyword search first, then hybrid retrieval that combines lexical matching with vector similarity.
+4. **Evaluation** runs offline query sets against expected judgments and reports nDCG@k, MRR, Precision@k, and failure cases.
+
+```text
+sample product data -> ingestion pipeline -> Elasticsearch index
+                                      |             |
+                                      v             v
+                              change events   search API / experiments
+                                                    |
+                                                    v
+                                           offline relevance reports
+```
+
+## Planned Features
+
+- Local Elasticsearch stack with Docker Compose.
+- Product index mappings for titles, descriptions, brands, categories, attributes, prices, availability, and behavioral ranking signals.
+- Keyword retrieval with analyzers, boosts, filters, facets, and sorting.
+- Hybrid retrieval experiments using embeddings and vector search.
+- Catalog change simulation for creates, updates, deletes, price changes, and availability changes.
+- Offline relevance evaluation with query fixtures and graded judgments.
+- Example reports comparing keyword and hybrid strategies.
+- API layer for search experiments and repeatable evaluation runs.
+
+## Quickstart
+
+Local setup instructions will be added as the implementation lands. The intended flow is:
+
+```powershell
+docker compose up -d
+# install API and Python dependencies
+# load sample products
+# run search examples
+# run relevance evaluation
+```
+
+## Relevance Evaluation
+
+The evaluation module will compare retrieval strategies against curated query judgments. Planned metrics include:
+
+- nDCG@k for graded relevance quality.
+- MRR for first-good-result behavior.
+- Precision@k for top-result concentration.
+- Query-level diagnostics for regressions and mapping failures.
+
+## Ingestion Simulation
+
+The ingestion workflow will include repeatable scripts that simulate catalog lifecycle events:
+
+- New product creation.
+- Product title, category, and attribute updates.
+- Price and promotion updates.
+- Stock and availability changes.
+- Product deletion or deactivation.
+
+## Tech Stack
+
+- Elasticsearch 9.3.0
+- Docker Compose
+- Node.js / TypeScript for API and search experiments
+- Python for ingestion, evaluation, and analysis utilities
+- GitHub Actions planned for validation once implementation begins
+
+## Roadmap
+
+- [ ] Add Docker Compose Elasticsearch service and health checks.
+- [ ] Define product mappings and analyzer strategy.
+- [ ] Add sample product catalog fixtures.
+- [ ] Implement ingestion scripts.
+- [ ] Implement keyword search API.
+- [ ] Add hybrid retrieval experiments.
+- [ ] Build offline relevance evaluation fixtures and reports.
+- [ ] Add performance and resilience notes from local experiments.
+
+## Portfolio Note
+
+This is an educational/search-engineering lab, not a production marketplace backend. It is intentionally compact so the search architecture, relevance decisions, and evaluation workflow remain easy to inspect.
