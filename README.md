@@ -149,6 +149,25 @@ GET http://localhost:3000/search?q=headphones&brand=Sony&debug=true
 GET http://localhost:3000/product/P100002
 GET http://localhost:3000/metrics/search-latency-demo
 ```
+## Optional Hybrid Search Setup
+
+Hybrid search can generate local 384-dimensional product embeddings and compare lexical, boosted lexical, and vector-fused retrieval. It does not require paid APIs or cloud credentials.
+
+For real semantic embeddings, install the optional vector dependencies:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[vector]"
+```
+
+Then generate embeddings and evaluate hybrid retrieval:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\generate_embeddings.py --input data\sample\products.jsonl
+.\.venv\Scripts\python.exe scripts\evaluate_hybrid_search.py
+```
+
+If `sentence-transformers` is not installed, the scripts use deterministic hash embeddings as a lightweight local fallback. See `docs/hybrid_search.md` for tradeoffs.
+
 ## Relevance Evaluation
 
 The evaluation module will compare retrieval strategies against curated query judgments. Planned metrics include:

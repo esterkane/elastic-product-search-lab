@@ -16,6 +16,9 @@ esci = [
   "pandas",
   "pyarrow"
 ]
+vector = [
+  "sentence-transformers"
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/python"]
