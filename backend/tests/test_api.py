@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 
 from backend.app.api.admin import get_ingestion_service
 from backend.app.dependencies import build_retrieval_service, get_async_engine
-from backend.app.api.search import get_retrieval_service
+from backend.app.api.search import answer_evidence, get_retrieval_service
 from backend.app.main import create_app
 from backend.app.retrieval.service import RankedHit, RetrievalWarning
 
@@ -215,19 +215,64 @@ def test_search_endpoint_returns_degraded_warnings() -> None:
     ]
 
 
-def test_answer_endpoint_returns_source_attributions() -> None:
+def test_answer_endpoint_returns_structured_grounded_evidence() -> None:
     client, _ = make_client()
 
     response = client.post("/api/v1/answer", json={"query": "best retrieval improvement"})
 
     assert response.status_code == 200
     body = response.json()
-    assert "Use hybrid retrieval to build a strong candidate pool" in body["answer"]
-    assert "Combine lexical and dense retrieval" in body["answer"]
-    assert body["sources"] == [
-        {"title": "Hybrid search notebook", "url": "https://example.test/hybrid#combine"},
-        {"title": "Query rules notebook", "url": "https://example.test/rules"},
+    assert "answer" not in body
+    assert "sources" not in body
+    assert "Combine lexical and dense retrieval" in body["summary"]
+    assert body["evidence"][0] == {
+        "title": "Hybrid search notebook",
+        "heading_path": "Guide > Hybrid",
+        "repo": "elastic/docs-content",
+        "path": "guide/page.md",
+        "excerpt": "Combine lexical and dense retrieval, then rerank the merged candidate set before presenting evidence.",
+        "highlight_terms": ["retrieval"],
+        "reader_url": "https://www.elastic.co/docs/guide/page#combine",
+        "source_url": "https://example.test/hybrid#combine",
+        "link_label": "Read documentation",
+    }
+    assert body["links"][:2] == [
+        {
+            "title": "Hybrid search notebook",
+            "url": "https://www.elastic.co/docs/guide/page#combine",
+            "link_label": "Read documentation",
+        },
+        {
+            "title": "Query rules notebook",
+            "url": "https://www.elastic.co/docs/rules/page#rules",
+            "link_label": "Read documentation",
+        },
     ]
+
+
+def test_answer_evidence_uses_source_url_for_non_docs_repos() -> None:
+    evidence = answer_evidence(
+        "hybrid retrieval",
+        [
+            RankedHit(
+                id="lab-1",
+                score=0.5,
+                metadata={
+                    "repo": "elastic/elasticsearch-labs",
+                    "path": "supporting-blog-content/example/README.md",
+                    "title": "Lab example",
+                    "heading_path": "Lab example > Hybrid search",
+                },
+                source_url="https://github.com/elastic/elasticsearch-labs/blob/abc/supporting-blog-content/example/README.md#hybrid-search",
+                text="Hybrid retrieval examples combine structured filtering with semantic search for better relevance.",
+                lexical_score=0.2,
+                dense_score=0.4,
+            )
+        ],
+    )
+
+    assert evidence[0].reader_url == evidence[0].source_url
+    assert evidence[0].link_label == "View source"
 
 
 def test_analyze_endpoint_returns_recommendations_with_evidence() -> None:

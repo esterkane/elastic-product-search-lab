@@ -42,6 +42,7 @@ export type SearchHit = {
 export type Source = {
   title: string;
   url: string;
+  link_label?: string;
 };
 
 export type RetrievalWarning = {
@@ -71,8 +72,19 @@ export type AnalyzeResponse = {
 };
 
 export type AnswerResponse = {
-  answer: string;
-  sources: Source[];
+  summary: string;
+  evidence: {
+    title: string;
+    heading_path?: string | null;
+    repo?: string | null;
+    path?: string | null;
+    excerpt: string;
+    highlight_terms: string[];
+    reader_url: string;
+    source_url: string;
+    link_label: "Read documentation" | "View source";
+  }[];
+  links: Source[];
   warnings?: RetrievalWarning[];
   degraded?: boolean;
 };

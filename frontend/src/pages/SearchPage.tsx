@@ -280,9 +280,33 @@ export function SearchPage() {
         <section className="panel answer-panel" aria-labelledby="answer-heading">
           <h2 id="answer-heading">Answer With Evidence</h2>
           <p className="answer-text">
-            {answerData?.answer ?? "Answers will appear here with direct source attributions."}
+            {answerData?.summary ?? "Answers will appear here with direct source attributions."}
           </p>
-          <SourceList sources={answerData?.sources ?? []} />
+          {answerData?.evidence?.length ? (
+            <div className="answer-evidence" aria-label="Grounded evidence">
+              {answerData.evidence.map((item) => (
+                <article className="answer-evidence__item" key={`${item.title}-${item.source_url}`}>
+                  <h3>{item.title}</h3>
+                  <p className="result-location">
+                    {[item.heading_path, item.path, item.repo].filter(Boolean).join(" - ")}
+                  </p>
+                  <blockquote className="evidence-snippet">
+                    {renderEvidenceExcerpt(item.excerpt, item.highlight_terms)}
+                  </blockquote>
+                  <div className="answer-evidence__links">
+                    <a href={item.reader_url} target="_blank" rel="noreferrer">
+                      {item.link_label}
+                    </a>
+                    <a href={item.source_url} target="_blank" rel="noreferrer">
+                      View source
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <SourceList sources={answerData?.links ?? []} />
+          )}
         </section>
       </div>
 
@@ -306,4 +330,19 @@ function uniqueWarnings(warnings: RetrievalWarning[]): RetrievalWarning[] {
     seen.add(key);
     return true;
   });
+}
+
+function renderEvidenceExcerpt(excerpt: string, highlights: string[]) {
+  if (highlights.length === 0) {
+    return excerpt;
+  }
+  const pattern = new RegExp(`(${highlights.map(escapeRegExp).join("|")})`, "gi");
+  return excerpt.split(pattern).map((part, index) => {
+    const marked = highlights.some((term) => term.toLowerCase() === part.toLowerCase());
+    return marked ? <mark key={`${part}-${index}`}>{part}</mark> : part;
+  });
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

@@ -330,6 +330,37 @@ button:disabled {
   margin-bottom: 14px;
 }
 
+.answer-evidence {
+  display: grid;
+  gap: 12px;
+}
+
+.answer-evidence__item {
+  border-top: 1px solid #d9dee7;
+  padding-top: 12px;
+}
+
+.answer-evidence__item h3 {
+  margin-bottom: 4px;
+  font-size: 0.98rem;
+}
+
+.answer-evidence__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.answer-evidence__links a {
+  color: #0b6f85;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.answer-evidence__links a:hover {
+  text-decoration: underline;
+}
+
 .segmented-control {
   display: flex;
   flex-wrap: wrap;

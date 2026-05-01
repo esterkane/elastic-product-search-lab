@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import re
-from typing import Annotated
+from typing import Annotated, Literal
+from urllib.parse import urldefrag
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from backend.app.dependencies import get_retrieval_service
+from backend.app.ingest.parser import stable_anchor
 from backend.app.ingest.metadata import normalize_boosts, normalize_filters, normalize_metadata
 from backend.app.retrieval.service import RankedHit, RetrievalService, RetrievalWarning, canonical_source_key
 
@@ -78,6 +80,27 @@ class SourceAttribution(BaseModel):
     url: str
 
 
+LinkLabel = Literal["Read documentation", "View source"]
+
+
+class AnswerEvidence(BaseModel):
+    title: str
+    heading_path: str | None = None
+    repo: str | None = None
+    path: str | None = None
+    excerpt: str
+    highlight_terms: list[str]
+    reader_url: str
+    source_url: str
+    link_label: LinkLabel
+
+
+class AnswerLink(BaseModel):
+    title: str
+    url: str
+    link_label: LinkLabel
+
+
 class WarningResponse(BaseModel):
     code: str
     message: str
@@ -112,8 +135,9 @@ class AnswerRequest(SearchRequest):
 
 
 class AnswerResponse(BaseModel):
-    answer: str
-    sources: list[SourceAttribution]
+    summary: str
+    evidence: list[AnswerEvidence]
+    links: list[AnswerLink]
     warnings: list[WarningResponse] = Field(default_factory=list)
     degraded: bool = False
 
@@ -146,10 +170,11 @@ async def answer(request: AnswerRequest, retrieval_service: RetrievalDependency)
         boosts=request.boosts.as_dict() if request.boosts else None,
     )
     hits = [hit for hit in result.get("hits", []) if isinstance(hit, RankedHit)]
-    sources = source_attributions(hits)
+    evidence = answer_evidence(request.query, hits, limit=3)
     return AnswerResponse(
-        answer=synthesize_answer(request.query, hits),
-        sources=sources,
+        summary=synthesize_answer(request.query, evidence),
+        evidence=evidence,
+        links=answer_links(evidence, limit=3),
         warnings=warning_responses(result.get("warnings", [])),
         degraded=bool(result.get("degraded", False)),
     )
@@ -229,40 +254,73 @@ def warning_responses(warnings: object) -> list[WarningResponse]:
     return output
 
 
-def synthesize_answer(query: str, hits: list[RankedHit]) -> str:
-    if not hits:
+def answer_evidence(query: str, hits: list[RankedHit], limit: int = 3) -> list[AnswerEvidence]:
+    evidence: list[AnswerEvidence] = []
+    seen: set[str] = set()
+    for hit in sorted(hits, key=evidence_sort_key):
+        metadata = normalize_metadata(hit.metadata, source_url=hit.source_url)
+        source_key = canonical_source_key(hit.source_url)
+        if not hit.source_url or source_key in seen:
+            continue
+        excerpt = best_snippet(query, hit.text)
+        if not excerpt:
+            continue
+        seen.add(source_key)
+        title = metadata_value(metadata, "title") or metadata_value(metadata, "heading_path") or hit.id
+        repo = metadata_value(metadata, "repo")
+        path = metadata_value(metadata, "path")
+        heading_path = metadata_value(metadata, "heading_path")
+        reader_url = reader_url_for(metadata, hit.source_url)
+        link_label: LinkLabel = "Read documentation" if reader_url != hit.source_url else "View source"
+        evidence.append(
+            AnswerEvidence(
+                title=title,
+                heading_path=heading_path,
+                repo=repo,
+                path=path,
+                excerpt=excerpt,
+                highlight_terms=highlight_terms(query, hit.text),
+                reader_url=reader_url,
+                source_url=hit.source_url,
+                link_label=link_label,
+            )
+        )
+        if len(evidence) >= limit:
+            break
+    return evidence
+
+
+def evidence_sort_key(hit: RankedHit) -> tuple[int, int, float, str]:
+    repo = str(hit.metadata.get("repo") or "")
+    final_rank = int(hit.metadata.get("final_rank") or 9999)
+    docs_priority = 0 if repo == "elastic/docs-content" else 1
+    return (docs_priority, final_rank, -hit.score, hit.id)
+
+
+def answer_links(evidence: list[AnswerEvidence], limit: int = 3) -> list[AnswerLink]:
+    links: list[AnswerLink] = []
+    seen: set[str] = set()
+    for item in evidence:
+        url = item.reader_url or item.source_url
+        if url in seen:
+            continue
+        seen.add(url)
+        links.append(AnswerLink(title=item.title, url=url, link_label=item.link_label))
+        if len(links) >= limit:
+            break
+    return links
+
+
+def synthesize_answer(query: str, evidence: list[AnswerEvidence]) -> str:
+    if not evidence:
         return f"No grounded sources were found for '{query}'."
 
-    evidence = evidence_points(query, hits)
-    if not evidence:
-        top = hits[0]
-        title = metadata_value(top.metadata, "title") or metadata_value(top.metadata, "heading_path") or "the top source"
-        return f"The best grounded answer is in {title}. Open the cited source for the exact implementation details."
-
-    thematic = thematic_answer(query, evidence)
-    if thematic:
-        return thematic
-
-    lead = f"Based on the strongest matched sources, {lower_first(evidence[0][0])}"
+    lead = f"The strongest evidence indicates: {evidence[0].excerpt}"
     if len(evidence) == 1:
         return lead
 
-    supporting = " ".join(f"{point} ({title})." for point, title in evidence[1:3])
+    supporting = " ".join(f"Supporting evidence adds: {item.excerpt}" for item in evidence[1:3])
     return f"{lead} {supporting}".strip()
-
-
-def thematic_answer(query: str, evidence: list[tuple[str, str]]) -> str | None:
-    terms = meaningful_terms(query)
-    if {"hybrid", "retrieval"} & terms or {"rerank", "reranking"} & terms:
-        source_names = unique_titles(evidence)
-        support = f" Grounded by {', '.join(source_names[:2])}." if source_names else ""
-        detail = f" {evidence[0][0]}" if evidence else ""
-        return (
-            "Use hybrid retrieval to build a strong candidate pool, then rerank only the small top-k set "
-            "when final precision matters more than raw latency."
-            f"{detail}{support}"
-        )
-    return None
 
 
 def evidence_points(query: str, hits: list[RankedHit]) -> list[tuple[str, str]]:
@@ -282,6 +340,32 @@ def evidence_points(query: str, hits: list[RankedHit]) -> list[tuple[str, str]]:
             points.append((ensure_sentence(truncate_sentence(normalized)), title))
             break
     return points
+
+
+def reader_url_for(metadata: dict, source_url: str) -> str:
+    repo = metadata_value(metadata, "repo")
+    path = metadata_value(metadata, "path")
+    if repo != "elastic/docs-content" or not path:
+        return source_url
+
+    reader_path = path.replace("\\", "/")
+    reader_path = re.sub(r"\.mdx?$", "", reader_path, flags=re.IGNORECASE).strip("/")
+    anchor = metadata_value(metadata, "anchor") or source_anchor(source_url) or heading_anchor(metadata)
+    url = f"https://www.elastic.co/docs/{reader_path}"
+    return f"{url}#{anchor}" if anchor else url
+
+
+def source_anchor(source_url: str) -> str | None:
+    fragment = urldefrag(source_url).fragment.strip()
+    return fragment or None
+
+
+def heading_anchor(metadata: dict) -> str | None:
+    heading_path = metadata_value(metadata, "heading_path")
+    if not heading_path:
+        return None
+    heading = heading_path.split(">")[-1].strip()
+    return stable_anchor(heading)
 
 
 def best_snippet(query: str, text: str, max_chars: int = 360) -> str | None:
@@ -377,13 +461,3 @@ def ensure_sentence(text: str) -> str:
 
 def lower_first(text: str) -> str:
     return text[:1].lower() + text[1:] if text else text
-
-
-def unique_titles(evidence: list[tuple[str, str]]) -> list[str]:
-    titles: list[str] = []
-    seen: set[str] = set()
-    for _, title in evidence:
-        if title not in seen:
-            titles.append(title)
-            seen.add(title)
-    return titles
