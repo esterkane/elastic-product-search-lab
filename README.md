@@ -59,14 +59,37 @@ python tools/repo_inventory.py --sources-dir C:\tmp\sources --artifacts-dir C:\t
 
 ## Architecture
 
-- `tools/repo_inventory.py`: clones or updates source repositories and emits repo manifests.
-- `backend/app/ingest`: parses Markdown frontmatter/headings, computes stable anchors, classifies content, records source metadata, and creates deterministic chunks.
-- `backend/app/embeddings`: calls a TEI-compatible embedding endpoint.
-- `backend/app/vector`: supports Qdrant and pgvector-style vector repository interfaces.
-- `backend/app/retrieval`: combines PostgreSQL full-text search and dense retrieval with reciprocal rank fusion and optional reranking.
-- `backend/app/recommend`: produces short grounded recommendations with source links.
-- `backend/app/api`: exposes ingestion, search, analyze, answer, health, and metrics endpoints.
-- `frontend/src`: React + TypeScript UI for search, evidence, analysis, recommendations, filters, and incremental indexing.
+The application is built as a provenance-first retrieval pipeline: source material is normalized into deterministic chunks, each chunk keeps its canonical source metadata, and every answer or recommendation is assembled from ranked evidence rather than free-floating generated text. The current implementation ingests Markdown from the configured Elastic repositories. If PDF support is added later, a PDF adapter should first extract text and page-level provenance, then pass that normalized content into the same document and chunk model instead of bypassing the existing metadata rules.
+
+For the example query `When should I use reranking after hybrid retrieval?`, the flow is:
+
+1. `tools/repo_inventory.py` and `backend/app/ingest/indexer.py` clone or update `elastic/docs-content`, `elastic/elasticsearch-labs`, and `elastic/labs-releases` under `sources/`.
+2. `backend/app/ingest/parser.py` parses Markdown frontmatter and headings; `backend/app/ingest/chunker.py` creates stable anchors and deterministic chunk IDs from `repo:path:anchor:chunk_index`.
+3. `backend/app/ingest/license.py` records the source license family, while each chunk stores repo, path, commit SHA, canonical source URL, content type, heading path, and license metadata.
+4. Chunk text is stored in PostgreSQL for lexical full-text search, and embeddings from `backend/app/embeddings/client.py` are upserted into Qdrant through `backend/app/vector/qdrant_client.py`.
+5. `backend/app/retrieval/service.py` runs PostgreSQL full-text search and dense vector search, merges candidates with reciprocal rank fusion, de-duplicates overlapping source pages, and optionally calls the TEI reranker when `TEI_RERANK_URL` is configured.
+6. `backend/app/api/search.py` returns evidence-backed search and answer responses with direct source attributions; `backend/app/recommend/service.py` groups improvement suggestions into relevance, ingestion, mapping, performance, and resiliency categories.
+7. `frontend/src` presents the ranked results, synthesized answer, source links, filters, and incremental indexing control in the React UI.
+
+```mermaid
+flowchart LR
+    A["Source repositories / future extracted PDF text"] --> B["Inventory and ingestion"]
+    B --> C["Markdown parser and canonical metadata"]
+    C --> D["Deterministic chunks with source URLs"]
+    D --> E["PostgreSQL full-text index"]
+    D --> F["TEI embeddings"]
+    F --> G["Qdrant vector store"]
+    E --> H["Hybrid retrieval"]
+    G --> H
+    H --> I["RRF merge and source de-duplication"]
+    I --> J["Optional TEI reranker"]
+    J --> K["Evidence-backed answer"]
+    I --> L["Improvement recommendations"]
+    K --> M["React UI"]
+    L --> M
+```
+
+In practice, the query `When should I use reranking after hybrid retrieval?` should retrieve broad BM25 and semantic candidates first, then use reranking only on the smaller merged candidate set when better ordering is worth the extra latency and memory. The UI should show both the answer and the specific documentation or lab sources that support it.
 
 ## Source Attribution And Licensing
 
