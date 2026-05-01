@@ -503,6 +503,8 @@ sha256(f"{repo}:{path}:{anchor}:{chunk_index}".encode()).hexdigest()
 
 Evaluation runs should use pinned queries, deterministic ordering, and stable metric implementations. Current metrics include NDCG@10, MRR@10, and Recall@20.
 
+See [Validation Strategy](docs/validation-strategy.md) for the public test plan covering ingestion, OCR readiness, hybrid retrieval, reranking, claim-checking, evidence rendering, latency checks, and golden-query evaluation.
+
 Run backend tests:
 
 ```powershell
