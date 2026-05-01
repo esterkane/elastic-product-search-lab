@@ -167,6 +167,34 @@ The local reranker is a deterministic text-similarity placeholder for workflow t
 
 See `docs/reranking.md` for the tradeoffs and the future path for wiring semantic reranking.
 
+
+## Continuous Integration
+
+GitHub Actions runs API tests/build and Python unit tests on every push and pull request. CI intentionally does not start Docker or require Elasticsearch.
+
+Python tests that need local services should be marked as integration tests:
+
+```python
+import pytest
+
+@pytest.mark.integration
+def test_requires_elasticsearch():
+    ...
+```
+
+Run the default unit-test suite locally with:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest tests/python -m "not integration"
+```
+
+Run integration tests locally after starting Elasticsearch:
+
+```powershell
+docker compose up -d
+.\.venv\Scripts\python.exe -m pytest tests/python -m integration
+```
+
 ## Next Improvements
 
 - Kafka or Redpanda integration for real event streaming.

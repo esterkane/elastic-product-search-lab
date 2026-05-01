@@ -25,3 +25,6 @@ vector = [
 [tool.pytest.ini_options]
 testpaths = ["tests/python"]
 pythonpath = ["."]
+markers = [
+  "integration: tests that require local services such as Elasticsearch"
+]
