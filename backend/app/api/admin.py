@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import asyncio
 import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.app.dependencies import get_async_engine, service_not_configured
@@ -55,16 +56,26 @@ class MetricsResponse(BaseModel):
 class LocalIngestionService:
     def __init__(self, indexer: RepositoryIndexer) -> None:
         self.indexer = indexer
+        self._lock = asyncio.Lock()
 
     async def ingest_repo(self, request: IngestRepoRequest) -> IngestRepoResponse:
-        result = await self.indexer.index(
-            repo_url=request.repo_url,
-            repo_slug=request.repo,
-            branch=request.branch,
-            force=request.force,
-            update_sources=request.update_sources,
-            max_files=request.max_files,
-        )
+        if self._lock.locked():
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "ingestion_in_progress",
+                    "message": "A repository ingestion job is already running. Wait for it to finish before starting another.",
+                },
+            )
+        async with self._lock:
+            result = await self.indexer.index(
+                repo_url=request.repo_url,
+                repo_slug=request.repo,
+                branch=request.branch,
+                force=request.force,
+                update_sources=request.update_sources,
+                max_files=request.max_files,
+            )
         return IngestRepoResponse(
             status=result.status,
             repo_url=result.repo_url,
@@ -97,6 +108,8 @@ def get_ingestion_service() -> LocalIngestionService:
             collection=os.getenv("QDRANT_COLLECTION", "repo-docs"),
             api_key=os.getenv("QDRANT_API_KEY"),
         ),
+        embedding_batch_size=int(os.getenv("INGEST_EMBED_BATCH_SIZE", "8")),
+        upsert_batch_size=int(os.getenv("INGEST_UPSERT_BATCH_SIZE", "64")),
     )
     return LocalIngestionService(indexer)
 

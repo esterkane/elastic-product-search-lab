@@ -26,6 +26,13 @@ Open the app:
 
 From the UI, click **Sync & index changes** to clone or update the configured source repositories and index new or changed Markdown chunks. The first run indexes available content. Later runs compare deterministic chunk IDs and stored content, then embed only new or changed chunks.
 
+The reranker model is optional in local development because it can reserve several GiB of memory while ingestion only needs the embedding model. Enable it when needed:
+
+```powershell
+$env:TEI_RERANK_URL="http://tei-rerank/rerank"
+docker compose --profile rerank up -d
+```
+
 ## Inventory CLI
 
 The repository inventory CLI writes deterministic artifacts for the configured Elastic repos:

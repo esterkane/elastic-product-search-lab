@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
+import logging
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -12,6 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from backend.app.embeddings.client import EmbeddingClient
 from backend.app.ingest.chunker import IngestedDocument, SourceMetadata, build_source_url, ingest_markdown
 from backend.app.vector.qdrant_client import QdrantVectorRepository, VectorPoint, vector_payload
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -37,6 +41,19 @@ class IndexingResult:
     errors: list[str] = field(default_factory=list)
 
 
+@dataclass
+class ExistingChunkState:
+    content_hash: str | None
+    commit_sha: str | None
+    content: str | None = None
+
+
+@dataclass
+class PendingVector:
+    point: VectorPoint
+    text: str
+
+
 REPOSITORIES: tuple[RepoSpec, ...] = (
     RepoSpec("elastic/docs-content", "https://github.com/elastic/docs-content.git", "docs-content"),
     RepoSpec("elastic/docs-builder", "https://github.com/elastic/docs-builder.git", "docs-builder"),
@@ -55,12 +72,14 @@ class RepositoryIndexer:
         embedding_client: EmbeddingClient,
         vector_repository: QdrantVectorRepository,
         embedding_batch_size: int = 8,
+        upsert_batch_size: int = 64,
     ) -> None:
         self.sources_dir = sources_dir
         self.engine = engine
         self.embedding_client = embedding_client
         self.vector_repository = vector_repository
         self.embedding_batch_size = embedding_batch_size
+        self.upsert_batch_size = upsert_batch_size
 
     async def index(
         self,
@@ -141,12 +160,13 @@ class RepositoryIndexer:
         if max_files is not None:
             documents = documents[:max_files]
 
-        existing = await self.load_existing_content(spec.slug)
-        pending_points: list[VectorPoint] = []
-        rows: list[dict[str, object]] = []
+        existing = await self.load_existing_state(spec.slug)
+        pending_vectors: list[PendingVector] = []
+        pending_rows: list[dict[str, object]] = []
         result = IndexingResult(status="completed", repo_url=spec.url, branch=branch, message="")
 
-        for document_path in documents:
+        logger.info("Starting ingestion for %s with %s markdown files", spec.slug, len(documents))
+        for document_number, document_path in enumerate(documents, start=1):
             relative_path = document_path.relative_to(repo_path).as_posix()
             markdown = await asyncio.to_thread(document_path.read_text, encoding="utf-8", errors="replace")
             metadata = SourceMetadata(
@@ -159,36 +179,69 @@ class RepositoryIndexer:
             )
             ingested = ingest_markdown(markdown, metadata)
             result.documents_scanned += 1
-            rows.extend(chunk_rows(ingested))
             chunk_content = {chunk.chunk_id: chunk.content for chunk in ingested.chunks}
+            chunk_row_by_id = {str(row["id"]): row for row in chunk_rows(ingested)}
 
-            for point in points_for_ingested_document(ingested):
-                previous_content = existing.get(point.id)
-                if previous_content is None:
+            for pending_vector in vectors_for_ingested_document(ingested):
+                point = pending_vector.point
+                previous_state = existing.get(point.id)
+                content_hash = hash_text(chunk_content[point.id])
+                if previous_state is None:
                     result.new_chunks += 1
-                elif previous_content != chunk_content[point.id]:
+                elif previous_state.content_hash and previous_state.content_hash != content_hash:
+                    result.updated_chunks += 1
+                elif previous_state.content_hash is None and previous_state.content != chunk_content[point.id]:
                     result.updated_chunks += 1
                 elif force:
                     result.updated_chunks += 1
                 else:
                     result.unchanged_chunks += 1
                     continue
-                pending_points.append(point)
+                row = chunk_row_by_id[point.id]
+                row["content_hash"] = content_hash
+                pending_rows.append(row)
+                pending_vectors.append(pending_vector)
 
-        if pending_points:
-            await self.embed_and_attach_vectors(pending_points)
-            await self.upsert_vectors(pending_points)
-        if rows:
-            await self.upsert_chunks(rows)
-        result.chunks_indexed = len(pending_points)
+                if len(pending_vectors) >= self.upsert_batch_size:
+                    result.chunks_indexed += await self.flush_pending(pending_rows, pending_vectors)
+                    pending_rows = []
+                    pending_vectors = []
+
+            if document_number % 100 == 0:
+                logger.info(
+                    "Ingestion progress for %s: %s/%s files, %s new, %s updated, %s unchanged",
+                    spec.slug,
+                    document_number,
+                    len(documents),
+                    result.new_chunks,
+                    result.updated_chunks,
+                    result.unchanged_chunks,
+                )
+
+        result.chunks_indexed += await self.flush_pending(pending_rows, pending_vectors)
+        logger.info(
+            "Finished ingestion for %s: %s files, %s indexed, %s unchanged",
+            spec.slug,
+            result.documents_scanned,
+            result.chunks_indexed,
+            result.unchanged_chunks,
+        )
         return result
 
-    async def embed_and_attach_vectors(self, points: list[VectorPoint]) -> None:
-        for start in range(0, len(points), self.embedding_batch_size):
-            batch = points[start : start + self.embedding_batch_size]
-            vectors = await self.embedding_client.embed([str(point.payload.get("text") or "") for point in batch])
-            for point, vector in zip(batch, vectors, strict=True):
-                point.vector[:] = vector
+    async def flush_pending(self, rows: list[dict[str, object]], pending_vectors: list[PendingVector]) -> int:
+        if not pending_vectors:
+            return 0
+        await self.embed_and_attach_vectors(pending_vectors)
+        await self.upsert_vectors([pending.point for pending in pending_vectors])
+        await self.upsert_chunks(rows)
+        return len(pending_vectors)
+
+    async def embed_and_attach_vectors(self, pending_vectors: list[PendingVector]) -> None:
+        for start in range(0, len(pending_vectors), self.embedding_batch_size):
+            batch = pending_vectors[start : start + self.embedding_batch_size]
+            vectors = await self.embedding_client.embed([pending.text for pending in batch])
+            for pending, vector in zip(batch, vectors, strict=True):
+                pending.point.vector[:] = vector
 
     async def upsert_vectors(self, points: list[VectorPoint]) -> None:
         if not points:
@@ -207,6 +260,7 @@ class RepositoryIndexer:
                         metadata JSONB NOT NULL,
                         source_url TEXT NOT NULL,
                         search_vector TSVECTOR NOT NULL,
+                        content_hash TEXT NOT NULL,
                         commit_sha TEXT NOT NULL,
                         repo TEXT NOT NULL,
                         path TEXT NOT NULL,
@@ -215,6 +269,7 @@ class RepositoryIndexer:
                     """
                 )
             )
+            await connection.execute(text("ALTER TABLE document_chunks ADD COLUMN IF NOT EXISTS content_hash TEXT"))
             await connection.execute(
                 text("CREATE INDEX IF NOT EXISTS document_chunks_search_idx ON document_chunks USING GIN (search_vector)")
             )
@@ -222,19 +277,26 @@ class RepositoryIndexer:
                 text("CREATE INDEX IF NOT EXISTS document_chunks_metadata_idx ON document_chunks USING GIN (metadata)")
             )
 
-    async def load_existing_content(self, repo: str) -> dict[str, str]:
+    async def load_existing_state(self, repo: str) -> dict[str, ExistingChunkState]:
         async with self.engine.connect() as connection:
             result = await connection.execute(
-                text("SELECT id, content FROM document_chunks WHERE repo = :repo"),
+                text("SELECT id, content_hash, commit_sha, content FROM document_chunks WHERE repo = :repo"),
                 {"repo": repo},
             )
-        return {str(row.id): str(row.content) for row in result}
+        return {
+            str(row.id): ExistingChunkState(
+                content_hash=str(row.content_hash) if row.content_hash else None,
+                commit_sha=str(row.commit_sha) if row.commit_sha else None,
+                content=str(row.content) if row.content is not None else None,
+            )
+            for row in result
+        }
 
     async def upsert_chunks(self, rows: list[dict[str, object]]) -> None:
         statement = text(
             """
             INSERT INTO document_chunks (
-                id, content, metadata, source_url, search_vector, commit_sha, repo, path, updated_at
+                id, content, metadata, source_url, search_vector, content_hash, commit_sha, repo, path, updated_at
             )
             VALUES (
                 :id,
@@ -242,6 +304,7 @@ class RepositoryIndexer:
                 CAST(:metadata AS jsonb),
                 :source_url,
                 to_tsvector('english', :content),
+                :content_hash,
                 :commit_sha,
                 :repo,
                 :path,
@@ -252,6 +315,7 @@ class RepositoryIndexer:
                 metadata = EXCLUDED.metadata,
                 source_url = EXCLUDED.source_url,
                 search_vector = EXCLUDED.search_vector,
+                content_hash = EXCLUDED.content_hash,
                 commit_sha = EXCLUDED.commit_sha,
                 repo = EXCLUDED.repo,
                 path = EXCLUDED.path,
@@ -262,9 +326,9 @@ class RepositoryIndexer:
             await connection.execute(statement, rows)
 
 
-def points_for_ingested_document(ingested: IngestedDocument) -> list[VectorPoint]:
+def vectors_for_ingested_document(ingested: IngestedDocument) -> list[PendingVector]:
     title = ingested.document.title
-    points: list[VectorPoint] = []
+    vectors: list[PendingVector] = []
     for chunk in ingested.chunks:
         heading_path = " > ".join(part for part in [title, chunk.heading] if part)
         payload = vector_payload(
@@ -277,9 +341,13 @@ def points_for_ingested_document(ingested: IngestedDocument) -> list[VectorPoint
             source_url=chunk.source_url,
         )
         payload["commit_sha"] = chunk.commit_sha
-        payload["text"] = chunk.content
-        points.append(VectorPoint(id=chunk.chunk_id, vector=[], payload=payload, source_url=chunk.source_url))
-    return points
+        vectors.append(
+            PendingVector(
+                point=VectorPoint(id=chunk.chunk_id, vector=[], payload=payload, source_url=chunk.source_url),
+                text=chunk.content,
+            )
+        )
+    return vectors
 
 
 def chunk_rows(ingested: IngestedDocument) -> list[dict[str, object]]:
@@ -303,6 +371,7 @@ def chunk_rows(ingested: IngestedDocument) -> list[dict[str, object]]:
             {
                 "id": chunk.chunk_id,
                 "content": chunk.content,
+                "content_hash": hash_text(chunk.content),
                 "metadata": json.dumps(metadata, sort_keys=True),
                 "source_url": chunk.source_url,
                 "commit_sha": chunk.commit_sha,
@@ -311,6 +380,10 @@ def chunk_rows(ingested: IngestedDocument) -> list[dict[str, object]]:
             }
         )
     return rows
+
+
+def hash_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def iter_markdown_files(repo_path: Path) -> list[Path]:
