@@ -1,5 +1,5 @@
 {
-  "repo_count": 5,
+  "repo_count": 3,
   "repositories": [
     {
       "codeowners_files": [
@@ -53,121 +53,6 @@
         ".github/workflows/label-community-issues.yml",
         ".github/workflows/sync-sheets-keyless.yml",
         ".github/workflows/update-kube-stack-version.yml"
-      ]
-    },
-    {
-      "codeowners_files": [
-        ".github/CODEOWNERS"
-      ],
-      "contributing_files": [
-        "CONTRIBUTING.md"
-      ],
-      "default_branch": "main",
-      "errors": [],
-      "key_config_files": [
-        ".editorconfig",
-        ".gitignore",
-        "package-lock.json"
-      ],
-      "license_file": "LICENSE.txt",
-      "license_files": [
-        "LICENSE.txt",
-        "NOTICE.txt"
-      ],
-      "path": "sources/docs-builder",
-      "readme_files": [
-        "README.md",
-        "actions/update-link-index/README.md",
-        "aspire/README.md",
-        "src/Elastic.Documentation.LegacyDocs/README.md",
-        "src/Elastic.Documentation.Navigation/README.md",
-        "src/infra/docs-lambda-changelog-scrubber/README.md",
-        "src/infra/docs-lambda-index-publisher/README.md"
-      ],
-      "repo": "elastic/docs-builder",
-      "top_level_dirs": [
-        ".claude",
-        ".github",
-        ".husky",
-        ".vscode",
-        "actions",
-        "aspire",
-        "build",
-        "config",
-        "docs",
-        "src",
-        "tests",
-        "tests-integration"
-      ],
-      "url": "https://github.com/elastic/docs-builder.git",
-      "workflow_locations": [
-        ".github/workflows/assembler-preview-cleanup.yml",
-        ".github/workflows/assembler-preview.yml",
-        ".github/workflows/auto-add-needs-triage-label.yml",
-        ".github/workflows/build-changelog-scrubber-lambda.yml",
-        ".github/workflows/build-link-index-updater-lambda.yml",
-        ".github/workflows/ci.yml",
-        ".github/workflows/comment-on-asciidoc-changes.yml",
-        ".github/workflows/create-major-tag.yml",
-        ".github/workflows/detect-duplicate-issues.yml",
-        ".github/workflows/docs-preview-cleanup-local.yml",
-        ".github/workflows/docs-preview-local.yml",
-        ".github/workflows/license.yml",
-        ".github/workflows/prerelease.yml",
-        ".github/workflows/release-drafter.yml",
-        ".github/workflows/release.yml",
-        ".github/workflows/required-labels.yml",
-        ".github/workflows/smoke-test.yml",
-        ".github/workflows/updatecli.yml"
-      ]
-    },
-    {
-      "codeowners_files": [
-        ".github/CODEOWNERS"
-      ],
-      "contributing_files": [],
-      "default_branch": "master",
-      "errors": [],
-      "key_config_files": [
-        ".gitignore",
-        "Dockerfile",
-        "Makefile",
-        "package.json",
-        "yarn.lock"
-      ],
-      "license_file": null,
-      "license_files": [],
-      "path": "sources/docs",
-      "readme_files": [
-        ".docker/README",
-        ".github/actions/docs-preview/README.md",
-        "README.asciidoc",
-        "extra/README",
-        "integtest/README",
-        "resources/asciidoctor/README",
-        "shared/versions/stack/README"
-      ],
-      "repo": "elastic/docs",
-      "top_level_dirs": [
-        ".buildkite",
-        ".bundle",
-        ".ci",
-        ".docker",
-        ".github",
-        ".repos",
-        "air_gapped",
-        "extra",
-        "integtest",
-        "lib",
-        "preview",
-        "resources",
-        "shared",
-        "template"
-      ],
-      "url": "https://github.com/elastic/docs.git",
-      "workflow_locations": [
-        ".github/workflows/doc-preview.yml",
-        ".github/workflows/patch-release-version-bump.yml"
       ]
     },
     {

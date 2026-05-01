@@ -103,8 +103,6 @@ def classify_content_type(repo: str, path: str) -> str:
         if lowered.startswith("get-started/") or "/get-started/" in lowered:
             return "guide"
         return "documentation"
-    if repo.endswith("/docs-builder") or repo.endswith("/docs"):
-        return "tooling"
     if repo.endswith("/elasticsearch-labs"):
         if lowered.startswith("example-apps/") or "/example-apps/" in lowered:
             return "example"
@@ -112,4 +110,3 @@ def classify_content_type(repo: str, path: str) -> str:
     if repo.endswith("/labs-releases"):
         return "release_metadata"
     return "documentation"
-

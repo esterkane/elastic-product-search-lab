@@ -165,3 +165,8 @@ def test_qdrant_filter_is_deterministic() -> None:
             {"key": "repo", "match": {"value": "elastic/docs-content"}},
         ]
     }
+    assert qdrant_filter({"repo": ["elastic/docs-content", "elastic/elasticsearch-labs"]}) == {
+        "must": [
+            {"key": "repo", "match": {"any": ["elastic/docs-content", "elastic/elasticsearch-labs"]}},
+        ]
+    }

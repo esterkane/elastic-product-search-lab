@@ -26,8 +26,8 @@ class FakeRetrievalService:
                         "content_type": "guide",
                         "license_family": "elastic-license",
                     },
-                    source_url="https://example.test/hybrid",
-                    text="Combine lexical and dense retrieval.",
+                    source_url="https://example.test/hybrid#combine",
+                    text="Combine lexical and dense retrieval, then rerank the merged candidate set before presenting evidence.",
                 ),
                 RankedHit(
                     id="chunk-2",
@@ -42,6 +42,20 @@ class FakeRetrievalService:
                     },
                     source_url="https://example.test/rules",
                     text="Use query rules for curated boosts.",
+                ),
+                RankedHit(
+                    id="chunk-3",
+                    score=0.68,
+                    metadata={
+                        "repo": "elastic/docs-content",
+                        "path": "guide/page.md",
+                        "title": "Hybrid search notebook",
+                        "heading_path": "Guide > Hybrid follow-up",
+                        "content_type": "guide",
+                        "license_family": "elastic-license",
+                    },
+                    source_url="https://example.test/hybrid#rerank",
+                    text="Reranking helps choose the most useful evidence after hybrid retrieval returns overlapping candidates.",
                 ),
             ],
             "recommendation_categories": ["relevance", "ingestion", "mapping", "performance", "resiliency"],
@@ -90,7 +104,7 @@ def test_search_endpoint_supports_optional_filters() -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["hits"][0]["title"] == "Hybrid search notebook"
-    assert body["hits"][0]["source_url"] == "https://example.test/hybrid"
+    assert body["hits"][0]["source_url"] == "https://example.test/hybrid#combine"
     assert retrieval.calls[0]["filters"] == {"repo": "elastic/docs-content", "content_type": "guide"}
 
 
@@ -101,9 +115,9 @@ def test_answer_endpoint_returns_source_attributions() -> None:
 
     assert response.status_code == 200
     body = response.json()
-    assert "strongest improvement" in body["answer"]
+    assert "two-stage hybrid retrieval flow" in body["answer"]
     assert body["sources"] == [
-        {"title": "Hybrid search notebook", "url": "https://example.test/hybrid"},
+        {"title": "Hybrid search notebook", "url": "https://example.test/hybrid#combine"},
         {"title": "Query rules notebook", "url": "https://example.test/rules"},
     ]
 
@@ -124,7 +138,7 @@ def test_analyze_endpoint_returns_recommendations_with_evidence() -> None:
     ]
     assert body["recommendations"][2]["evidence"][0] == {
         "title": "Hybrid search notebook",
-        "url": "https://example.test/hybrid",
+        "url": "https://example.test/hybrid#combine",
     }
 
 

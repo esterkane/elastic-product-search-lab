@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import re
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from backend.app.dependencies import get_retrieval_service
-from backend.app.retrieval.service import RankedHit, RetrievalService
+from backend.app.retrieval.service import RankedHit, RetrievalService, canonical_source_key
 
 
 router = APIRouter(prefix="/api/v1", tags=["search"])
@@ -118,9 +119,10 @@ def source_attributions(hits: list[RankedHit]) -> list[SourceAttribution]:
     sources: list[SourceAttribution] = []
     seen: set[str] = set()
     for hit in hits:
-        if not hit.source_url or hit.source_url in seen:
+        source_key = canonical_source_key(hit.source_url)
+        if not hit.source_url or source_key in seen:
             continue
-        seen.add(hit.source_url)
+        seen.add(source_key)
         sources.append(
             SourceAttribution(
                 title=metadata_value(hit, "title") or metadata_value(hit, "heading_path") or hit.id,
@@ -134,8 +136,109 @@ def synthesize_answer(query: str, hits: list[RankedHit]) -> str:
     if not hits:
         return f"No grounded sources were found for '{query}'."
 
-    top = hits[0]
-    title = metadata_value(top, "title") or metadata_value(top, "heading_path") or "the strongest source"
-    if len(hits) > 1:
-        return f"The strongest improvement is to use {title} as the primary source and validate it against the other retrieved evidence."
-    return f"The strongest improvement is to use {title} as the primary grounded source."
+    evidence = evidence_points(query, hits)
+    if not evidence:
+        top = hits[0]
+        title = metadata_value(top, "title") or metadata_value(top, "heading_path") or "the top source"
+        return f"The best grounded answer is in {title}. Open the cited source for the exact implementation details."
+
+    thematic = thematic_answer(query, evidence)
+    if thematic:
+        return thematic
+
+    lead = f"Based on the strongest matched sources, {lower_first(evidence[0][0])}"
+    if len(evidence) == 1:
+        return lead
+
+    supporting = " ".join(f"{point} ({title})." for point, title in evidence[1:3])
+    return f"{lead} {supporting}".strip()
+
+
+def thematic_answer(query: str, evidence: list[tuple[str, str]]) -> str | None:
+    terms = meaningful_terms(query)
+    if {"hybrid", "retrieval"} & terms or {"rerank", "reranking"} & terms:
+        source_names = unique_titles(evidence)
+        support = f" The top evidence is {', '.join(source_names[:2])}." if source_names else ""
+        return (
+            "Use a two-stage hybrid retrieval flow: combine lexical/BM25 or structured filtering "
+            "with semantic search, then rerank the merged candidates before presenting evidence."
+            f"{support}"
+        )
+    return None
+
+
+def evidence_points(query: str, hits: list[RankedHit]) -> list[tuple[str, str]]:
+    query_terms = meaningful_terms(query)
+    points: list[tuple[str, str]] = []
+    seen_sentences: set[str] = set()
+    for hit in hits:
+        title = metadata_value(hit, "title") or metadata_value(hit, "heading_path") or "source"
+        for sentence in split_sentences(hit.text):
+            sentence = clean_sentence(sentence)
+            if query_terms and not any(term in sentence.lower() for term in query_terms):
+                continue
+            normalized = re.sub(r"\s+", " ", sentence).strip()
+            if should_skip_sentence(normalized) or normalized.lower() in seen_sentences:
+                continue
+            seen_sentences.add(normalized.lower())
+            points.append((ensure_sentence(truncate_sentence(normalized)), title))
+            break
+    return points
+
+
+def split_sentences(text: str) -> list[str]:
+    clean = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
+    clean = re.sub(r"\s+", " ", clean)
+    return [part.strip(" -#*") for part in re.split(r"(?<=[.!?])\s+|\s+-\s+|\s+\*\s+", clean) if part.strip()]
+
+
+def clean_sentence(text: str) -> str:
+    text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
+    text = re.sub(r"\{\{([^}]+)\}\}", r"\1", text)
+    text = re.sub(r"\[([a-z0-9_-]+)\]", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"`([^`]+)`", r"\1", text)
+    text = text.replace("**", "")
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def should_skip_sentence(text: str) -> bool:
+    lower = text.lower()
+    if len(text) < 40:
+        return True
+    if lower.startswith(("blogs", "related content", "see also")):
+        return True
+    if text.count("http") > 1:
+        return True
+    if text.count("[") + text.count("]") > 2:
+        return True
+    return False
+
+
+def truncate_sentence(text: str, max_chars: int = 260) -> str:
+    if len(text) <= max_chars:
+        return text
+    truncated = text[:max_chars].rsplit(" ", 1)[0].rstrip(" ,;:")
+    return f"{truncated}..."
+
+
+def meaningful_terms(query: str) -> set[str]:
+    stop_words = {"about", "after", "best", "can", "does", "for", "from", "have", "into", "that", "the", "this", "what", "with", "your"}
+    return {term for term in re.findall(r"[a-z0-9]{4,}", query.lower()) if term not in stop_words}
+
+
+def ensure_sentence(text: str) -> str:
+    return text if text.endswith((".", "!", "?")) else f"{text}."
+
+
+def lower_first(text: str) -> str:
+    return text[:1].lower() + text[1:] if text else text
+
+
+def unique_titles(evidence: list[tuple[str, str]]) -> list[str]:
+    titles: list[str] = []
+    seen: set[str] = set()
+    for _, title in evidence:
+        if title not in seen:
+            titles.append(title)
+            seen.add(title)
+    return titles

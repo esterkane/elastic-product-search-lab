@@ -17,8 +17,6 @@ import {
 
 const REPOS = [
   "elastic/docs-content",
-  "elastic/docs-builder",
-  "elastic/docs",
   "elastic/elasticsearch-labs",
   "elastic/labs-releases"
 ];
@@ -29,7 +27,6 @@ const CONTENT_TYPES = [
   "reference",
   "troubleshooting",
   "release_note",
-  "tooling",
   "example",
   "lab",
   "release_metadata"

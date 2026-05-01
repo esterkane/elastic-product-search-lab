@@ -94,5 +94,5 @@ def test_deterministic_chunk_ids_use_repo_path_anchor_and_index() -> None:
 def test_classification_and_license_defaults_are_deterministic() -> None:
     assert classify_content_type("elastic/docs-content", "release-notes/8.14.md") == "release_note"
     assert classify_content_type("elastic/elasticsearch-labs", "example-apps/chatbot/README.md") == "example"
-    assert classify_content_type("elastic/docs-builder", "README.md") == "tooling"
+    assert classify_content_type("elastic/labs-releases", "indicators/ref7001/README.md") == "release_metadata"
     assert license_family_for_repo("unknown/repo") == "unknown"

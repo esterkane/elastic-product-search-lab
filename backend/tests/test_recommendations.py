@@ -14,7 +14,11 @@ from backend.app.vector.qdrant_client import SearchHit
 
 
 class FakeLexicalRepository:
+    def __init__(self) -> None:
+        self.filters: dict | None = None
+
     async def search(self, query: str, limit: int, filters: dict | None = None) -> list[RankedHit]:
+        self.filters = filters
         return [
             hit("lex-1", 7.0, "Mapping guidance", "mapping"),
             hit("shared", 6.0, "Hybrid search notebook", "relevance"),
@@ -22,10 +26,14 @@ class FakeLexicalRepository:
 
 
 class FakeVectorRepository:
+    def __init__(self) -> None:
+        self.filters: dict | None = None
+
     async def upsert(self, points: list) -> None:
         return None
 
     async def search(self, vector: list[float], limit: int, filters: dict | None = None) -> list[SearchHit]:
+        self.filters = filters
         return [
             SearchHit(
                 id="shared",
@@ -91,9 +99,11 @@ async def test_retrieval_service_embeds_searches_fuses_and_reranks(monkeypatch: 
 
     monkeypatch.setattr(httpx.AsyncClient, "post", fake_post)
 
+    lexical_repository = FakeLexicalRepository()
+    vector_repository = FakeVectorRepository()
     service = RetrievalService(
-        lexical_repository=FakeLexicalRepository(),
-        vector_repository=FakeVectorRepository(),
+        lexical_repository=lexical_repository,
+        vector_repository=vector_repository,
         embedding_client=EmbeddingClient("http://tei.local/embed"),
         reranker_client=RerankerClient("http://tei.local/rerank"),
     )
@@ -104,6 +114,10 @@ async def test_retrieval_service_embeds_searches_fuses_and_reranks(monkeypatch: 
     assert result["recommendation_categories"] == ["relevance", "ingestion", "mapping", "performance", "resiliency"]
     assert requests[0]["json"] == {"inputs": ["changed source identifiers"]}
     assert requests[1]["json"]["query"] == "changed source identifiers"
+    assert lexical_repository.filters == {
+        "repo": ["elastic/docs-content", "elastic/elasticsearch-labs", "elastic/labs-releases"]
+    }
+    assert vector_repository.filters == lexical_repository.filters
 
 
 def test_recommendation_engine_outputs_grounded_category_dicts() -> None:

@@ -14,8 +14,6 @@ from typing import Iterable, Sequence
 
 REPOS: tuple[str, ...] = (
     "https://github.com/elastic/docs-content.git",
-    "https://github.com/elastic/docs-builder.git",
-    "https://github.com/elastic/docs.git",
     "https://github.com/elastic/elasticsearch-labs.git",
     "https://github.com/elastic/labs-releases.git",
 )

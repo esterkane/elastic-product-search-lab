@@ -56,11 +56,11 @@ class PendingVector:
 
 REPOSITORIES: tuple[RepoSpec, ...] = (
     RepoSpec("elastic/docs-content", "https://github.com/elastic/docs-content.git", "docs-content"),
-    RepoSpec("elastic/docs-builder", "https://github.com/elastic/docs-builder.git", "docs-builder"),
-    RepoSpec("elastic/docs", "https://github.com/elastic/docs.git", "docs"),
     RepoSpec("elastic/elasticsearch-labs", "https://github.com/elastic/elasticsearch-labs.git", "elasticsearch-labs"),
     RepoSpec("elastic/labs-releases", "https://github.com/elastic/labs-releases.git", "labs-releases"),
 )
+
+ACTIVE_REPOSITORY_SLUGS: tuple[str, ...] = tuple(spec.slug for spec in REPOSITORIES)
 
 
 class RepositoryIndexer:

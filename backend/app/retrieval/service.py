@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Protocol
+from urllib.parse import urldefrag
 
 import httpx
 from sqlalchemy.exc import SQLAlchemyError
@@ -9,6 +10,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from backend.app.embeddings.client import EmbeddingClient
+from backend.app.ingest.indexer import ACTIVE_REPOSITORY_SLUGS
 from backend.app.vector.qdrant_client import SearchHit, VectorPayload, VectorRepository
 
 
@@ -127,23 +129,26 @@ class RetrievalService:
         vector_repository: VectorRepository,
         embedding_client: EmbeddingClient,
         reranker_client: RerankerClient | None = None,
+        default_repos: tuple[str, ...] = ACTIVE_REPOSITORY_SLUGS,
     ) -> None:
         self.lexical_repository = lexical_repository
         self.vector_repository = vector_repository
         self.embedding_client = embedding_client
         self.reranker_client = reranker_client
+        self.default_repos = default_repos
 
     async def retrieve(self, query: str, limit: int = 10, filters: dict | None = None) -> dict[str, object]:
-        lexical_hits = await self.lexical_repository.search(query, limit=50, filters=filters)
+        effective_filters = active_repo_filters(filters, self.default_repos)
+        lexical_hits = await self.lexical_repository.search(query, limit=50, filters=effective_filters)
         vectors = await self.embedding_client.embed([query])
         dense_hits = [
             vector_hit_to_ranked_hit(hit)
-            for hit in await self.vector_repository.search(vectors[0], limit=50, filters=filters)
+            for hit in await self.vector_repository.search(vectors[0], limit=50, filters=effective_filters)
         ]
 
         fused = reciprocal_rank_fusion(lexical_hits, dense_hits)[:20]
         ranked = await self.reranker_client.rerank(query, fused) if self.reranker_client else fused
-        hits = ranked[:limit]
+        hits = diversify_hits(ranked, limit)
         return {
             "hits": hits,
             "recommendation_categories": list(RECOMMENDATION_CATEGORIES),
@@ -224,21 +229,70 @@ def metadata_text(metadata: VectorPayload) -> str:
     return " ".join(str(part) for part in parts if part)
 
 
-def postgres_filter_clause(filters: dict) -> tuple[str, dict[str, str]]:
+def postgres_filter_clause(filters: dict) -> tuple[str, dict[str, object]]:
     if not filters:
         return "", {}
 
     clauses: list[str] = []
-    params: dict[str, str] = {}
+    params: dict[str, object] = {}
     for index, (key, value) in enumerate(sorted(filters.items())):
         if value is None:
             continue
         key_param = f"filter_key_{index}"
-        value_param = f"filter_value_{index}"
-        clauses.append(f"AND metadata ->> :{key_param} = :{value_param}")
         params[key_param] = str(key)
-        params[value_param] = str(value)
+        if isinstance(value, list | tuple | set):
+            value_params: list[str] = []
+            for value_index, item in enumerate(value):
+                value_param = f"filter_value_{index}_{value_index}"
+                value_params.append(f":{value_param}")
+                params[value_param] = str(item)
+            if not value_params:
+                continue
+            clauses.append(f"AND (metadata ->> :{key_param}) IN ({', '.join(value_params)})")
+        else:
+            value_param = f"filter_value_{index}"
+            clauses.append(f"AND (metadata ->> :{key_param}) = :{value_param}")
+            params[value_param] = str(value)
     return ("\n".join(clauses), params)
+
+
+def active_repo_filters(filters: dict | None, default_repos: tuple[str, ...]) -> dict[str, object] | None:
+    merged: dict[str, object] = dict(filters or {})
+    if default_repos and not merged.get("repo"):
+        merged["repo"] = list(default_repos)
+    return merged or None
+
+
+def diversify_hits(hits: list[RankedHit], limit: int) -> list[RankedHit]:
+    selected: list[RankedHit] = []
+    seen_pages: set[str] = set()
+    seen_titles: set[str] = set()
+
+    for hit in hits:
+        page_key = canonical_source_key(hit.source_url)
+        title_key = str(hit.metadata.get("title") or hit.metadata.get("heading_path") or "").strip().lower()
+        if page_key and page_key in seen_pages:
+            continue
+        if title_key and title_key in seen_titles:
+            continue
+        selected.append(hit)
+        if page_key:
+            seen_pages.add(page_key)
+        if title_key:
+            seen_titles.add(title_key)
+        if len(selected) >= limit:
+            return selected
+
+    for hit in hits:
+        if hit.id not in {selected_hit.id for selected_hit in selected}:
+            selected.append(hit)
+        if len(selected) >= limit:
+            break
+    return selected
+
+
+def canonical_source_key(source_url: str) -> str:
+    return urldefrag(source_url)[0].rstrip("/")
 
 
 def is_missing_relation(exc: SQLAlchemyError) -> bool:

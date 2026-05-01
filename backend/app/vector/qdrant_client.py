@@ -92,7 +92,9 @@ class QdrantVectorRepository:
 def qdrant_filter(filters: dict) -> dict:
     return {
         "must": [
-            {"key": key, "match": {"value": value}}
+            {"key": key, "match": {"any": list(value)}}
+            if isinstance(value, list | tuple | set)
+            else {"key": key, "match": {"value": value}}
             for key, value in sorted(filters.items())
             if value is not None
         ]
