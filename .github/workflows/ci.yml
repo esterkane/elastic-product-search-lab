@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install backend dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Run backend tests
+        run: python -m pytest -p no:cacheprovider
+
+  frontend:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Build frontend
+        run: npm run build
+
+  integration:
+    name: Compose And API Integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose
+        run: docker compose config --quiet
+
+      - name: Build API and frontend images
+        run: docker compose build api frontend
+
+      - name: Start data services
+        run: docker compose up -d postgres qdrant
+
+      - name: Start API without model services
+        run: docker compose up -d --no-deps api
+
+      - name: Wait for API health
+        run: |
+          for attempt in {1..30}; do
+            if curl -fsS http://localhost:8000/api/v1/health; then
+              exit 0
+            fi
+            sleep 5
+          done
+          docker compose logs api
+          exit 1
+
+      - name: Stop services
+        if: always()
+        run: docker compose down --volumes

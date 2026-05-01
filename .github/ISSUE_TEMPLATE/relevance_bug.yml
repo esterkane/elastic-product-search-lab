@@ -1,0 +1,44 @@
+name: Relevance bug
+description: Report a search, reranking, answer, or recommendation quality issue.
+title: "[Relevance]: "
+labels: ["relevance", "bug"]
+body:
+  - type: textarea
+    id: query
+    attributes:
+      label: Query or workflow
+      description: Include the exact query, filters, and endpoint or UI workflow.
+      placeholder: "Query: hybrid search mappings; filters: elastic/docs-content"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: Describe the result, source, or recommendation you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: Include ranked hits, answer text, scores, and source URLs if available.
+    validations:
+      required: true
+  - type: textarea
+    id: attribution
+    attributes:
+      label: Source attribution
+      description: List direct source URLs that should support the expected answer.
+    validations:
+      required: true
+  - type: input
+    id: commit_sha
+    attributes:
+      label: Indexed commit SHA
+      description: Commit SHA shown in metadata, if known.
+  - type: textarea
+    id: eval
+    attributes:
+      label: Deterministic evaluation impact
+      description: Note affected query sets, expected judgments, or metric movement.

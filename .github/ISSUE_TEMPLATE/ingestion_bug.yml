@@ -1,0 +1,43 @@
+name: Ingestion bug
+description: Report missing, stale, incorrectly chunked, or incorrectly attributed source content.
+title: "[Ingestion]: "
+labels: ["ingestion", "bug"]
+body:
+  - type: input
+    id: repo
+    attributes:
+      label: Repository
+      placeholder: elastic/docs-content
+    validations:
+      required: true
+  - type: input
+    id: path
+    attributes:
+      label: Source path
+      placeholder: deploy-manage/example.md
+    validations:
+      required: true
+  - type: input
+    id: source_url
+    attributes:
+      label: Canonical source URL
+      placeholder: https://github.com/elastic/docs-content/blob/<sha>/deploy-manage/example.md
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Describe what is missing, stale, incorrectly chunked, or incorrectly attributed.
+    validations:
+      required: true
+  - type: textarea
+    id: metadata
+    attributes:
+      label: Observed metadata
+      description: Include repo, path, content_type, license_family, commit_sha, anchor, and chunk ID if available.
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected metadata or chunking
+      description: Describe the deterministic metadata or chunk boundaries expected.
