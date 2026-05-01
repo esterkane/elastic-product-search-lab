@@ -7,6 +7,7 @@ export type SearchQueryParams = {
   maxPrice?: number;
   size: number;
   debug: boolean;
+  boost?: boolean;
 };
 
 export type ProductResponse = {
@@ -23,4 +24,13 @@ export type ProductResponse = {
   sellerId: string;
   updatedAt: string;
   score?: number;
+};
+
+export type ProductSearchResponse = {
+  took: number;
+  total: number;
+  products: ProductResponse[];
+  debug?: {
+    query: Record<string, unknown>;
+  };
 };

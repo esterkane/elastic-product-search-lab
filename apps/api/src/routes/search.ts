@@ -1,7 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import type { AppDependencies } from "../app.js";
-import { normalizeProductHit } from "../search/normalize.js";
-import { buildSearchDsl } from "../search/queryBuilder.js";
+import { searchProducts } from "../search/searchClient.js";
 import type { SearchQueryParams } from "../search/types.js";
 
 const searchQuerySchema = {
@@ -16,16 +15,9 @@ const searchQuerySchema = {
     maxPrice: { type: "number", minimum: 0 },
     size: { type: "integer", minimum: 1, maximum: 50, default: 10 },
     debug: { type: "boolean", default: false },
+    boost: { type: "boolean", default: true },
   },
 } as const;
-
-function totalHitsValue(total: unknown): number {
-  if (typeof total === "number") return total;
-  if (total && typeof total === "object" && "value" in total) {
-    return Number((total as { value: unknown }).value);
-  }
-  return 0;
-}
 
 export function registerSearchRoute(app: FastifyInstance, dependencies: AppDependencies): void {
   app.get<{ Querystring: SearchQueryParams }>(
@@ -40,19 +32,7 @@ export function registerSearchRoute(app: FastifyInstance, dependencies: AppDepen
         });
       }
 
-      const dsl = buildSearchDsl(params);
-      const response = await dependencies.elasticsearch.search({
-        index: dependencies.config.productIndex,
-        ...dsl,
-      });
-      const hits = response.hits?.hits ?? [];
-
-      return {
-        took: response.took ?? 0,
-        total: totalHitsValue(response.hits?.total),
-        products: hits.map(normalizeProductHit),
-        ...(params.debug ? { debug: { query: dsl } } : {}),
-      };
+      return searchProducts(dependencies.elasticsearch, dependencies.config.productIndex, params);
     }
   );
 }
