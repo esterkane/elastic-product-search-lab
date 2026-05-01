@@ -112,6 +112,8 @@ Use this checklist to prove the full local path works before tuning relevance:
 9. Optional: enable reranking with `$env:TEI_RERANK_URL="http://tei-rerank/rerank"`, then run `docker compose --profile rerank up -d` and `docker compose up -d --force-recreate api`.
 10. Repeat the same query and compare result ordering, source diversity, and answer quality.
 
+For more UI smoke queries, see [Validation Strategy](docs/validation-strategy.md#golden-queries).
+
 ## Inventory CLI
 
 The repository inventory CLI writes deterministic artifacts for the configured Elastic repos:

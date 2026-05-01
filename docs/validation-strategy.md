@@ -45,6 +45,25 @@ For retrieval behavior, add focused tests whenever a change affects ranking, fil
 
 Golden-query tests should be deterministic and small. They should avoid live network dependencies, use mocked lexical/vector/reranker responses, and assert both ranking quality and evidence quality.
 
+Try these in the search box during local UI testing. They should exercise real relevance, reasoning, and evidence quality:
+
+1. `How should I combine BM25 and semantic search for better relevance?`
+2. `When should I use reranking after hybrid retrieval?`
+3. `How do I improve search results for short keyword queries?`
+4. `What is the best way to index documentation chunks with stable source links?`
+5. `How can I reduce duplicate or overlapping search results?`
+6. `What metadata should I store for filtering search results by repo and content type?`
+7. `How do I evaluate whether retrieval quality improved?`
+8. `What are recommended approaches for semantic search in Elasticsearch?`
+9. `How should I handle ingestion updates when source documentation changes?`
+10. `What can improve answer quality when search returns multiple similar docs?`
+
+Recommended first smoke test:
+
+```text
+When should I use reranking after hybrid retrieval?
+```
+
 Start with these query families:
 
 | Query | Expected behavior | Metrics |
