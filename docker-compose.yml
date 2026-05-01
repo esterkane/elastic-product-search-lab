@@ -25,7 +25,7 @@ services:
     volumes:
       - qdrant_storage:/qdrant/storage
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:6333/healthz >/dev/null 2>&1 || exit 1"]
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/6333'"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -40,7 +40,7 @@ services:
     volumes:
       - tei_embed_cache:/data
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost/health >/dev/null 2>&1 || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/health >/dev/null"]
       interval: 20s
       timeout: 10s
       retries: 20
@@ -55,7 +55,7 @@ services:
     volumes:
       - tei_rerank_cache:/data
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost/health >/dev/null 2>&1 || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/health >/dev/null"]
       interval: 20s
       timeout: 10s
       retries: 20
