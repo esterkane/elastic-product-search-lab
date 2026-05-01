@@ -94,6 +94,9 @@ class SearchHitResponse(BaseModel):
     content_type: str | None = None
     license_family: str | None = None
     source_url: str
+    snippet: str | None = None
+    highlights: list[str] = Field(default_factory=list)
+    match_reason: str | None = None
     score_breakdown: ScoreBreakdown | None = None
 
 
@@ -127,7 +130,7 @@ async def search(request: SearchRequest, retrieval_service: RetrievalDependency)
         boosts=request.boosts.as_dict() if request.boosts else None,
     )
     return SearchResponse(
-        hits=[hit_response(hit, include_debug=request.explain) for hit in result.get("hits", [])],
+        hits=[hit_response(hit, request.query, include_debug=request.explain) for hit in result.get("hits", [])],
         recommendation_categories=[str(category) for category in result.get("recommendation_categories", [])],
         warnings=warning_responses(result.get("warnings", [])),
         degraded=bool(result.get("degraded", False)),
@@ -152,7 +155,7 @@ async def answer(request: AnswerRequest, retrieval_service: RetrievalDependency)
     )
 
 
-def hit_response(hit: object, include_debug: bool = False) -> SearchHitResponse:
+def hit_response(hit: object, query: str, include_debug: bool = False) -> SearchHitResponse:
     if not isinstance(hit, RankedHit):
         raise TypeError("retrieval result contains an unsupported hit")
 
@@ -168,6 +171,9 @@ def hit_response(hit: object, include_debug: bool = False) -> SearchHitResponse:
         content_type=metadata_value(metadata, "content_type"),
         license_family=metadata_value(metadata, "license_family"),
         source_url=hit.source_url,
+        snippet=best_snippet(query, hit.text),
+        highlights=highlight_terms(query, hit.text),
+        match_reason=match_reason(hit),
         score_breakdown=score_breakdown,
     )
 
@@ -249,11 +255,12 @@ def thematic_answer(query: str, evidence: list[tuple[str, str]]) -> str | None:
     terms = meaningful_terms(query)
     if {"hybrid", "retrieval"} & terms or {"rerank", "reranking"} & terms:
         source_names = unique_titles(evidence)
-        support = f" The top evidence is {', '.join(source_names[:2])}." if source_names else ""
+        support = f" Grounded by {', '.join(source_names[:2])}." if source_names else ""
+        detail = f" {evidence[0][0]}" if evidence else ""
         return (
-            "Use a two-stage hybrid retrieval flow: combine lexical/BM25 or structured filtering "
-            "with semantic search, then rerank the merged candidates before presenting evidence."
-            f"{support}"
+            "Use hybrid retrieval to build a strong candidate pool, then rerank only the small top-k set "
+            "when final precision matters more than raw latency."
+            f"{detail}{support}"
         )
     return None
 
@@ -275,6 +282,53 @@ def evidence_points(query: str, hits: list[RankedHit]) -> list[tuple[str, str]]:
             points.append((ensure_sentence(truncate_sentence(normalized)), title))
             break
     return points
+
+
+def best_snippet(query: str, text: str, max_chars: int = 360) -> str | None:
+    sentences = [clean_sentence(sentence) for sentence in split_sentences(text)]
+    sentences = [sentence for sentence in sentences if not should_skip_sentence(sentence)]
+    if not sentences:
+        cleaned = clean_sentence(text)
+        return truncate_sentence(cleaned, max_chars=max_chars) if cleaned else None
+
+    terms = meaningful_terms(query)
+    if terms:
+        scored = sorted(
+            (
+                (
+                    sum(1 for term in terms if term in sentence.lower()),
+                    min(len(sentence), max_chars),
+                    sentence,
+                )
+                for sentence in sentences
+            ),
+            key=lambda item: (-item[0], -item[1], item[2]),
+        )
+        if scored and scored[0][0] > 0:
+            return truncate_sentence(ensure_sentence(scored[0][2]), max_chars=max_chars)
+    return truncate_sentence(ensure_sentence(sentences[0]), max_chars=max_chars)
+
+
+def highlight_terms(query: str, text: str, max_terms: int = 6) -> list[str]:
+    terms = meaningful_terms(query)
+    lower_text = clean_sentence(text).lower()
+    matched = sorted(term for term in terms if term in lower_text)
+    return matched[:max_terms]
+
+
+def match_reason(hit: RankedHit) -> str:
+    channels: list[str] = []
+    if hit.lexical_score > 0:
+        channels.append("keyword/BM25")
+    if hit.dense_score > 0:
+        channels.append("semantic")
+    if hit.rerank_score is not None:
+        channels.append("reranked")
+    if not channels:
+        channels.append("metadata")
+    heading = metadata_value(hit.metadata, "heading_path") or metadata_value(hit.metadata, "title")
+    location = f" in {heading}" if heading else ""
+    return f"Matched by {', '.join(channels)} evidence{location}."
 
 
 def split_sentences(text: str) -> list[str]:

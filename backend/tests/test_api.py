@@ -129,6 +129,9 @@ def test_search_endpoint_supports_optional_filters() -> None:
     body = response.json()
     assert body["hits"][0]["title"] == "Hybrid search notebook"
     assert body["hits"][0]["source_url"] == "https://example.test/hybrid#combine"
+    assert body["hits"][0]["snippet"] == "Combine lexical and dense retrieval, then rerank the merged candidate set before presenting evidence."
+    assert body["hits"][0]["highlights"] == ["retrieval"]
+    assert body["hits"][0]["match_reason"] == "Matched by keyword/BM25, semantic, reranked evidence in Guide > Hybrid."
     assert "score_breakdown" not in body["hits"][0]
     assert body["warnings"] == []
     assert body["degraded"] is False
@@ -219,7 +222,8 @@ def test_answer_endpoint_returns_source_attributions() -> None:
 
     assert response.status_code == 200
     body = response.json()
-    assert "two-stage hybrid retrieval flow" in body["answer"]
+    assert "Use hybrid retrieval to build a strong candidate pool" in body["answer"]
+    assert "Combine lexical and dense retrieval" in body["answer"]
     assert body["sources"] == [
         {"title": "Hybrid search notebook", "url": "https://example.test/hybrid#combine"},
         {"title": "Query rules notebook", "url": "https://example.test/rules"},

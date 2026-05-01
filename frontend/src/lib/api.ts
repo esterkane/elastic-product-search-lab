@@ -26,6 +26,9 @@ export type SearchHit = {
   content_type?: string | null;
   license_family?: string | null;
   source_url: string;
+  snippet?: string | null;
+  highlights?: string[];
+  match_reason?: string | null;
   score_breakdown?: {
     bm25: number;
     semantic: number;

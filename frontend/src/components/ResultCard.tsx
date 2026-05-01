@@ -7,7 +7,8 @@ type ResultCardProps = {
 
 export function ResultCard({ result }: ResultCardProps) {
   const title = result.title || result.heading_path || result.path || result.id;
-  const snippet = [result.heading_path, result.path, result.repo].filter(Boolean).join(" - ");
+  const heading = result.heading_path && result.heading_path !== result.title ? result.heading_path : null;
+  const location = [heading, result.path, result.repo].filter(Boolean).join(" - ");
   const breakdown = result.score_breakdown;
 
   return (
@@ -15,7 +16,7 @@ export function ResultCard({ result }: ResultCardProps) {
       <div className="result-card__header">
         <div>
           <h3 id={`result-${result.id}`}>{title}</h3>
-          <p>{snippet || "Indexed repository evidence"}</p>
+          <p className="result-location">{location || "Indexed repository evidence"}</p>
         </div>
         <span className="score" aria-label={`Score ${result.score.toFixed(3)}`}>
           {result.score.toFixed(3)}
@@ -25,6 +26,12 @@ export function ResultCard({ result }: ResultCardProps) {
         {result.content_type && <span>{result.content_type}</span>}
         {result.license_family && <span>{result.license_family}</span>}
       </div>
+      {result.snippet && (
+        <blockquote className="evidence-snippet">
+          {renderHighlightedSnippet(result.snippet, result.highlights ?? [])}
+        </blockquote>
+      )}
+      {result.match_reason && <p className="match-reason">{result.match_reason}</p>}
       {breakdown && (
         <dl className="score-breakdown" aria-label="Score breakdown">
           <div>
@@ -55,4 +62,25 @@ export function ResultCard({ result }: ResultCardProps) {
       </a>
     </article>
   );
+}
+
+function renderHighlightedSnippet(snippet: string, highlights: string[]) {
+  if (highlights.length === 0) {
+    return snippet;
+  }
+
+  const escaped = highlights.map(escapeRegExp).filter(Boolean);
+  if (escaped.length === 0) {
+    return snippet;
+  }
+
+  const pattern = new RegExp(`(${escaped.join("|")})`, "gi");
+  return snippet.split(pattern).map((part, index) => {
+    const isHighlight = highlights.some((term) => term.toLowerCase() === part.toLowerCase());
+    return isHighlight ? <mark key={`${part}-${index}`}>{part}</mark> : part;
+  });
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
