@@ -1,6 +1,8 @@
 import hashlib
+from pathlib import Path
 
 from backend.app.ingest.chunker import SourceMetadata, ingest_markdown, make_chunk_id
+from backend.app.ingest.indexer import RepoSpec, sync_repository
 from backend.app.ingest.license import license_family_for_repo
 from backend.app.ingest.metadata import metadata_boost_score, normalize_filters, normalize_metadata
 from backend.app.ingest.parser import classify_content_type, extract_headings, parse_markdown
@@ -154,3 +156,25 @@ def test_classification_and_license_defaults_are_deterministic() -> None:
     assert classify_content_type("elastic/elasticsearch-labs", "example-apps/chatbot/README.md") == "example"
     assert classify_content_type("elastic/labs-releases", "indicators/ref7001/README.md") == "release_metadata"
     assert license_family_for_repo("unknown/repo") == "unknown"
+
+
+def test_existing_source_sync_resets_to_fetched_branch(monkeypatch) -> None:
+    repo_path = Path("sources/docs-content")
+    commands: list[list[str]] = []
+
+    def fake_run_git(command, cwd):
+        commands.append(command)
+
+    monkeypatch.setattr("backend.app.ingest.indexer.run_git", fake_run_git)
+
+    sync_repository(
+        RepoSpec("elastic/docs-content", "https://github.com/elastic/docs-content.git", "docs-content"),
+        repo_path,
+        branch=None,
+    )
+
+    assert commands == [
+        ["git", "-C", str(repo_path), "fetch", "--prune", "origin", "main"],
+        ["git", "-C", str(repo_path), "checkout", "main"],
+        ["git", "-C", str(repo_path), "reset", "--hard", "origin/main"],
+    ]

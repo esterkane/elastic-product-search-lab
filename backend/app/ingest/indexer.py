@@ -411,18 +411,18 @@ def resolve_repositories(repo_url: str | None, repo_slug: str | None) -> list[Re
 
 def sync_repository(spec: RepoSpec, repo_path: Path, branch: str | None) -> None:
     repo_path.parent.mkdir(parents=True, exist_ok=True)
+    target_branch = branch or spec.default_branch
     if not repo_path.exists():
         command = ["git", "clone", "--depth", "1"]
-        if branch:
-            command.extend(["--branch", branch])
+        if target_branch:
+            command.extend(["--branch", target_branch])
         command.extend([spec.url, str(repo_path)])
         run_git(command, repo_path.parent)
         return
 
-    run_git(["git", "-C", str(repo_path), "fetch", "--prune"], repo_path)
-    if branch:
-        run_git(["git", "-C", str(repo_path), "checkout", branch], repo_path)
-    run_git(["git", "-C", str(repo_path), "pull", "--ff-only"], repo_path)
+    run_git(["git", "-C", str(repo_path), "fetch", "--prune", "origin", target_branch], repo_path)
+    run_git(["git", "-C", str(repo_path), "checkout", target_branch], repo_path)
+    run_git(["git", "-C", str(repo_path), "reset", "--hard", f"origin/{target_branch}"], repo_path)
 
 
 def read_git_value(repo_path: Path, args: list[str], fallback: str) -> str:
