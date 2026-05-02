@@ -6,6 +6,25 @@ export type SearchFilters = {
   license_family?: string;
 };
 
+export type ChangeTopic =
+  | "relevance"
+  | "ingestion"
+  | "data_modeling"
+  | "performance"
+  | "resilience"
+  | "esql"
+  | "vector_search"
+  | "search_applications"
+  | "observability"
+  | "release_notes";
+
+export type VersionRange = {
+  from?: string;
+  to?: string;
+};
+
+export type TimeRange = "latest" | "30d" | "90d" | "1y" | "all";
+
 export type SearchBoosts = {
   repo?: Record<string, number>;
   path?: Record<string, number>;
@@ -105,6 +124,9 @@ export type QueryRequest = {
   filters?: SearchFilters;
   boosts?: SearchBoosts;
   explain?: boolean;
+  topic?: ChangeTopic | "";
+  version_range?: VersionRange;
+  time_range?: TimeRange;
 };
 
 export type IngestRepoRequest = {

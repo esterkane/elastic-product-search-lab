@@ -42,11 +42,27 @@ describe("SearchPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /Search/i }));
 
     await waitFor(() => {
-      expect(search).toHaveBeenCalledWith(expect.objectContaining({ query: "hybrid retrieval improvements" }));
-      expect(answer).toHaveBeenCalledWith(expect.objectContaining({ query: "hybrid retrieval improvements" }));
+      expect(search).toHaveBeenCalledWith(expect.objectContaining({
+        query: expect.stringContaining("hybrid retrieval improvements"),
+        topic: "vector_search",
+        version_range: { from: "9.0", to: "9.2" },
+        time_range: "latest"
+      }));
+      expect(answer).toHaveBeenCalledWith(expect.objectContaining({ query: expect.stringContaining("latest 9.x 8.x") }));
     });
     expect(screen.queryByText(/Improvement Suggestions/i)).not.toBeInTheDocument();
     expect(screen.getByText(/Use hybrid retrieval to gather candidates/i)).toBeInTheDocument();
+  });
+
+  it("shows version-aware release intelligence controls", () => {
+    render(<SearchPage />);
+
+    fireEvent.click(screen.getByText("Advanced options"));
+
+    expect(screen.getByLabelText(/Topic/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Version from/i)).toHaveValue("9.0");
+    expect(screen.getByLabelText(/Version to/i)).toHaveValue("9.2");
+    expect(screen.getByLabelText(/Time range/i)).toHaveValue("latest");
   });
 
   it("renders the answer region before the results region", () => {

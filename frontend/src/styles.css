@@ -124,7 +124,8 @@ a:focus-visible {
 }
 
 .filter-row,
-.metadata-row {
+.metadata-row,
+.release-row {
   display: grid;
   gap: 12px;
   align-items: end;
@@ -132,6 +133,10 @@ a:focus-visible {
 
 .filter-row {
   grid-template-columns: repeat(3, minmax(170px, 1fr)) repeat(2, auto);
+}
+
+.release-row {
+  grid-template-columns: minmax(220px, 1.3fr) repeat(3, minmax(140px, 1fr));
 }
 
 .metadata-row {
@@ -539,10 +544,16 @@ button:disabled {
   background: #fbfcfd;
 }
 
-.insight-block-new {
+.insight-block-new,
+.insight-block-release {
   margin-bottom: 12px;
   border-color: #8bc2ce;
   background: #f2fbfa;
+}
+
+.insight-block-release {
+  border-color: #b7d18c;
+  background: #f7fbf1;
 }
 
 .insight-block h3 {
@@ -831,6 +842,7 @@ button:disabled {
 
   .filter-row,
   .metadata-row,
+  .release-row,
   .answer-results-grid {
     grid-template-columns: 1fr;
   }

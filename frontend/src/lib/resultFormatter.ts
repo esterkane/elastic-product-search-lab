@@ -8,6 +8,9 @@ export type FormattedEvidence = AnswerResponse["evidence"][number] & {
   takeaway: string;
   whatToLookFor: string;
   sourceType: SourceKind;
+  topic: ChangeTopicName;
+  version?: string;
+  date?: string;
   role: "primary" | "supporting";
   tags: string[];
   display: DisplayMetadata;
@@ -54,6 +57,9 @@ export type NormalizedSearchResult = SearchHit & {
   takeaway: string;
   whatToLookFor: string;
   sourceType: SourceKind;
+  topic: ChangeTopicName;
+  version?: string;
+  date?: string;
   links: {
     source: string;
   };
@@ -61,6 +67,17 @@ export type NormalizedSearchResult = SearchHit & {
 
 export type SearchResult = NormalizedSearchResult;
 export type SourceKind = "procedural" | "conceptual" | "troubleshooting" | "performance" | "reference" | "example";
+export type ChangeTopicName =
+  | "relevance"
+  | "ingestion"
+  | "data_modeling"
+  | "performance"
+  | "resilience"
+  | "esql"
+  | "vector_search"
+  | "search_applications"
+  | "observability"
+  | "release_notes";
 
 export function formatAnswer(answer: AnswerResponse | null): AnswerViewModel {
   const rawEvidence = prioritizeEvidence((answer?.evidence ?? []).map(formatEvidence));
@@ -186,6 +203,9 @@ export function formatEvidence(item: AnswerResponse["evidence"][number]): Format
     takeaway: insight.takeaway,
     whatToLookFor: insight.whatToLookFor,
     sourceType: insight.sourceType,
+    topic: classifyTopic(`${display.title} ${display.section ?? ""} ${display.filePath ?? ""} ${claim} ${excerpt}`),
+    version: extractVersion(`${display.title} ${display.section ?? ""} ${display.filePath ?? ""} ${claim} ${excerpt}`),
+    date: extractDate(`${display.title} ${display.section ?? ""} ${display.filePath ?? ""} ${claim} ${excerpt}`),
     role: item.role ?? "supporting",
     tags: evidenceTags(item),
     display
@@ -218,6 +238,9 @@ export function formatSearchResult(hit: SearchHit): NormalizedSearchResult {
     takeaway: insight.takeaway,
     whatToLookFor: insight.whatToLookFor,
     sourceType: insight.sourceType,
+    topic: classifyTopic(`${display.title} ${display.section ?? ""} ${display.filePath ?? ""} ${excerpt}`),
+    version: extractVersion(`${display.title} ${display.section ?? ""} ${display.filePath ?? ""} ${excerpt}`),
+    date: extractDate(`${display.title} ${display.section ?? ""} ${display.filePath ?? ""} ${excerpt}`),
     links: {
       source: hit.source_url
     }
@@ -310,6 +333,12 @@ export function buildAnswerSummary(answer: AnswerResponse | null, evidence: Form
   if (isChunkLinkTopic(answer, evidence)) {
     return "Index documentation as section-aware chunks with stable metadata and separate reader/source links.";
   }
+  if (isReleaseIntelligenceTopic(answer, evidence)) {
+    const primary = evidence[0];
+    const topicLabel = primary ? topicLabelFor(primary.topic) : "the selected area";
+    const version = primary?.version ? ` in ${primary.version}` : "";
+    return `Focus on the ${topicLabel} changes${version} that affect query behavior, indexing, or operations.`;
+  }
   if (isFailureStoreTopic(answer, evidence)) {
     return "Use a failure store for indexing failures that need review, and handle ingest-pipeline errors separately.";
   }
@@ -334,6 +363,11 @@ export function buildExplanationSummary(answer: AnswerResponse | null, evidence:
   if (isChunkLinkTopic(answer, evidence)) {
     return `The strongest evidence is about documentation links, anchors, and page-level source locations. In practice, each chunk should carry the file path, heading, stable anchor, license, content type, reader URL, and source URL so the UI can open ${location} and highlight the exact passage instead of showing a raw path.`;
   }
+  if (isReleaseIntelligenceTopic(answer, evidence)) {
+    const primary = evidence[0];
+    const releasePhrase = primary?.version ? `Elasticsearch ${primary.version}` : "the selected Elasticsearch version";
+    return `Treat the result as a change briefing for ${releasePhrase}. Start with the release-note or docs section that states the change, then map it to the engineering effect: query latency, ranking quality, mapping choices, ingest reliability, or operational safety. Keep serverless-specific guidance secondary unless the query asks for it.`;
+  }
   if (isFailureStoreTopic(answer, evidence)) {
     return `Failure store docs separate two problems: errors raised inside ingest pipelines and documents rejected during indexing. The useful workflow is to capture failed indexing operations, inspect why they failed, and recover or replay the affected documents instead of losing them in logs. Start with ${location} to see which failure path applies.`;
   }
@@ -352,8 +386,11 @@ export function buildWhatNewSummary(answer: AnswerResponse | null, evidence: For
     return dedupeText(explicit).slice(0, 3);
   }
   const text = allAnswerText(answer, evidence);
-  if (!/(new|change|changed|improve|improvement|performance|release|update|workflow|rerank)/i.test(text)) {
+  if (!/(new|change|changed|improve|improvement|performance|release|update|workflow|rerank|8\.|9\.|version)/i.test(text)) {
     return [];
+  }
+  if (isReleaseIntelligenceTopic(answer, evidence)) {
+    return releaseWhatNewItems(evidence);
   }
   if (isHybridRerankTopic(answer, evidence)) {
     return [
@@ -366,6 +403,9 @@ export function buildWhatNewSummary(answer: AnswerResponse | null, evidence: For
       "Stable anchors and canonical source metadata become part of every indexed chunk.",
       "Reader-facing documentation links and source-code provenance are kept separate."
     ];
+  }
+  if (isReleaseIntelligenceTopic(answer, evidence)) {
+    return releaseLookForItems(evidence);
   }
   if (isFailureStoreTopic(answer, evidence)) {
     return [
@@ -384,6 +424,9 @@ export function buildWhatToNotice(answer: AnswerResponse | null, evidence: Forma
       "Check whether reader-facing docs links and source-code provenance are stored separately.",
       "Notice whether metadata fields are consistent enough to support filtering and deduplication."
     ];
+  }
+  if (isReleaseIntelligenceTopic(answer, evidence)) {
+    return releaseLookForItems(evidence);
   }
   if (isFailureStoreTopic(answer, evidence)) {
     return [
@@ -462,6 +505,12 @@ function sourceQualityScore(item: FormattedEvidence): number {
   let score = item.score ?? 0;
   if (item.repo === "elastic/docs-content") {
     score += 0.12;
+  }
+  if (item.content_type === "release_note" || /release-notes|breaking-changes|whats-new/.test(text)) {
+    score += 0.16;
+  }
+  if (/serverless/.test(text) && !/serverless/.test(allAnswerText(null, [item]))) {
+    score -= 0.08;
   }
   if (item.sourceType === "conceptual" || item.sourceType === "procedural" || item.sourceType === "troubleshooting") {
     score += 0.08;
@@ -629,6 +678,109 @@ function sourceTypeLookFor(sourceType: SourceKind): string {
     default:
       return "Focus on the specific condition, field, or limitation that changes what you should do.";
   }
+}
+
+function classifyTopic(text: string): ChangeTopicName {
+  const lower = text.toLowerCase();
+  if (/vector|semantic|knn|dense|sparse|rerank|inference/.test(lower)) {
+    return "vector_search";
+  }
+  if (/relevance|ranking|scoring|query rules|bm25/.test(lower)) {
+    return "relevance";
+  }
+  if (/ingest|pipeline|bulk|failure store|data freshness/.test(lower)) {
+    return "ingestion";
+  }
+  if (/mapping|field|schema|template|data model/.test(lower)) {
+    return "data_modeling";
+  }
+  if (/latency|performance|memory|faster|throughput|scaling/.test(lower)) {
+    return "performance";
+  }
+  if (/resilien|recover|retry|backoff|circuit breaker|failure/.test(lower)) {
+    return "resilience";
+  }
+  if (/es\|ql|esql|join|lookup/.test(lower)) {
+    return "esql";
+  }
+  if (/search application|search app/.test(lower)) {
+    return "search_applications";
+  }
+  if (/observability|monitor|metric|profile|slow log/.test(lower)) {
+    return "observability";
+  }
+  return "release_notes";
+}
+
+function extractVersion(text: string): string | undefined {
+  return text.match(/\b(?:elasticsearch\s*)?([89]\.\d{1,2}(?:\.\d+)?)\b/i)?.[1];
+}
+
+function extractDate(text: string): string | undefined {
+  return text.match(/\b(20\d{2}-\d{2}-\d{2})\b/)?.[1];
+}
+
+function topicLabelFor(topic: ChangeTopicName): string {
+  return {
+    relevance: "relevance and ranking",
+    ingestion: "ingestion",
+    data_modeling: "data modeling",
+    performance: "performance",
+    resilience: "resilience",
+    esql: "ES|QL",
+    vector_search: "vector search",
+    search_applications: "search application",
+    observability: "search observability",
+    release_notes: "release-note"
+  }[topic];
+}
+
+function isReleaseIntelligenceTopic(answer: AnswerResponse | null, evidence: FormattedEvidence[]): boolean {
+  const text = allAnswerText(answer, evidence);
+  return /release|what changed|what is new|latest|breaking|8\.|9\.|version|elasticsearch/.test(text)
+    || evidence.some((item) => item.content_type === "release_note" || /release-notes|breaking-changes|whats-new/.test(`${item.path ?? ""} ${item.source_url}`));
+}
+
+function releaseWhatNewItems(evidence: FormattedEvidence[]): string[] {
+  const items = evidence
+    .filter(isUsefulSecondaryEvidence)
+    .slice(0, 5)
+    .map((item) => {
+      const topic = topicLabelFor(item.topic);
+      const version = item.version ? ` in ${item.version}` : "";
+      if (item.topic === "vector_search") {
+        return `Vector search${version}: check whether the change affects memory use, filtered retrieval, reranking, or inference behavior.`;
+      }
+      if (item.topic === "performance") {
+        return `Performance${version}: look for latency, memory, or query-execution changes and any tradeoff.`;
+      }
+      if (item.topic === "ingestion") {
+        return `Ingestion${version}: check pipeline behavior, failure handling, mapping impact, or data freshness.`;
+      }
+      if (item.topic === "esql") {
+        return `ES|QL${version}: inspect query-language changes such as joins, lookup behavior, or execution limits.`;
+      }
+      return `${capitalize(topic)}${version}: inspect the change and the operational impact before adopting it.`;
+    });
+  return dedupeText(items).slice(0, 5);
+}
+
+function releaseLookForItems(evidence: FormattedEvidence[]): string[] {
+  const topics = new Set(evidence.map((item) => item.topic));
+  const items = [
+    topics.has("vector_search") ? "Check whether the vector-search change affects recall, memory, filtered retrieval, or reranking quality." : null,
+    topics.has("performance") ? "Look for the measured speedup and the condition where it applies." : null,
+    topics.has("ingestion") ? "Inspect any mapping, pipeline, or failure-recovery detail that changes ingestion behavior." : null,
+    topics.has("data_modeling") ? "Check whether the mapping or field choice changes query behavior later." : null,
+    topics.has("resilience") ? "Look for retry, recovery, circuit-breaker, or graceful-degradation implications." : null,
+    topics.has("esql") ? "Check the exact ES|QL syntax or execution behavior before using it in production." : null,
+    "Prefer release-note sections that state a concrete behavior change over generic overview pages."
+  ].filter(Boolean) as string[];
+  return dedupeText(items).slice(0, 5);
+}
+
+function capitalize(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 function topicFromEvidence(answer: AnswerResponse, evidence: FormattedEvidence[]): string {

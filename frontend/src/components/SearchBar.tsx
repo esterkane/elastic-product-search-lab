@@ -1,5 +1,6 @@
 import { FormEvent } from "react";
 import { Loader2, Search } from "lucide-react";
+import type { ChangeTopic, TimeRange } from "../lib/api";
 
 type SearchBarProps = {
   query: string;
@@ -12,16 +13,27 @@ type SearchBarProps = {
     headingPath: string;
     contentType: string;
     licenseFamily: string;
+    topic: ChangeTopic | "";
+    versionFrom: string;
+    versionTo: string;
+    timeRange: TimeRange;
     boostDocumentation: boolean;
     explainScores: boolean;
     repos: string[];
     contentTypes: string[];
     licenseFamilies: string[];
+    topics: { value: ChangeTopic; label: string }[];
+    versions: string[];
+    timeRanges: { value: TimeRange; label: string }[];
     onRepoChange: (value: string) => void;
     onPathChange: (value: string) => void;
     onHeadingPathChange: (value: string) => void;
     onContentTypeChange: (value: string) => void;
     onLicenseFamilyChange: (value: string) => void;
+    onTopicChange: (value: ChangeTopic | "") => void;
+    onVersionFromChange: (value: string) => void;
+    onVersionToChange: (value: string) => void;
+    onTimeRangeChange: (value: TimeRange) => void;
     onBoostDocumentationChange: (value: boolean) => void;
     onExplainScoresChange: (value: boolean) => void;
   };
@@ -44,6 +56,55 @@ export function SearchBar({ query, onQueryChange, onSubmit, isLoading, advanced 
       <details className="advanced-options">
         <summary>Advanced options</summary>
         <div className="advanced-options__content">
+          <div className="release-row" aria-label="Release intelligence filters">
+            <label>
+              <span>Topic</span>
+              <select value={advanced.topic} onChange={(event) => advanced.onTopicChange(event.target.value as ChangeTopic | "")}>
+                <option value="">All topics</option>
+                {advanced.topics.map((item) => (
+                  <option value={item.value} key={item.value}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              <span>Version from</span>
+              <select value={advanced.versionFrom} onChange={(event) => advanced.onVersionFromChange(event.target.value)}>
+                <option value="">Any 8.x/9.x</option>
+                {advanced.versions.map((item) => (
+                  <option value={item} key={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              <span>Version to</span>
+              <select value={advanced.versionTo} onChange={(event) => advanced.onVersionToChange(event.target.value)}>
+                <option value="">Latest</option>
+                {advanced.versions.map((item) => (
+                  <option value={item} key={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              <span>Time range</span>
+              <select value={advanced.timeRange} onChange={(event) => advanced.onTimeRangeChange(event.target.value as TimeRange)}>
+                {advanced.timeRanges.map((item) => (
+                  <option value={item.value} key={item.value}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
           <div className="filter-row">
             <label>
               <span>Repo</span>

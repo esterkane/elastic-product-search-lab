@@ -25,6 +25,16 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
         <h3>Summary</h3>
         <p>{model.explanation}</p>
       </div>
+      {model.whatNew.length > 0 && (
+        <div className="insight-block insight-block-release">
+          <h3>What's new</h3>
+          <ul>
+            {model.whatNew.slice(0, 5).map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       {model.whatToNotice.length > 0 && (
         <div className="insight-block insight-block-new">
           <h3>What to look for</h3>
