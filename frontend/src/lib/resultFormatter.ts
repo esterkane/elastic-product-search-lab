@@ -65,7 +65,6 @@ export type SourceKind = "procedural" | "conceptual" | "troubleshooting" | "perf
 export function formatAnswer(answer: AnswerResponse | null): AnswerViewModel {
   const rawEvidence = prioritizeEvidence((answer?.evidence ?? []).map(formatEvidence));
   const bestSource = selectPrimarySource(answer, rawEvidence);
-  const links = (answer?.links?.slice(0, 3) ?? []).map(formatSource);
   const synthesis = {
     answer: buildAnswerSummary(answer, rawEvidence),
     explanation: buildExplanationSummary(answer, rawEvidence),
@@ -80,21 +79,77 @@ export function formatAnswer(answer: AnswerResponse | null): AnswerViewModel {
     synthesis.supportingContext,
     ...synthesis.whatNew
   ]);
+  const otherSources = selectDistinctSupportingSources(answer, evidence, bestSource);
   return {
-    directAnswer: synthesis.answer,
-    explanation: synthesis.explanation,
+    directAnswer: polishText(synthesis.answer),
+    explanation: polishText(synthesis.explanation),
     whatNew: synthesis.whatNew,
-    important: synthesis.whyItMatters,
-    keyTakeaways: answer?.key_takeaways?.length ? answer.key_takeaways : inferTakeaways(answer),
-    whatToNotice: buildWhatToNotice(answer, evidence),
-    supportingContext: synthesis.supportingContext,
+    important: polishText(synthesis.whyItMatters),
+    keyTakeaways: (answer?.key_takeaways?.length ? answer.key_takeaways : inferTakeaways(answer)).map(polishText),
+    whatToNotice: buildWhatToNotice(answer, evidence).map(polishText),
+    supportingContext: polishText(synthesis.supportingContext),
     confidence: answer?.confidence ?? inferConfidence(answer),
     bestSource,
-    supportingSources: answer?.supporting_sources?.length ? answer.supporting_sources.map(formatSource) : links.slice(1),
+    supportingSources: otherSources,
     primaryEvidence: evidence[0] ?? null,
     supportingEvidence: evidence.slice(1),
-    sourceNavigator: links
+    sourceNavigator: [bestSource, ...otherSources].filter(Boolean) as FormattedSource[]
   };
+}
+
+function selectDistinctSupportingSources(
+  answer: AnswerResponse | null,
+  evidence: FormattedEvidence[],
+  bestSource: FormattedSource | null
+): FormattedSource[] {
+  const candidates = [
+    ...evidence.slice(1).filter(isUsefulSecondaryEvidence).map((item) =>
+      formatSource({
+        title: item.title,
+        url: item.reader_url,
+        link_label: item.link_label,
+        repo: item.repo,
+        path: item.path,
+        heading_path: item.heading_path
+      })
+    ),
+    ...(answer?.supporting_sources ?? []).map(formatSource),
+    ...(answer?.links ?? []).map(formatSource)
+  ];
+  const seen = new Set<string>(bestSource ? [sourceKey(bestSource)] : []);
+  const distinct: FormattedSource[] = [];
+  for (const source of candidates) {
+    const key = sourceKey(source);
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    distinct.push(source);
+    if (distinct.length >= 3) {
+      break;
+    }
+  }
+  return distinct;
+}
+
+function isUsefulSecondaryEvidence(item: FormattedEvidence): boolean {
+  if ((item.score ?? 0) < 0.015) {
+    return false;
+  }
+  if (isBoilerplateClaim(item.excerpt, item.title, item.heading_path)) {
+    return false;
+  }
+  return item.sourceType !== "reference" || Boolean(item.display.section);
+}
+
+function sourceKey(source: FormattedSource): string {
+  if (source.url) {
+    return source.url.toLowerCase();
+  }
+  return [source.url, source.display.title, source.display.section, source.display.filePath, source.display.repo]
+    .filter(Boolean)
+    .join("|")
+    .toLowerCase();
 }
 
 export function groupRelatedResults(hits: SearchHit[]): { primary: NormalizedSearchResult | null; related: NormalizedSearchResult[] } {
@@ -125,7 +180,7 @@ export function formatEvidence(item: AnswerResponse["evidence"][number]): Format
   return {
     ...item,
     title: display.title,
-    claim: claim || `Open ${display.title} to inspect the exact source detail.`,
+    claim: claim || `Open ${display.title} for the exact passage.`,
     excerpt: shortestFaithfulExcerpt(excerpt || item.excerpt),
     concept: insight.concept,
     takeaway: insight.takeaway,
@@ -265,9 +320,9 @@ export function buildAnswerSummary(answer: AnswerResponse | null, evidence: Form
     return "Use reranking when you need better ordering of already-relevant results and can afford the extra latency.";
   }
   if (topic) {
-    return `${topic} is the best source-backed direction from the current results.`;
+    return `${topic} is the clearest place to start.`;
   }
-  return "The current results point to a relevant source, but the evidence is not strong enough for a high-confidence answer.";
+  return "The current results point to a relevant source, but the evidence is still thin.";
 }
 
 export function buildExplanationSummary(answer: AnswerResponse | null, evidence: FormattedEvidence[] = []): string {
@@ -280,15 +335,15 @@ export function buildExplanationSummary(answer: AnswerResponse | null, evidence:
     return `The strongest evidence is about documentation links, anchors, and page-level source locations. In practice, each chunk should carry the file path, heading, stable anchor, license, content type, reader URL, and source URL so the UI can open ${location} and highlight the exact passage instead of showing a raw path.`;
   }
   if (isFailureStoreTopic(answer, evidence)) {
-    return `The source is drawing a boundary between failures that happen while a document is being indexed and failures that happen inside an ingest pipeline. A failure store is useful when rejected indexing operations need to be captured for later inspection instead of disappearing into logs. Read ${location} first to confirm which failure path applies before changing pipeline handling.`;
+    return `Failure store docs separate two problems: errors raised inside ingest pipelines and documents rejected during indexing. The useful workflow is to capture failed indexing operations, inspect why they failed, and recover or replay the affected documents instead of losing them in logs. Start with ${location} to see which failure path applies.`;
   }
   if (isHybridRerankTopic(answer, evidence)) {
-    return `The evidence describes a two-stage retrieval pattern: first collect candidates with lexical and semantic search, then apply reranking to the smaller candidate set. That keeps broad recall from hybrid retrieval while using reranking only where it improves the final ordering users see. Verify the details in ${location}.`;
+    return `Hybrid search is the broad first pass: it gathers candidates from lexical and semantic retrieval. Reranking is the narrower second pass that improves the order of a smaller candidate set. Start with ${location} to see where recall ends and precision tuning begins.`;
   }
   if (isRerankPerformanceTopic(answer, evidence)) {
-    return `The evidence indicates that reranking is a quality step, not a replacement for first-stage retrieval. It is most useful after search has already found plausible matches, because the reranker spends extra work comparing the query with each candidate. Open ${location} first to check the exact recommendation and constraints.`;
+    return `Reranking improves the order of results that are already plausible matches; it is not a replacement for first-stage retrieval. The tradeoff is latency, because each candidate needs extra comparison work. Open ${location} first to check the recommendation and constraints.`;
   }
-  return `The primary result gives the most relevant source location, and the supporting results add adjacent context. Start with ${location}, then use the secondary sources only to confirm related details or edge cases.`;
+  return `Start with ${location}. It has the clearest connection to the question, while the other sources are useful only when they add an example, caveat, or implementation detail.`;
 }
 
 export function buildWhatNewSummary(answer: AnswerResponse | null, evidence: FormattedEvidence[] = []): string[] {
@@ -315,10 +370,10 @@ export function buildWhatNewSummary(answer: AnswerResponse | null, evidence: For
   if (isFailureStoreTopic(answer, evidence)) {
     return [
       "The important distinction is between ingest-pipeline failures and indexing failures.",
-      "Failure stores are framed as a review and recovery mechanism for rejected indexing operations."
+      "Failure stores help you review and recover rejected indexing operations."
     ];
   }
-  return ["The retrieved sources point to an improvement or updated workflow; verify the read-first source before changing implementation."];
+  return ["The retrieved sources point to an updated workflow; read the first source before changing implementation."];
 }
 
 export function buildWhatToNotice(answer: AnswerResponse | null, evidence: FormattedEvidence[] = []): string[] {
@@ -332,10 +387,10 @@ export function buildWhatToNotice(answer: AnswerResponse | null, evidence: Forma
   }
   if (isFailureStoreTopic(answer, evidence)) {
     return [
-      "Check whether the failure happens during ingest processing or during indexing.",
-      "Look for the condition that sends rejected operations into the failure store.",
-      "Notice the recovery path: the store is for later review, not automatic correction.",
-      "Pay attention to any caveat about which data stream or index mode supports the feature."
+      "Separate ingest-pipeline exceptions from documents rejected during indexing.",
+      "Focus on the step that captures failed operations in the failure store.",
+      "Check how the docs reconstruct or replay the original document after review.",
+      "Watch for support limits around data streams, mappings, or index mode."
     ];
   }
   if (isHybridRerankTopic(answer, evidence)) {
@@ -352,8 +407,8 @@ export function buildWhatToNotice(answer: AnswerResponse | null, evidence: Forma
     ];
   }
   return [
-    primary?.whatToLookFor ?? "Look for the recommendation, caveat, or implementation detail in the read-first source.",
-    "Use the other sources to compare adjacent cases instead of rereading the same claim."
+    primary?.whatToLookFor ?? "Focus on the recommendation, caveat, or implementation detail in the first source.",
+    "Keep the other sources only if they add an example, caveat, or implementation detail."
   ];
 }
 
@@ -434,10 +489,10 @@ function evidenceTags(item: AnswerResponse["evidence"][number]): string[] {
 
 function buildSupportingContext(evidence: FormattedEvidence[]): string {
   if (evidence.length <= 1) {
-    return "Use the read-first source to confirm the main idea and inspect the caveat or implementation detail.";
+    return "No extra source adds a clearly different angle yet.";
   }
-  const supporting = evidence.slice(1, 3).map((item) => item.display.title).join(" and ");
-  return `${supporting} add examples, caveats, or implementation detail around the main idea.`;
+  const supporting = evidence.slice(1, 4).map((item) => item.display.title).join(", ");
+  return `${supporting} add a useful example, caveat, or implementation detail.`;
 }
 
 function sourceLocationPhrase(display: DisplayMetadata): string {
@@ -462,16 +517,16 @@ function buildSourceInsight(input: {
   if (/failure store|failed indexing|indexing failure|ingest pipeline|rejected/.test(text)) {
     return {
       concept: "Failure handling decision point",
-      summary: "This result explains which failure path you are dealing with and whether rejected indexing operations should be captured for later review.",
-      takeaway: "Use it to decide whether to fix pipeline logic, inspect failed indexing operations, or plan a replay workflow.",
-      whatToLookFor: "Look for the boundary between ingest-pipeline errors and indexing failures, then check the recovery step.",
+      summary: "This source explains how failure stores capture rejected indexing operations so they can be inspected and recovered later.",
+      takeaway: "The practical choice is whether to fix the ingest pipeline, review failed documents, or replay corrected data.",
+      whatToLookFor: "Focus on the recovery step that reconstructs or replays the original document.",
       sourceType: "troubleshooting"
     };
   }
   if (/rerank|reranking/.test(text) && /performance|improv|latency|precision|quality/.test(text)) {
     return {
       concept: "Reranking quality and cost",
-      summary: "This result is about using reranking to improve the final ordering after retrieval has already found plausible matches.",
+      summary: "Reranking improves the final order after retrieval has already found plausible matches.",
       takeaway: "Focus on whether the source is claiming better precision, acceptable latency, or both.",
       whatToLookFor: "Look for the performance claim, candidate-set size, and any latency caveat.",
       sourceType: "performance"
@@ -489,8 +544,8 @@ function buildSourceInsight(input: {
   if (/anchor|source_url|reader_url|source link|links|path|chunk/.test(text)) {
     return {
       concept: "Stable source linking",
-      summary: "This result is about preserving enough source metadata to reopen the exact documentation location.",
-      takeaway: "Use it to verify how links, headings, and provenance should be stored with chunks.",
+      summary: "This source shows how to keep enough metadata to reopen the exact documentation location.",
+      takeaway: "Store links, headings, and anchors with each chunk so the UI can take users directly to the right section.",
       whatToLookFor: "Look for anchors, page links, source URLs, and section-level linking guidance.",
       sourceType: "procedural"
     };
@@ -498,8 +553,8 @@ function buildSourceInsight(input: {
   if (/performance|latency|faster|speed|throughput/.test(text)) {
     return {
       concept: "Performance tradeoff",
-      summary: "This result is about operational behavior, so the useful part is the condition under which performance changes.",
-      takeaway: "Use it to understand the practical cost or benefit before changing the workflow.",
+      summary: "This source explains the condition where performance changes.",
+      takeaway: "Compare the gain with the latency or resource cost before changing the workflow.",
       whatToLookFor: "Look for the metric, benchmark condition, and limitation.",
       sourceType: "performance"
     };
@@ -507,16 +562,16 @@ function buildSourceInsight(input: {
   if (/step|configure|create|add|use|install|enable/.test(text)) {
     return {
       concept: "Implementation guidance",
-      summary: "This result appears procedural; the useful part is the decision point or setup step.",
-      takeaway: "Use it to identify the next concrete action to try.",
+      summary: "This source lays out the setup or workflow step that matters next.",
+      takeaway: "Find the decision point, then follow the next concrete action.",
       whatToLookFor: "Look for required fields, configuration values, or ordered steps.",
       sourceType: "procedural"
     };
   }
   return {
-    concept: input.contentType === "lab" ? "Applied example" : sourceType === "reference" ? "Reference detail" : "Documentation guidance",
+    concept: input.contentType === "lab" ? "Applied example" : sourceType === "reference" ? "Documented setting" : "Documentation page",
     summary: sourceTypeSummary(sourceType, input.contentType),
-    takeaway: input.score && input.score < 0.015 ? "Use this as background, then verify the main idea in the read-first source." : "Use this to verify the main idea in context.",
+    takeaway: input.score && input.score < 0.015 ? "Keep this only as background." : "Use this for the concrete detail it documents.",
     whatToLookFor: sourceTypeLookFor(sourceType),
     sourceType
   };
@@ -545,24 +600,24 @@ function classifySourceType(input: { title: string; section?: string; text: stri
 function sourceTypeSummary(sourceType: SourceKind, contentType?: string | null): string {
   switch (sourceType) {
     case "troubleshooting":
-      return "This source is useful for identifying the failure mode, the likely fix path, and any caveat before acting.";
+      return "This source explains what failed, why it matters, and how to move toward recovery.";
     case "performance":
-      return "This source is useful for understanding the gain, the tradeoff, and the condition where the behavior applies.";
+      return "This source explains the gain, the tradeoff, and the condition where it applies.";
     case "procedural":
-      return "This source is useful for following the sequence, finding the decision point, and choosing the next concrete action.";
+      return "This source shows the order of steps and the point where you choose the next action.";
     case "conceptual":
-      return "This source is useful for understanding the idea, how the parts relate, and what implication follows.";
+      return "This source explains the idea, how the parts relate, and what follows from that.";
     case "example":
-      return "This source gives an applied example that can make the documentation guidance easier to translate into implementation.";
+      return "This source gives an applied example that can make the docs easier to translate into implementation.";
     default:
-      return `This source provides ${contentType === "lab" ? "an example" : "a reference detail"} related to the query.`;
+      return contentType === "lab" ? "This source gives a concrete example." : "This source documents a specific setting or capability.";
   }
 }
 
 function sourceTypeLookFor(sourceType: SourceKind): string {
   switch (sourceType) {
     case "troubleshooting":
-      return "Look for the failure mode, the condition that triggers it, and the recovery path.";
+      return "Focus on the step that fixes, recovers, or replays the failed data.";
     case "performance":
       return "Look for the metric, the condition behind the gain, and the latency or resource caveat.";
     case "procedural":
@@ -572,7 +627,7 @@ function sourceTypeLookFor(sourceType: SourceKind): string {
     case "example":
       return "Look for the concrete implementation detail that shows how the idea is applied.";
     default:
-      return "Look for the specific condition, field, or limitation that connects to your question.";
+      return "Focus on the specific condition, field, or limitation that changes what you should do.";
   }
 }
 
@@ -639,6 +694,18 @@ function dedupeText(items: string[]): string[] {
     output.push(item);
   }
   return output;
+}
+
+function polishText(text: string): string {
+  return cleanText(text)
+    .replace(/best source-backed direction from the current results/gi, "clearest place to start")
+    .replace(/Use this to verify the main idea in context\./gi, "Use this for the concrete detail it documents.")
+    .replace(/This result is about operational behavior, so the useful part is/gi, "This source explains")
+    .replace(/supporting context/gi, "additional detail")
+    .replace(/related context rather than primary proof/gi, "background")
+    .replace(/The primary result gives the most relevant source location, and the supporting results add adjacent context\./gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function inferWhatNew(answer: AnswerResponse | null): string[] {

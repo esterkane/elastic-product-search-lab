@@ -18,10 +18,10 @@ describe("resultFormatter", () => {
     expect(model.supportingSources).toHaveLength(1);
     expect(model.primaryEvidence?.role).toBe("primary");
     expect(model.supportingEvidence[0].title).toBe("Lab hybrid retrieval example");
-    expect(model.explanation).toMatch(/two-stage retrieval pattern|hybrid retrieval/i);
+    expect(model.explanation).toMatch(/broad first pass|hybrid retrieval/i);
     expect(model.whatToNotice[0]).toMatch(/first-stage retrieval/i);
     expect(model.supportingContext).toMatch(/examples|caveats|implementation detail/i);
-    expect(model.supportingContext).not.toMatch(/supporting evidence|primary proof|matched by/i);
+    expect(model.supportingContext).not.toMatch(/supporting evidence|primary proof|matched by|source-backed direction|use this to verify/i);
   });
 
   it("groups the first hit as primary and keeps related matches secondary", () => {
@@ -124,8 +124,11 @@ describe("resultFormatter", () => {
 
     expect(model.directAnswer).toMatch(/failure store/i);
     expect(model.explanation).toMatch(/ingest pipeline|indexing/i);
-    expect(model.whatToNotice).toEqual(expect.arrayContaining([expect.stringMatching(/failure happens/i)]));
+    expect(model.whatToNotice).toEqual(expect.arrayContaining([expect.stringMatching(/reconstructs|replay/i)]));
     expect(model.important).toMatch(/fix a pipeline|replay workflow/i);
+    expect(`${model.directAnswer} ${model.explanation} ${model.supportingContext}`).not.toMatch(
+      /source-backed direction|use this to verify|this result is about operational behavior|related context rather than primary proof/i
+    );
   });
 
   it("suppresses evidence claims that repeat synthesized answer text", () => {

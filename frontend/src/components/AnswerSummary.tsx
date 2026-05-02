@@ -22,7 +22,7 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
         {isLoading ? "Building a grounded answer from the strongest evidence." : model.directAnswer}
       </p>
       <div className="explain-block">
-        <h3>Brief explanation</h3>
+        <h3>Summary</h3>
         <p>{model.explanation}</p>
       </div>
       {model.whatToNotice.length > 0 && (
@@ -41,7 +41,7 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
           <p>{model.important}</p>
         </div>
         <div className="insight-block">
-          <h3>Related sources</h3>
+          <h3>Other good sources</h3>
           <p>{model.supportingContext}</p>
         </div>
         {model.bestSource && (
