@@ -184,6 +184,84 @@ def test_search_endpoint_explain_mode_returns_score_breakdown() -> None:
     }
 
 
+def test_search_endpoint_applies_release_intelligence_context() -> None:
+    client, retrieval = make_client()
+
+    response = client.post(
+        "/api/v1/search",
+        json={
+            "query": "what changed for vector search",
+            "limit": 2,
+            "topic": "vector_search",
+            "version_range": {"from": "9.0", "to": "9.2"},
+            "time_range": "latest",
+        },
+    )
+
+    assert response.status_code == 200
+    assert retrieval.calls[0]["limit"] == 20
+
+
+def test_release_intelligence_does_not_make_serverless_primary_by_default() -> None:
+    client, retrieval = make_client()
+
+    async def release_retrieve(query: str, limit: int = 10, filters: dict | None = None, boosts: dict | None = None):
+        return {
+            "hits": [
+                RankedHit(
+                    id="serverless",
+                    score=0.99,
+                    metadata={
+                        "repo": "elastic/docs-content",
+                        "path": "release-notes/elastic-cloud-serverless/index.md",
+                        "title": "Serverless changelog",
+                        "heading_path": "Serverless changelog > Vector fix",
+                        "content_type": "release_note",
+                        "final_rank": 1,
+                    },
+                    source_url="https://github.com/elastic/docs-content/blob/main/release-notes/elastic-cloud-serverless/index.md#vector-fix",
+                    text="Serverless fixes semantic text indexing memory pressure in Elasticsearch 9.1.",
+                    lexical_score=0.9,
+                    dense_score=0.9,
+                ),
+                RankedHit(
+                    id="docs",
+                    score=0.55,
+                    metadata={
+                        "repo": "elastic/docs-content",
+                        "path": "solutions/search/vector/knn.md",
+                        "title": "kNN search in Elasticsearch",
+                        "heading_path": "kNN search > Vector search",
+                        "content_type": "documentation",
+                        "final_rank": 2,
+                    },
+                    source_url="https://github.com/elastic/docs-content/blob/main/solutions/search/vector/knn.md#vector-search",
+                    text="Elasticsearch 9.1 vector search changes can affect dense retrieval memory, filtered search, and query latency.",
+                    lexical_score=0.5,
+                    dense_score=0.5,
+                ),
+            ],
+            "recommendation_categories": [],
+            "warnings": [],
+            "degraded": False,
+        }
+
+    retrieval.retrieve = release_retrieve  # type: ignore[method-assign]
+
+    response = client.post(
+        "/api/v1/search",
+        json={
+            "query": "what changed for vector search",
+            "topic": "vector_search",
+            "version_range": {"from": "9.0", "to": "9.2"},
+            "time_range": "latest",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["hits"][0]["id"] == "docs"
+
+
 def test_search_endpoint_returns_degraded_warnings() -> None:
     client, retrieval = make_client()
 

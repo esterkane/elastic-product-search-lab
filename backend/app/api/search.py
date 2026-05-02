@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from datetime import date
 from typing import Annotated, Literal
 from urllib.parse import urldefrag
 
@@ -58,12 +59,35 @@ class SearchBoosts(BaseModel):
         })
 
 
+ChangeTopic = Literal[
+    "relevance",
+    "ingestion",
+    "data_modeling",
+    "performance",
+    "resilience",
+    "esql",
+    "vector_search",
+    "search_applications",
+    "observability",
+    "release_notes",
+]
+TimeRange = Literal["latest", "30d", "90d", "1y", "all"]
+
+
+class VersionRange(BaseModel):
+    from_: str | None = Field(default=None, alias="from")
+    to: str | None = None
+
+
 class SearchRequest(BaseModel):
     query: str = Field(min_length=1)
     limit: int = Field(default=10, ge=1, le=50)
     filters: SearchFilters | None = None
     boosts: SearchBoosts | None = None
     explain: bool = False
+    topic: ChangeTopic | Literal[""] | None = None
+    version_range: VersionRange | None = None
+    time_range: TimeRange | None = None
 
 
 class ScoreBreakdown(BaseModel):
@@ -179,12 +203,13 @@ RetrievalDependency = Annotated[RetrievalService, Depends(get_retrieval_service)
 async def search(request: SearchRequest, retrieval_service: RetrievalDependency) -> SearchResponse:
     result = await retrieval_service.retrieve(
         request.query,
-        limit=request.limit,
+        limit=retrieval_limit(request),
         filters=request.filters.as_dict() if request.filters else None,
         boosts=request.boosts.as_dict() if request.boosts else None,
     )
+    hits = ranked_hits_for_request(result.get("hits", []), request)
     return SearchResponse(
-        hits=[hit_response(hit, request.query, include_debug=request.explain) for hit in result.get("hits", [])],
+        hits=[hit_response(hit, request.query, include_debug=request.explain) for hit in hits[: request.limit]],
         recommendation_categories=[str(category) for category in result.get("recommendation_categories", [])],
         warnings=warning_responses(result.get("warnings", [])),
         degraded=bool(result.get("degraded", False)),
@@ -195,11 +220,11 @@ async def search(request: SearchRequest, retrieval_service: RetrievalDependency)
 async def answer(request: AnswerRequest, retrieval_service: RetrievalDependency) -> AnswerResponse:
     result = await retrieval_service.retrieve(
         request.query,
-        limit=request.limit,
+        limit=retrieval_limit(request),
         filters=request.filters.as_dict() if request.filters else None,
         boosts=request.boosts.as_dict() if request.boosts else None,
     )
-    hits = [hit for hit in result.get("hits", []) if isinstance(hit, RankedHit)]
+    hits = ranked_hits_for_request(result.get("hits", []), request)
     evidence = answer_evidence(request.query, hits, limit=3)
     answer_model = synthesize_answer_model(request.query, evidence)
     return AnswerResponse(
@@ -220,6 +245,169 @@ async def answer(request: AnswerRequest, retrieval_service: RetrievalDependency)
         warnings=warning_responses(result.get("warnings", [])),
         degraded=bool(result.get("degraded", False)),
     )
+
+
+def retrieval_limit(request: SearchRequest) -> int:
+    if is_release_request(request):
+        return min(max(request.limit * 3, 20), 50)
+    return request.limit
+
+
+def ranked_hits_for_request(raw_hits: object, request: SearchRequest) -> list[RankedHit]:
+    hits = [hit for hit in raw_hits if isinstance(hit, RankedHit)] if isinstance(raw_hits, list) else []
+    if not is_release_request(request):
+        return hits
+    return release_ranked_hits(hits, request)
+
+
+def is_release_request(request: SearchRequest) -> bool:
+    return bool(
+        request.topic
+        or request.version_range
+        or request.time_range
+        or re.search(r"\b(new|changed|latest|release|8\.|9\.|version|upgrade)\b", request.query, flags=re.IGNORECASE)
+    )
+
+
+TOPIC_TERMS: dict[str, tuple[str, ...]] = {
+    "relevance": ("relevance", "ranking", "rerank", "scoring", "bm25", "query rules"),
+    "ingestion": ("ingest", "pipeline", "bulk", "failure store", "data freshness", "indexing failure"),
+    "data_modeling": ("mapping", "field", "schema", "template", "data model"),
+    "performance": ("performance", "latency", "memory", "faster", "throughput", "scaling", "speed"),
+    "resilience": ("resilience", "recovery", "retry", "backoff", "circuit breaker", "failure", "bulkhead"),
+    "esql": ("es|ql", "esql", "join", "lookup", "query language"),
+    "vector_search": ("vector", "semantic", "knn", "dense", "sparse", "rerank", "inference"),
+    "search_applications": ("search application", "template", "query rules", "search app"),
+    "observability": ("observability", "monitor", "metrics", "profile", "slow log"),
+    "release_notes": ("release note", "breaking change", "deprecation", "migration", "what's new"),
+}
+
+ENGINEERING_TERMS = (
+    "latency",
+    "memory",
+    "performance",
+    "faster",
+    "improve",
+    "failure",
+    "recovery",
+    "mapping",
+    "pipeline",
+    "rerank",
+    "vector",
+    "join",
+    "breaking",
+    "deprecation",
+)
+
+
+def release_ranked_hits(hits: list[RankedHit], request: SearchRequest) -> list[RankedHit]:
+    query_mentions_serverless = "serverless" in request.query.lower()
+    decorated = [(release_hit_score(hit, request, query_mentions_serverless), index, hit) for index, hit in enumerate(hits)]
+    decorated.sort(key=lambda item: (-item[0], item[1]))
+    sorted_hits = [hit for _, _, hit in decorated]
+    if query_mentions_serverless:
+        return sorted_hits
+    non_serverless = [hit for hit in sorted_hits if not hit_mentions_serverless(hit)]
+    serverless = [hit for hit in sorted_hits if hit_mentions_serverless(hit)]
+    return non_serverless + serverless if non_serverless else sorted_hits
+
+
+def release_hit_score(hit: RankedHit, request: SearchRequest, query_mentions_serverless: bool) -> float:
+    text = hit_text_blob(hit)
+    lower = text.lower()
+    score = hit.score
+    topic = request.topic or infer_topic(request.query)
+    if topic:
+        topic_terms = TOPIC_TERMS.get(topic, ())
+        matches = sum(1 for term in topic_terms if term in lower)
+        score += min(matches, 4) * 0.08
+    if any(term in lower for term in ENGINEERING_TERMS):
+        score += 0.08
+    content_type = str(hit.metadata.get("content_type") or "")
+    path = str(hit.metadata.get("path") or "")
+    if content_type == "release_note" or "release-notes" in path:
+        score += 0.18
+    if hit.metadata.get("repo") == "elastic/docs-content":
+        score += 0.08
+    version = extract_version(text)
+    if version:
+        if version_in_range(version, request.version_range):
+            score += 0.16
+        elif request.version_range:
+            score -= 0.22
+        if request.time_range == "latest" and version.startswith("9."):
+            score += 0.08
+    if request.time_range and request.time_range != "all":
+        hit_date = extract_date_value(text)
+        if hit_date and request.time_range == "latest":
+            score += hit_date.toordinal() / 10_000_000
+    if hit_mentions_serverless(hit) and not query_mentions_serverless:
+        score -= 0.65
+    if is_archived_source(hit.metadata, hit.source_url):
+        score -= 1.0
+    return score
+
+
+def hit_text_blob(hit: RankedHit) -> str:
+    return " ".join(
+        str(value)
+        for value in [
+            hit.metadata.get("title"),
+            hit.metadata.get("heading_path"),
+            hit.metadata.get("path"),
+            hit.metadata.get("content_type"),
+            hit.source_url,
+            hit.text[:2000],
+        ]
+        if value
+    )
+
+
+def hit_mentions_serverless(hit: RankedHit) -> bool:
+    return "serverless" in hit_text_blob(hit).lower()
+
+
+def infer_topic(query: str) -> str | None:
+    lower = query.lower()
+    for topic, terms in TOPIC_TERMS.items():
+        if any(term in lower for term in terms):
+            return topic
+    return None
+
+
+def extract_version(text: str) -> str | None:
+    match = re.search(r"\b(?:elasticsearch\s*)?([89]\.\d{1,2})(?:\.\d+)?\b", text, flags=re.IGNORECASE)
+    return match.group(1) if match else None
+
+
+def version_in_range(version: str, version_range: VersionRange | None) -> bool:
+    if not version_range:
+        return True
+    value = version_tuple(version)
+    lower = version_tuple(version_range.from_) if version_range.from_ else None
+    upper = version_tuple(version_range.to) if version_range.to else None
+    if lower and value < lower:
+        return False
+    if upper and value > upper:
+        return False
+    return True
+
+
+def version_tuple(version: str | None) -> tuple[int, int]:
+    if not version:
+        return (0, 0)
+    major, _, minor = version.partition(".")
+    return (int(major or 0), int(minor or 0))
+
+
+def extract_date_value(text: str) -> date | None:
+    match = re.search(r"\b(20\d{2})-(\d{2})-(\d{2})\b", text)
+    if not match:
+        return None
+    try:
+        return date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
+    except ValueError:
+        return None
 
 
 def hit_response(hit: object, query: str, include_debug: bool = False) -> SearchHitResponse:

@@ -45,7 +45,11 @@ export function SearchBar({ query, onQueryChange, onSubmit, isLoading, advanced 
       <div className="query-row">
         <label className="query-field">
           <span>Query</span>
-          <input value={query} onChange={(event) => onQueryChange(event.target.value)} placeholder="Ask a documentation question" />
+          <input
+            value={query}
+            onChange={(event) => onQueryChange(event.target.value)}
+            placeholder="Ask what changed in Elasticsearch 8.x or 9.x"
+          />
         </label>
         <button type="submit" disabled={isLoading}>
           {isLoading ? <Loader2 aria-hidden="true" className="spin" size={18} /> : <Search aria-hidden="true" size={18} />}

@@ -175,7 +175,7 @@ export function SearchPage() {
       <header className="topbar">
         <div>
           <p className="eyebrow">Elastic repo intelligence</p>
-          <h1>Search and Explain</h1>
+          <h1>Release Intelligence</h1>
         </div>
         <button className="sync-button" type="button" onClick={handleIndexChanges} disabled={isIndexing}>
           {isIndexing ? <Loader2 aria-hidden="true" className="spin" size={18} /> : <RefreshCw aria-hidden="true" size={18} />}

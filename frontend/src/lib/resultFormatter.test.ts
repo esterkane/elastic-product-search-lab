@@ -20,7 +20,7 @@ describe("resultFormatter", () => {
     expect(model.supportingEvidence[0].title).toBe("Lab hybrid retrieval example");
     expect(model.explanation).toMatch(/broad first pass|hybrid retrieval/i);
     expect(model.whatToNotice[0]).toMatch(/first-stage retrieval/i);
-    expect(model.supportingContext).toMatch(/examples|caveats|implementation detail/i);
+    expect(model.supportingContext).toMatch(/context|edge cases|implementation detail/i);
     expect(model.supportingContext).not.toMatch(/supporting evidence|primary proof|matched by|source-backed direction|use this to verify/i);
   });
 
@@ -96,6 +96,34 @@ describe("resultFormatter", () => {
     expect(model.directAnswer).not.toMatch(/^Performance Elastic Rerank shows/);
     expect(buildAnswerSummary(hybridRetrievalAnswer, [model.primaryEvidence!])).toMatch(/hybrid retrieval/i);
     expect(buildWhatNewSummary(hybridRetrievalAnswer, [model.primaryEvidence!]).length).toBeGreaterThan(0);
+  });
+
+  it("turns release evidence into engineering-impact bullets", () => {
+    const model = formatAnswer({
+      ...hybridRetrievalAnswer,
+      summary: "The clearest update: Dense vector models Hybrid search between a semantic and lexical query can be achieved by providing:.",
+      direct_answer: "The clearest update: Dense vector models Hybrid search between a semantic and lexical query can be achieved by providing:.",
+      what_new_items: [
+        "Dense vector models Hybrid search between a semantic and lexical query can be achieved by providing:."
+      ],
+      evidence: [
+        {
+          ...hybridRetrievalAnswer.evidence[0],
+          title: "Elasticsearch 9.1 vector search improvements",
+          heading_path: "Elasticsearch 9.1 > Vector search improvements",
+          path: "release-notes/elasticsearch/9.1.md",
+          content_type: "release_note",
+          claim: "Elasticsearch 9.1 improves vector search memory use and filtered retrieval behavior.",
+          excerpt: "Elasticsearch 9.1 improves vector search memory use and filtered retrieval behavior.",
+          highlight_terms: ["vector", "search", "memory"]
+        }
+      ]
+    });
+
+    expect(model.directAnswer).toMatch(/vector search changes in 9\.1|Prioritize the vector search changes in 9\.1/i);
+    expect(model.whatNew[0]).toMatch(/Vector search in 9\.1/i);
+    expect(model.whatNew[0]).toMatch(/memory use|filtered retrieval|reranking|inference/i);
+    expect(model.whatNew[0]).not.toMatch(/can be achieved by providing/i);
   });
 
   it("turns failure store sources into decision-oriented guidance", () => {

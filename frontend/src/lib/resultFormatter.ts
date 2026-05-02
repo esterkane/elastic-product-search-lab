@@ -337,7 +337,7 @@ export function buildAnswerSummary(answer: AnswerResponse | null, evidence: Form
     const primary = evidence[0];
     const topicLabel = primary ? topicLabelFor(primary.topic) : "the selected area";
     const version = primary?.version ? ` in ${primary.version}` : "";
-    return `Focus on the ${topicLabel} changes${version} that affect query behavior, indexing, or operations.`;
+    return `Prioritize the ${topicLabel} changes${version} that change search behavior, operations, or upgrade risk.`;
   }
   if (isFailureStoreTopic(answer, evidence)) {
     return "Use a failure store for indexing failures that need review, and handle ingest-pipeline errors separately.";
@@ -366,7 +366,7 @@ export function buildExplanationSummary(answer: AnswerResponse | null, evidence:
   if (isReleaseIntelligenceTopic(answer, evidence)) {
     const primary = evidence[0];
     const releasePhrase = primary?.version ? `Elasticsearch ${primary.version}` : "the selected Elasticsearch version";
-    return `Treat the result as a change briefing for ${releasePhrase}. Start with the release-note or docs section that states the change, then map it to the engineering effect: query latency, ranking quality, mapping choices, ingest reliability, or operational safety. Keep serverless-specific guidance secondary unless the query asks for it.`;
+    return `Read this as a change briefing for ${releasePhrase}. The useful signal is whether the source changes query latency, ranking quality, mapping choices, ingest reliability, or operational safety. Serverless-specific material stays secondary unless the query asks for it.`;
   }
   if (isFailureStoreTopic(answer, evidence)) {
     return `Failure store docs separate two problems: errors raised inside ingest pipelines and documents rejected during indexing. The useful workflow is to capture failed indexing operations, inspect why they failed, and recover or replay the affected documents instead of losing them in logs. Start with ${location} to see which failure path applies.`;
@@ -381,16 +381,16 @@ export function buildExplanationSummary(answer: AnswerResponse | null, evidence:
 }
 
 export function buildWhatNewSummary(answer: AnswerResponse | null, evidence: FormattedEvidence[] = []): string[] {
-  const explicit = answer?.what_new_items?.map((item) => cleanClaim(item)).filter(Boolean) ?? [];
-  if (explicit.length > 0) {
-    return dedupeText(explicit).slice(0, 3);
-  }
   const text = allAnswerText(answer, evidence);
   if (!/(new|change|changed|improve|improvement|performance|release|update|workflow|rerank|8\.|9\.|version)/i.test(text)) {
     return [];
   }
   if (isReleaseIntelligenceTopic(answer, evidence)) {
     return releaseWhatNewItems(evidence);
+  }
+  const explicit = answer?.what_new_items?.map((item) => cleanClaim(item)).filter(Boolean) ?? [];
+  if (explicit.length > 0) {
+    return dedupeText(explicit).slice(0, 3);
   }
   if (isHybridRerankTopic(answer, evidence)) {
     return [
@@ -538,10 +538,10 @@ function evidenceTags(item: AnswerResponse["evidence"][number]): string[] {
 
 function buildSupportingContext(evidence: FormattedEvidence[]): string {
   if (evidence.length <= 1) {
-    return "No extra source adds a clearly different angle yet.";
+    return "No related source adds a clearly different angle yet.";
   }
   const supporting = evidence.slice(1, 4).map((item) => item.display.title).join(", ");
-  return `${supporting} add a useful example, caveat, or implementation detail.`;
+  return `${supporting} add context, edge cases, or implementation detail.`;
 }
 
 function sourceLocationPhrase(display: DisplayMetadata): string {
@@ -749,18 +749,18 @@ function releaseWhatNewItems(evidence: FormattedEvidence[]): string[] {
       const topic = topicLabelFor(item.topic);
       const version = item.version ? ` in ${item.version}` : "";
       if (item.topic === "vector_search") {
-        return `Vector search${version}: check whether the change affects memory use, filtered retrieval, reranking, or inference behavior.`;
+        return `Vector search${version}: check for changes to memory use, filtered retrieval, reranking, or inference behavior.`;
       }
       if (item.topic === "performance") {
-        return `Performance${version}: look for latency, memory, or query-execution changes and any tradeoff.`;
+        return `Performance${version}: review latency, memory, and query-execution impact, including any tradeoff.`;
       }
       if (item.topic === "ingestion") {
-        return `Ingestion${version}: check pipeline behavior, failure handling, mapping impact, or data freshness.`;
+        return `Ingestion${version}: review pipeline behavior, failure handling, mapping impact, or data freshness.`;
       }
       if (item.topic === "esql") {
-        return `ES|QL${version}: inspect query-language changes such as joins, lookup behavior, or execution limits.`;
+        return `ES|QL${version}: inspect joins, lookup behavior, query syntax, or execution limits.`;
       }
-      return `${capitalize(topic)}${version}: inspect the change and the operational impact before adopting it.`;
+      return `${capitalize(topic)}${version}: identify the behavior change and its operational impact before adopting it.`;
     });
   return dedupeText(items).slice(0, 5);
 }

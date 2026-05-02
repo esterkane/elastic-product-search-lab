@@ -21,10 +21,6 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
       <p className="answer-summary">
         {isLoading ? "Building a grounded answer from the strongest evidence." : model.directAnswer}
       </p>
-      <div className="explain-block">
-        <h3>Summary</h3>
-        <p>{model.explanation}</p>
-      </div>
       {model.whatNew.length > 0 && (
         <div className="insight-block insight-block-release">
           <h3>What's new</h3>
@@ -35,6 +31,11 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
           </ul>
         </div>
       )}
+      <div className="explain-block">
+        <h3>Why it matters</h3>
+        <p>{model.explanation}</p>
+        <p>{model.important}</p>
+      </div>
       {model.whatToNotice.length > 0 && (
         <div className="insight-block insight-block-new">
           <h3>What to look for</h3>
@@ -46,17 +47,9 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
         </div>
       )}
       <div className="insight-grid">
-        <div className="insight-block">
-          <h3>Why it matters</h3>
-          <p>{model.important}</p>
-        </div>
-        <div className="insight-block">
-          <h3>Other good sources</h3>
-          <p>{model.supportingContext}</p>
-        </div>
         {model.bestSource && (
           <div className="insight-block">
-            <h3>Read first</h3>
+            <h3>Best source</h3>
             <SourceMetadata display={model.bestSource.display} includeTitle />
             <a className="best-link" href={model.bestSource.url} target="_blank" rel="noreferrer">
               <MapPin aria-hidden="true" size={15} />
@@ -65,6 +58,10 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
             </a>
           </div>
         )}
+        <div className="insight-block">
+          <h3>Related sources</h3>
+          <p>{model.supportingContext}</p>
+        </div>
       </div>
     </section>
   );
