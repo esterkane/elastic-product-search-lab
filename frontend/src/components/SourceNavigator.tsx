@@ -1,6 +1,7 @@
 import { ExternalLink } from "lucide-react";
 import type { Source } from "../lib/api";
 import { formatSource } from "../lib/resultFormatter";
+import { SourceMetadata } from "./SourceMetadata";
 
 type SourceNavigatorProps = {
   bestSource: Source | null;
@@ -27,26 +28,7 @@ export function SourceNavigator({ bestSource, supportingSources }: SourceNavigat
                 <span>{source.display.title}</span>
                 <ExternalLink aria-hidden="true" size={14} />
               </a>
-              <dl className="metadata-list metadata-list-compact">
-                {source.display.section && (
-                  <div>
-                    <dt>Section</dt>
-                    <dd>{source.display.section}</dd>
-                  </div>
-                )}
-                {source.display.filePath && (
-                  <div>
-                    <dt>File</dt>
-                    <dd>{source.display.filePath}</dd>
-                  </div>
-                )}
-                {source.display.repo && (
-                  <div>
-                    <dt>Repo</dt>
-                    <dd>{source.display.repo}</dd>
-                  </div>
-                )}
-              </dl>
+              <SourceMetadata display={source.display} compact />
             </div>
           </li>
         ))}

@@ -1,6 +1,7 @@
 import { ArrowRight, MapPin } from "lucide-react";
 import type { AnswerViewModel } from "../lib/resultFormatter";
 import { ConfidenceBadge } from "./ConfidenceBadge";
+import { SourceMetadata } from "./SourceMetadata";
 
 type AnswerSummaryProps = {
   model: AnswerViewModel;
@@ -21,7 +22,7 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
         {isLoading ? "Building a grounded answer from the strongest evidence." : model.directAnswer}
       </p>
       <div className="explain-block">
-        <h3>Explain this result</h3>
+        <h3>Explanation</h3>
         <p>{model.explanation}</p>
       </div>
       {model.whatNew.length > 0 && (
@@ -47,33 +48,14 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
             ))}
           </ul>
         </div>
+        <div className="insight-block">
+          <h3>Supporting context</h3>
+          <p>{model.supportingContext}</p>
+        </div>
         {model.bestSource && (
           <div className="insight-block">
             <h3>Where to read next</h3>
-            <dl className="metadata-list">
-              <div>
-                <dt>Source</dt>
-                <dd>{model.bestSource.display.title}</dd>
-              </div>
-              {model.bestSource.display.section && (
-                <div>
-                  <dt>Section</dt>
-                  <dd>{model.bestSource.display.section}</dd>
-                </div>
-              )}
-              {model.bestSource.display.filePath && (
-                <div>
-                  <dt>File</dt>
-                  <dd>{model.bestSource.display.filePath}</dd>
-                </div>
-              )}
-              {model.bestSource.display.repo && (
-                <div>
-                  <dt>Repo</dt>
-                  <dd>{model.bestSource.display.repo}</dd>
-                </div>
-              )}
-            </dl>
+            <SourceMetadata display={model.bestSource.display} includeTitle />
             <a className="best-link" href={model.bestSource.url} target="_blank" rel="noreferrer">
               <MapPin aria-hidden="true" size={15} />
               <span>{model.bestSource.link_label === "Read documentation" ? "Read docs" : "Open source"}</span>

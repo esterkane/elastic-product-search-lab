@@ -1,4 +1,13 @@
-import { formatAnswer, formatSearchResult, groupRelatedResults, normalizeDisplayMetadata } from "./resultFormatter";
+import {
+  buildAnswerSummary,
+  buildWhatNewSummary,
+  dedupeClaims,
+  formatAnswer,
+  formatSearchResult,
+  groupRelatedResults,
+  normalizeDisplayMetadata,
+  normalizeSourceMetadata
+} from "./resultFormatter";
 import { hybridRetrievalAnswer, hybridRetrievalSearch } from "../test/fixtures";
 
 describe("resultFormatter", () => {
@@ -9,6 +18,8 @@ describe("resultFormatter", () => {
     expect(model.supportingSources).toHaveLength(1);
     expect(model.primaryEvidence?.role).toBe("primary");
     expect(model.supportingEvidence[0].title).toBe("Lab hybrid retrieval example");
+    expect(model.explanation).toMatch(/two-stage retrieval pattern|hybrid retrieval/i);
+    expect(model.supportingContext).toMatch(/Supporting evidence/i);
   });
 
   it("groups the first hit as primary and keeps related matches secondary", () => {
@@ -33,6 +44,7 @@ describe("resultFormatter", () => {
     expect(display.title).toBe("Documentation archive");
     expect(display.section).toBe("Documentation archive");
     expect(display.cleanPath).toBe("Section: Documentation archive | archive.md | elastic/docs-content");
+    expect(display.canonicalPath).toBe("Section: Documentation archive | File: archive.md | Repo: elastic/docs-content");
   });
 
   it("removes duplicated boilerplate snippets from formatted results", () => {
@@ -54,5 +66,40 @@ describe("resultFormatter", () => {
     expect(result.title).toBe("Documentation archive");
     expect(result.snippet).toBeUndefined();
     expect(result.display.cleanPath).not.toContain("Documentation archive > Documentation archive");
+  });
+
+  it("normalizes repeated rerank title and breadcrumb artifacts", () => {
+    const display = normalizeSourceMetadata({
+      title: "Elastic Rerank Elastic Rerank",
+      heading_path: "Elastic Rerank > Elastic Rerank > Performance [ml-nlp-rerank-performance]",
+      repo: "elastic/docs-content",
+      path: "explore-analyze/machine-learning/nlp/ml-nlp-rerank.md"
+    });
+
+    expect(display.displayTitle).toBe("Elastic Rerank");
+    expect(display.displaySection).toBe("Performance [ml-nlp-rerank-performance]");
+    expect(display.canonicalPath).toBe(
+      "Section: Performance [ml-nlp-rerank-performance] | File: explore-analyze/machine-learning/nlp/ml-nlp-rerank.md | Repo: elastic/docs-content"
+    );
+  });
+
+  it("builds synthesized answer fields instead of reusing raw snippets", () => {
+    const model = formatAnswer({
+      ...hybridRetrievalAnswer,
+      summary: "Performance Elastic Rerank shows significant improvements over raw retrieval.",
+      direct_answer: "Performance Elastic Rerank shows significant improvements over raw retrieval."
+    });
+
+    expect(model.directAnswer).toMatch(/hybrid retrieval|rerank/i);
+    expect(model.directAnswer).not.toMatch(/^Performance Elastic Rerank shows/);
+    expect(buildAnswerSummary(hybridRetrievalAnswer, [model.primaryEvidence!])).toMatch(/hybrid retrieval/i);
+    expect(buildWhatNewSummary(hybridRetrievalAnswer, [model.primaryEvidence!]).length).toBeGreaterThan(0);
+  });
+
+  it("suppresses evidence claims that repeat synthesized answer text", () => {
+    const evidence = [formatAnswer(hybridRetrievalAnswer).primaryEvidence!];
+    const deduped = dedupeClaims(evidence, [evidence[0].claim]);
+
+    expect(deduped[0].claim).toBe("");
   });
 });

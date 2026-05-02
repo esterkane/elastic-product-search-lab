@@ -46,7 +46,7 @@ describe("SearchPage", () => {
       expect(answer).toHaveBeenCalledWith(expect.objectContaining({ query: "hybrid retrieval improvements" }));
     });
     expect(screen.queryByText(/Improvement Suggestions/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/Hybrid retrieval improvements should combine lexical/i)).toBeInTheDocument();
+    expect(screen.getByText(/Use hybrid retrieval to gather candidates/i)).toBeInTheDocument();
   });
 
   it("renders the answer region before the results region", () => {

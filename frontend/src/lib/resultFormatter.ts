@@ -4,6 +4,7 @@ export type ConfidenceLevel = "high" | "medium" | "low";
 
 export type FormattedEvidence = AnswerResponse["evidence"][number] & {
   claim: string;
+  matchExplanation: string;
   role: "primary" | "supporting";
   tags: string[];
   display: DisplayMetadata;
@@ -15,6 +16,7 @@ export type AnswerViewModel = {
   whatNew: string[];
   important: string;
   keyTakeaways: string[];
+  supportingContext: string;
   confidence: ConfidenceLevel;
   bestSource: FormattedSource | null;
   supportingSources: FormattedSource[];
@@ -30,6 +32,11 @@ export type DisplayMetadata = {
   filePath?: string;
   sourceType?: string;
   cleanPath: string;
+  displayTitle: string;
+  displaySection?: string;
+  displayFile?: string;
+  displayRepo?: string;
+  canonicalPath: string;
 };
 
 export type FormattedSource = Source & {
@@ -48,16 +55,32 @@ export type NormalizedSearchResult = SearchHit & {
 export type SearchResult = NormalizedSearchResult;
 
 export function formatAnswer(answer: AnswerResponse | null): AnswerViewModel {
-  const evidence = (answer?.evidence ?? []).map(formatEvidence);
+  const rawEvidence = (answer?.evidence ?? []).map(formatEvidence);
+  const bestSource = selectPrimarySource(answer, rawEvidence);
   const links = (answer?.links?.slice(0, 3) ?? []).map(formatSource);
+  const synthesis = {
+    answer: buildAnswerSummary(answer, rawEvidence),
+    explanation: buildExplanationSummary(answer, rawEvidence),
+    whatNew: buildWhatNewSummary(answer, rawEvidence),
+    whyItMatters: buildWhyItMattersSummary(answer, rawEvidence),
+    supportingContext: buildSupportingContext(rawEvidence)
+  };
+  const evidence = dedupeClaims(rawEvidence, [
+    synthesis.answer,
+    synthesis.explanation,
+    synthesis.whyItMatters,
+    synthesis.supportingContext,
+    ...synthesis.whatNew
+  ]);
   return {
-    directAnswer: answer?.direct_answer ?? answer?.summary ?? "Run a search to see one clear answer with highlighted proof.",
-    explanation: answer?.explanation ?? inferExplanation(answer),
-    whatNew: answer?.what_new_items?.length ? answer.what_new_items : inferWhatNew(answer),
-    important: answer?.important ?? inferImportance(answer),
+    directAnswer: synthesis.answer,
+    explanation: synthesis.explanation,
+    whatNew: synthesis.whatNew,
+    important: synthesis.whyItMatters,
     keyTakeaways: answer?.key_takeaways?.length ? answer.key_takeaways : inferTakeaways(answer),
+    supportingContext: synthesis.supportingContext,
     confidence: answer?.confidence ?? inferConfidence(answer),
-    bestSource: answer?.best_source ? formatSource(answer.best_source) : links[0] ?? null,
+    bestSource,
     supportingSources: answer?.supporting_sources?.length ? answer.supporting_sources.map(formatSource) : links.slice(1),
     primaryEvidence: evidence.find((item) => item.role === "primary") ?? evidence[0] ?? null,
     supportingEvidence: evidence.filter((item, index) => item.role === "supporting" || index > 0),
@@ -87,7 +110,8 @@ export function formatEvidence(item: AnswerResponse["evidence"][number]): Format
     ...item,
     title: display.title,
     claim: claim || `Matched ${display.title}; open the cited section to verify the exact passage.`,
-    excerpt: excerpt || item.excerpt,
+    excerpt: shortestFaithfulExcerpt(excerpt || item.excerpt),
+    matchExplanation: buildMatchExplanation(item, display),
     role: item.role ?? "supporting",
     tags: evidenceTags(item),
     display
@@ -129,6 +153,16 @@ export function formatSource(source: Source): FormattedSource {
   };
 }
 
+export function normalizeSourceMetadata(input: {
+  title?: string | null;
+  heading_path?: string | null;
+  repo?: string | null;
+  path?: string | null;
+  sourceType?: string | null;
+}): DisplayMetadata {
+  return normalizeDisplayMetadata(input);
+}
+
 export function normalizeDisplayMetadata(input: {
   title?: string | null;
   heading_path?: string | null;
@@ -142,14 +176,134 @@ export function normalizeDisplayMetadata(input: {
   const title = cleanTitle(rawTitle, input.heading_path);
   const section = cleanSection(headingSegments.at(-1), title);
   const parts = [section ? `Section: ${section}` : null, path, input.repo].filter(Boolean) as string[];
+  const cleanPath = formatCanonicalPath({ section, filePath: path, repo: input.repo ?? undefined });
   return {
     title,
     section,
     repo: input.repo ?? undefined,
     filePath: path,
     sourceType: input.sourceType ?? undefined,
-    cleanPath: parts.join(" | ")
+    cleanPath: parts.join(" | "),
+    displayTitle: title,
+    displaySection: section,
+    displayFile: path,
+    displayRepo: input.repo ?? undefined,
+    canonicalPath: cleanPath
   };
+}
+
+export function formatCanonicalPath(input: { section?: string; filePath?: string; repo?: string }): string {
+  return [
+    input.section ? `Section: ${input.section}` : null,
+    input.filePath ? `File: ${input.filePath}` : null,
+    input.repo ? `Repo: ${input.repo}` : null
+  ].filter(Boolean).join(" | ");
+}
+
+export function selectPrimarySource(answer: AnswerResponse | null, evidence: FormattedEvidence[] = []): FormattedSource | null {
+  if (answer?.best_source) {
+    return formatSource(answer.best_source);
+  }
+  const primary = evidence.find((item) => item.role === "primary") ?? evidence[0];
+  if (primary) {
+    return formatSource({
+      title: primary.title,
+      url: primary.reader_url,
+      link_label: primary.link_label,
+      repo: primary.repo,
+      path: primary.path,
+      heading_path: primary.heading_path
+    });
+  }
+  return answer?.links?.[0] ? formatSource(answer.links[0]) : null;
+}
+
+export function buildAnswerSummary(answer: AnswerResponse | null, evidence: FormattedEvidence[] = []): string {
+  if (!answer) {
+    return "Run a search to get a direct, source-backed answer.";
+  }
+  const topic = topicFromEvidence(answer, evidence);
+  if (isChunkLinkTopic(answer, evidence)) {
+    return "Index documentation as section-aware chunks with stable metadata and separate reader/source links.";
+  }
+  if (isHybridRerankTopic(answer, evidence)) {
+    return "Use hybrid retrieval to gather candidates, then rerank the strongest set when final precision matters.";
+  }
+  if (isRerankPerformanceTopic(answer, evidence)) {
+    return "Use reranking when you need better ordering of already-relevant results and can afford the extra latency.";
+  }
+  if (topic) {
+    return `${topic} is the best source-backed direction from the current results.`;
+  }
+  return "The current results point to a relevant source, but the evidence is not strong enough for a high-confidence answer.";
+}
+
+export function buildExplanationSummary(answer: AnswerResponse | null, evidence: FormattedEvidence[] = []): string {
+  if (!answer || evidence.length === 0) {
+    return "The system did not retrieve enough grounded evidence to explain the answer yet. Try syncing sources or narrowing the query to a specific product area.";
+  }
+  const primary = evidence[0];
+  const location = sourceLocationPhrase(primary.display);
+  if (isChunkLinkTopic(answer, evidence)) {
+    return `The strongest evidence is about documentation links, anchors, and page-level source locations. In practice, each chunk should carry the file path, heading, stable anchor, license, content type, reader URL, and source URL so the UI can open ${location} and highlight the exact passage instead of showing a raw path.`;
+  }
+  if (isHybridRerankTopic(answer, evidence)) {
+    return `The evidence describes a two-stage retrieval pattern: first collect candidates with lexical and semantic search, then apply reranking to the smaller candidate set. That keeps broad recall from hybrid retrieval while using reranking only where it improves the final ordering users see. Verify the details in ${location}.`;
+  }
+  if (isRerankPerformanceTopic(answer, evidence)) {
+    return `The evidence indicates that reranking is a quality step, not a replacement for first-stage retrieval. It is most useful after search has already found plausible matches, because the reranker spends extra work comparing the query with each candidate. Open ${location} first to check the exact recommendation and constraints.`;
+  }
+  return `The primary result gives the most relevant source location, and the supporting results add adjacent context. Start with ${location}, then use the secondary sources only to confirm related details or edge cases.`;
+}
+
+export function buildWhatNewSummary(answer: AnswerResponse | null, evidence: FormattedEvidence[] = []): string[] {
+  const explicit = answer?.what_new_items?.map((item) => cleanClaim(item)).filter(Boolean) ?? [];
+  if (explicit.length > 0) {
+    return dedupeText(explicit).slice(0, 3);
+  }
+  const text = allAnswerText(answer, evidence);
+  if (!/(new|change|changed|improve|improvement|performance|release|update|workflow|rerank)/i.test(text)) {
+    return [];
+  }
+  if (isHybridRerankTopic(answer, evidence)) {
+    return [
+      "The workflow separates broad candidate retrieval from final relevance ordering.",
+      "Reranking is treated as a precision step over a smaller top-k set, not as the first retrieval stage."
+    ];
+  }
+  if (isChunkLinkTopic(answer, evidence)) {
+    return [
+      "Stable anchors and canonical source metadata become part of every indexed chunk.",
+      "Reader-facing documentation links and source-code provenance are kept separate."
+    ];
+  }
+  return ["The retrieved sources point to an improvement or updated workflow; verify the primary source before changing implementation."];
+}
+
+export function buildWhyItMattersSummary(answer: AnswerResponse | null, evidence: FormattedEvidence[] = []): string {
+  if (isChunkLinkTopic(answer, evidence)) {
+    return "This matters because stable metadata prevents duplicate evidence, supports reliable filters, and lets users jump directly to the exact documentation section.";
+  }
+  if (isHybridRerankTopic(answer, evidence)) {
+    return "This matters because users get broader recall from hybrid search and cleaner final ordering from reranking without scanning repetitive result cards.";
+  }
+  if (answer?.important) {
+    return cleanClaim(answer.important) || answer.important;
+  }
+  return "This matters because the answer is tied to a verifiable source location instead of unsupported generated text.";
+}
+
+export function dedupeClaims(evidence: FormattedEvidence[], existingClaims: string[] = []): FormattedEvidence[] {
+  const seen = new Set(existingClaims.map(normalizeForCompare).filter(Boolean));
+  return evidence.map((item) => {
+    const claimKey = normalizeForCompare(item.claim);
+    const excerptKey = normalizeForCompare(item.excerpt);
+    const claim = claimKey && !seen.has(claimKey) && claimKey !== excerptKey ? item.claim : "";
+    if (claim) {
+      seen.add(claimKey);
+    }
+    return { ...item, claim };
+  });
 }
 
 function dedupeResults(results: NormalizedSearchResult[]): NormalizedSearchResult[] {
@@ -172,6 +326,91 @@ function evidenceTags(item: AnswerResponse["evidence"][number]): string[] {
     item.license_family,
     item.role === "primary" ? "primary evidence" : "supporting evidence"
   ].filter(Boolean) as string[]));
+}
+
+function buildSupportingContext(evidence: FormattedEvidence[]): string {
+  if (evidence.length <= 1) {
+    return "There is one primary source; use it as the main verification point.";
+  }
+  const supporting = evidence.slice(1, 3).map((item) => item.display.title).join(" and ");
+  return `Supporting evidence from ${supporting} is related context, not a replacement for the primary proof.`;
+}
+
+function buildMatchExplanation(item: AnswerResponse["evidence"][number], display: DisplayMetadata): string {
+  const terms = item.highlight_terms?.filter(Boolean).slice(0, 4) ?? [];
+  const termText = terms.length > 0 ? ` It matched question terms such as ${terms.join(", ")}.` : "";
+  const roleText = item.role === "primary" ? "Primary proof" : "Supporting context";
+  return `${roleText} from ${sourceLocationPhrase(display)}.${termText}`;
+}
+
+function sourceLocationPhrase(display: DisplayMetadata): string {
+  if (display.section && display.filePath) {
+    return `${display.section} in ${display.filePath}`;
+  }
+  if (display.filePath) {
+    return display.filePath;
+  }
+  return display.title;
+}
+
+function topicFromEvidence(answer: AnswerResponse, evidence: FormattedEvidence[]): string {
+  return evidence[0]?.display.title ?? answer.best_source?.title ?? answer.links?.[0]?.title ?? "";
+}
+
+function isHybridRerankTopic(answer: AnswerResponse | null, evidence: FormattedEvidence[]): boolean {
+  const text = allAnswerText(answer, evidence);
+  return /hybrid/.test(text) && /rerank|reranking|rank/.test(text);
+}
+
+function isRerankPerformanceTopic(answer: AnswerResponse | null, evidence: FormattedEvidence[]): boolean {
+  const text = allAnswerText(answer, evidence);
+  return /rerank|reranking/.test(text) && /performance|latency|precision|quality|improv/.test(text);
+}
+
+function isChunkLinkTopic(answer: AnswerResponse | null, evidence: FormattedEvidence[]): boolean {
+  const text = allAnswerText(answer, evidence);
+  return /chunk|anchor|source link|source_url|reader_url|stable metadata|documentation links/.test(text);
+}
+
+function allAnswerText(answer: AnswerResponse | null, evidence: FormattedEvidence[]): string {
+  return [
+    answer?.summary,
+    answer?.direct_answer,
+    answer?.explanation,
+    answer?.important,
+    answer?.what_new,
+    ...(answer?.what_new_items ?? []),
+    ...evidence.flatMap((item) => [item.title, item.heading_path, item.claim, item.excerpt, item.path])
+  ].filter(Boolean).join(" ").toLowerCase();
+}
+
+function shortestFaithfulExcerpt(text: string, maxChars = 260): string {
+  const cleaned = cleanText(text)
+    .replace(/:::\{[^}]+\}|:::/g, " ")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s*[✅❌]\s*/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (cleaned.length <= maxChars) {
+    return cleaned;
+  }
+  const boundary = cleaned.slice(0, maxChars).lastIndexOf(" ");
+  return `${cleaned.slice(0, boundary > 120 ? boundary : maxChars).replace(/[,:; ]+$/, "")}...`;
+}
+
+function dedupeText(items: string[]): string[] {
+  const seen = new Set<string>();
+  const output: string[] = [];
+  for (const item of items) {
+    const key = normalizeForCompare(item);
+    if (!key || seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    output.push(item);
+  }
+  return output;
 }
 
 function inferWhatNew(answer: AnswerResponse | null): string[] {

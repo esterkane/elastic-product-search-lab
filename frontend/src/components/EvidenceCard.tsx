@@ -1,5 +1,6 @@
 import { ExternalLink } from "lucide-react";
 import type { FormattedEvidence } from "../lib/resultFormatter";
+import { SourceMetadata } from "./SourceMetadata";
 
 type EvidenceCardProps = {
   evidence: FormattedEvidence;
@@ -13,26 +14,7 @@ export function EvidenceCard({ evidence, primary = false }: EvidenceCardProps) {
         <div>
           <p className="evidence-kicker">{primary ? "Primary proof" : "Supporting evidence"}</p>
           <h3>{evidence.title}</h3>
-          <dl className="metadata-list metadata-list-inline">
-            {evidence.display.section && (
-              <div>
-                <dt>Section</dt>
-                <dd>{evidence.display.section}</dd>
-              </div>
-            )}
-            {evidence.display.filePath && (
-              <div>
-                <dt>File</dt>
-                <dd>{evidence.display.filePath}</dd>
-              </div>
-            )}
-            {evidence.display.repo && (
-              <div>
-                <dt>Repo</dt>
-                <dd>{evidence.display.repo}</dd>
-              </div>
-            )}
-          </dl>
+          <SourceMetadata display={evidence.display} />
         </div>
       </div>
       <div className="tag-row">
@@ -41,6 +23,7 @@ export function EvidenceCard({ evidence, primary = false }: EvidenceCardProps) {
         ))}
       </div>
       {evidence.claim && evidence.claim !== evidence.excerpt && <p className="evidence-claim">{evidence.claim}</p>}
+      <p className="match-reason">{evidence.matchExplanation}</p>
       <blockquote className="evidence-snippet">{renderHighlightedText(evidence.excerpt, evidence.highlight_terms)}</blockquote>
       <div className="answer-evidence__links">
         <a className="evidence-cta evidence-cta-primary" href={evidence.reader_url} target="_blank" rel="noreferrer">

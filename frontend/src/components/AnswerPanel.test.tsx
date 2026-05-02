@@ -6,9 +6,11 @@ describe("AnswerPanel", () => {
   it("renders a grounded summary, confidence, and highlighted evidence", () => {
     const { container } = render(<AnswerPanel answer={hybridRetrievalAnswer} />);
 
-    expect(screen.getByText(/Hybrid retrieval improvements should combine lexical/i)).toBeInTheDocument();
+    expect(screen.getByText(/Use hybrid retrieval to gather candidates/i)).toBeInTheDocument();
+    expect(screen.getByText(/two-stage retrieval pattern/i)).toBeInTheDocument();
     expect(screen.getByText("high confidence")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "What's new" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Supporting context" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Where to read next" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Ranking and reranking" })).toBeInTheDocument();
     expect(container.querySelectorAll("mark").length).toBeGreaterThan(0);
