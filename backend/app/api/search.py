@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from datetime import date
+from datetime import date, timedelta
 from typing import Annotated, Literal
 from urllib.parse import urldefrag
 
@@ -72,6 +72,9 @@ ChangeTopic = Literal[
     "release_notes",
 ]
 TimeRange = Literal["latest", "30d", "90d", "1y", "all"]
+
+
+TODAY = date.today()
 
 
 class VersionRange(BaseModel):
@@ -225,7 +228,7 @@ async def answer(request: AnswerRequest, retrieval_service: RetrievalDependency)
         boosts=request.boosts.as_dict() if request.boosts else None,
     )
     hits = ranked_hits_for_request(result.get("hits", []), request)
-    evidence = answer_evidence(request.query, hits, limit=3)
+    evidence = answer_evidence(request.query, hits, limit=4)
     answer_model = synthesize_answer_model(request.query, evidence)
     return AnswerResponse(
         summary=answer_model["direct_answer"],
@@ -241,7 +244,7 @@ async def answer(request: AnswerRequest, retrieval_service: RetrievalDependency)
         evidence_quotes=answer_model["evidence_quotes"],
         provenance=answer_model["provenance"],
         evidence=evidence,
-        links=answer_links(evidence, limit=3),
+        links=answer_links(evidence, limit=4),
         warnings=warning_responses(result.get("warnings", [])),
         degraded=bool(result.get("degraded", False)),
     )
@@ -257,7 +260,28 @@ def ranked_hits_for_request(raw_hits: object, request: SearchRequest) -> list[Ra
     hits = [hit for hit in raw_hits if isinstance(hit, RankedHit)] if isinstance(raw_hits, list) else []
     if not is_release_request(request):
         return hits
-    return release_ranked_hits(hits, request)
+    return refresh_final_ranks(release_ranked_hits(hits, request))
+
+
+def refresh_final_ranks(hits: list[RankedHit]) -> list[RankedHit]:
+    ranked: list[RankedHit] = []
+    for index, hit in enumerate(hits, start=1):
+        metadata = dict(hit.metadata)
+        metadata["final_rank"] = index
+        ranked.append(
+            RankedHit(
+                id=hit.id,
+                score=hit.score,
+                metadata=metadata,
+                source_url=hit.source_url,
+                text=hit.text,
+                lexical_score=hit.lexical_score,
+                dense_score=hit.dense_score,
+                fusion_score=hit.fusion_score,
+                rerank_score=hit.rerank_score,
+            )
+        )
+    return ranked
 
 
 def is_release_request(request: SearchRequest) -> bool:
@@ -297,6 +321,33 @@ ENGINEERING_TERMS = (
     "join",
     "breaking",
     "deprecation",
+    "recall",
+    "quality",
+    "upgrade",
+)
+
+DIRECT_CHANGE_TERMS = (
+    "added",
+    "adds",
+    "changed",
+    "deprecated",
+    "improved",
+    "improves",
+    "new",
+    "removed",
+    "breaking",
+    "faster",
+    "memory",
+    "latency",
+    "risk",
+)
+
+GENERIC_REFERENCE_TERMS = (
+    "overview",
+    "getting started",
+    "api reference",
+    "configuration reference",
+    "settings reference",
 )
 
 
@@ -308,8 +359,7 @@ def release_ranked_hits(hits: list[RankedHit], request: SearchRequest) -> list[R
     if query_mentions_serverless:
         return sorted_hits
     non_serverless = [hit for hit in sorted_hits if not hit_mentions_serverless(hit)]
-    serverless = [hit for hit in sorted_hits if hit_mentions_serverless(hit)]
-    return non_serverless + serverless if non_serverless else sorted_hits
+    return non_serverless if non_serverless else sorted_hits
 
 
 def release_hit_score(hit: RankedHit, request: SearchRequest, query_mentions_serverless: bool) -> float:
@@ -323,29 +373,53 @@ def release_hit_score(hit: RankedHit, request: SearchRequest, query_mentions_ser
         score += min(matches, 4) * 0.08
     if any(term in lower for term in ENGINEERING_TERMS):
         score += 0.08
+    if any(term in lower for term in DIRECT_CHANGE_TERMS):
+        score += 0.1
     content_type = str(hit.metadata.get("content_type") or "")
     path = str(hit.metadata.get("path") or "")
     if content_type == "release_note" or "release-notes" in path:
+        score += 0.28
+    if "highlights" in path or "whats-new" in path:
         score += 0.18
+    if content_type == "reference" and not any(term in lower for term in DIRECT_CHANGE_TERMS):
+        score -= 0.16
+    if any(term in lower for term in GENERIC_REFERENCE_TERMS) and not any(term in lower for term in DIRECT_CHANGE_TERMS):
+        score -= 0.18
     if hit.metadata.get("repo") == "elastic/docs-content":
-        score += 0.08
+        score += 0.12
     version = extract_version(text)
     if version:
         if version_in_range(version, request.version_range):
             score += 0.16
         elif request.version_range:
-            score -= 0.22
+            score -= 0.55
         if request.time_range == "latest" and version.startswith("9."):
             score += 0.08
+    elif request.version_range:
+        score -= 0.12
     if request.time_range and request.time_range != "all":
         hit_date = extract_date_value(text)
         if hit_date and request.time_range == "latest":
             score += hit_date.toordinal() / 10_000_000
+        elif hit_date and not date_in_time_range(hit_date, request.time_range):
+            score -= 0.32
+        elif not hit_date and request.time_range in {"30d", "90d", "1y"}:
+            score -= 0.08
     if hit_mentions_serverless(hit) and not query_mentions_serverless:
         score -= 0.65
     if is_archived_source(hit.metadata, hit.source_url):
         score -= 1.0
     return score
+
+
+def date_in_time_range(hit_date: date, time_range: TimeRange) -> bool:
+    windows = {
+        "30d": timedelta(days=30),
+        "90d": timedelta(days=90),
+        "1y": timedelta(days=365),
+    }
+    window = windows.get(time_range)
+    return True if window is None else hit_date >= TODAY - window
 
 
 def hit_text_blob(hit: RankedHit) -> str:
@@ -384,8 +458,8 @@ def version_in_range(version: str, version_range: VersionRange | None) -> bool:
     if not version_range:
         return True
     value = version_tuple(version)
-    lower = version_tuple(version_range.from_) if version_range.from_ else None
-    upper = version_tuple(version_range.to) if version_range.to else None
+    lower = version_tuple(version_range.from_, wildcard_high=False) if version_range.from_ else None
+    upper = version_tuple(version_range.to, wildcard_high=True) if version_range.to else None
     if lower and value < lower:
         return False
     if upper and value > upper:
@@ -393,11 +467,15 @@ def version_in_range(version: str, version_range: VersionRange | None) -> bool:
     return True
 
 
-def version_tuple(version: str | None) -> tuple[int, int]:
+def version_tuple(version: str | None, wildcard_high: bool = False) -> tuple[int, int]:
     if not version:
         return (0, 0)
-    major, _, minor = version.partition(".")
-    return (int(major or 0), int(minor or 0))
+    normalized = version.lower().strip().removeprefix("v")
+    major, _, minor = normalized.partition(".")
+    major_value = int(major) if major.isdigit() else 0
+    if minor in {"x", "*"}:
+        return (major_value, 999 if wildcard_high else 0)
+    return (major_value, int(minor) if minor.isdigit() else 0)
 
 
 def extract_date_value(text: str) -> date | None:
@@ -616,8 +694,8 @@ def direct_answer_from_evidence(query: str, evidence: list[AnswerEvidence]) -> s
         return intent_answer
     primary = evidence[0].claim
     if is_change_query(query):
-        return f"The clearest update: {primary}"
-    return f"The best answer is: {primary}"
+        return ensure_sentence(primary)
+    return ensure_sentence(primary)
 
 
 def what_new_summary(query: str, evidence: list[AnswerEvidence]) -> str | None:
@@ -631,37 +709,42 @@ def what_new_summary(query: str, evidence: list[AnswerEvidence]) -> str | None:
 
 
 def why_it_matters(query: str, evidence: list[AnswerEvidence]) -> str:
+    text = " ".join(item.claim for item in evidence).lower()
     if "rerank" in query.lower() or any("rerank" in item.claim.lower() for item in evidence):
-        return "This matters because reranking can improve final precision after hybrid retrieval has already found a useful candidate pool."
+        return "This matters if you run hybrid retrieval or reranking, because it can improve ranking quality after the first retrieval pass while adding latency that needs to be budgeted."
+    if "vector" in text or "knn" in text or "semantic" in text:
+        return "This matters for vector search because changes can affect recall, memory use, filtered retrieval behavior, and query latency in production workloads."
+    if "mapping" in text or "field" in text:
+        return "This matters because mapping changes can alter indexing behavior, query semantics, storage cost, and upgrade risk."
+    if "pipeline" in text or "ingest" in text or "failure" in text:
+        return "This matters because ingest and failure-handling changes affect data freshness, recovery workflows, and how safely you can replay rejected documents."
+    if "es|ql" in text or "esql" in text or "join" in text:
+        return "This matters because query-language changes can alter execution behavior, latency, and which workloads are safe to move into ES|QL."
     if is_chunk_link_query(query):
         return "This matters because stable chunk metadata lets the UI open the exact documentation section, highlight the relevant passage, and avoid duplicate source cards after reindexing."
     if not evidence:
         return "No grounded evidence was available."
     if "metadata" in query.lower() or "filter" in query.lower():
-        return "This matters because consistent metadata makes source filtering, provenance, and answer grounding predictable."
-    return "This matters because the answer is tied to specific documentation sections and source provenance instead of unsupported generated text."
+        return "This matters because consistent metadata makes version, topic, repo, and content-type filtering predictable."
+    return "This matters because the selected source describes a concrete Elasticsearch change with engineering impact, not just a generic reference page."
 
 
 def explanation_from_evidence(query: str, evidence: list[AnswerEvidence]) -> str:
     primary = evidence[0]
-    source_family = "Elastic documentation" if primary.repo == "elastic/docs-content" else "Elastic source material"
     query_explanation = intent_explanation(query, evidence)
     if query_explanation:
         return query_explanation
     if primary.score < 0.015:
         return (
-            f"The best match is weak, so treat this as supporting context from {source_family}. "
-            "The result indicates the likely topic area, but you should verify the cited source before acting on it."
+            "The available source is weak for the selected release range. Treat it as a lead, then narrow the topic or version before changing production behavior."
         )
     if len(evidence) == 1:
         return (
-            f"The primary source says: {primary.claim} This is the main grounded result for the query, "
-            f"and it comes from {source_family}."
+            f"{primary.claim} Focus on the section that states the new behavior, any limitation, and the operational tradeoff."
         )
     supporting = evidence[1]
     return (
-        f"The primary source says: {primary.claim} A supporting source adds: {supporting.claim} "
-        "Together, these sources give the answer and show where to verify it without relying on repeated snippets."
+        f"{primary.claim} The next useful source adds: {supporting.claim} Read them as a short briefing: change first, tradeoff second, implementation detail last."
     )
 
 
@@ -672,7 +755,7 @@ def what_new_items(query: str, evidence: list[AnswerEvidence]) -> list[str]:
     if len(items) >= 2:
         return items
     if items:
-        items.append("The retrieved sources point to the most relevant changed or improved workflow for this query.")
+        items.append("The selected sources point to the newest meaningful change in the chosen version range.")
     return items
 
 
@@ -687,11 +770,11 @@ def key_takeaways(query: str, evidence: list[AnswerEvidence]) -> list[str]:
         return ["No grounded evidence was available."]
     primary = evidence[0]
     takeaways = [
-        f"Open {primary.title} first; it is the primary proof for this answer.",
+        f"Open {primary.title} first and inspect the section that describes the behavior change.",
         why_it_matters(query, evidence),
     ]
     if len(evidence) > 1:
-        takeaways.append("Use the supporting evidence to confirm related workflows or edge cases.")
+        takeaways.append("Use related sources only when they add an example, caveat, or implementation detail.")
     return dedupe_text(takeaways)[:3]
 
 

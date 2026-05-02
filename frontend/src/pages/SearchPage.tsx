@@ -48,7 +48,7 @@ const CHANGE_TOPICS: { value: ChangeTopic; label: string; queryTerms: string }[]
   { value: "release_notes", label: "Release notes and breaking changes", queryTerms: "release notes breaking changes deprecations migration" }
 ];
 
-const VERSIONS = ["9.2", "9.1", "9.0", "8.19", "8.18", "8.17", "8.16", "8.15", "8.14", "8.13", "8.12", "8.11", "8.10", "8.9", "8.8", "8.7", "8.6", "8.5", "8.4", "8.3", "8.2", "8.1", "8.0"];
+const VERSIONS = ["9.x", "9.2", "9.1", "9.0", "8.x", "8.19", "8.18", "8.17", "8.16", "8.15", "8.14", "8.13", "8.12", "8.11", "8.10", "8.9", "8.8", "8.7", "8.6", "8.5", "8.4", "8.3", "8.2", "8.1", "8.0"];
 
 const TIME_RANGES: { value: TimeRange; label: string }[] = [
   { value: "latest", label: "Latest first" },
@@ -59,7 +59,7 @@ const TIME_RANGES: { value: TimeRange; label: string }[] = [
 ];
 
 export function SearchPage() {
-  const [query, setQuery] = useState("hybrid retrieval improvements");
+  const [query, setQuery] = useState("vector search memory improvements");
   const [repo, setRepo] = useState("");
   const [path, setPath] = useState("");
   const [headingPath, setHeadingPath] = useState("");
@@ -254,7 +254,7 @@ export function SearchPage() {
         <section className="panel results-panel" aria-labelledby="results-heading">
           <div className="panel-heading">
             <Search aria-hidden="true" size={18} />
-            <h2 id="results-heading">Search Results</h2>
+            <h2 id="results-heading">Sources</h2>
           </div>
           <ResultList hits={searchData?.hits ?? []} />
         </section>

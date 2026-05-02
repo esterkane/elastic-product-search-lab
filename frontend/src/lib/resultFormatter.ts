@@ -336,8 +336,9 @@ export function buildAnswerSummary(answer: AnswerResponse | null, evidence: Form
   if (isReleaseIntelligenceTopic(answer, evidence)) {
     const primary = evidence[0];
     const topicLabel = primary ? topicLabelFor(primary.topic) : "the selected area";
-    const version = primary?.version ? ` in ${primary.version}` : "";
-    return `Prioritize the ${topicLabel} changes${version} that change search behavior, operations, or upgrade risk.`;
+    const version = primary?.version ? ` ${primary.version}` : "";
+    const impact = engineeringImpactPhrase(primary);
+    return `Elasticsearch${version} changes ${topicLabel}${impact ? ` with impact on ${impact}` : ""}.`;
   }
   if (isFailureStoreTopic(answer, evidence)) {
     return "Use a failure store for indexing failures that need review, and handle ingest-pipeline errors separately.";
@@ -366,7 +367,7 @@ export function buildExplanationSummary(answer: AnswerResponse | null, evidence:
   if (isReleaseIntelligenceTopic(answer, evidence)) {
     const primary = evidence[0];
     const releasePhrase = primary?.version ? `Elasticsearch ${primary.version}` : "the selected Elasticsearch version";
-    return `Read this as a change briefing for ${releasePhrase}. The useful signal is whether the source changes query latency, ranking quality, mapping choices, ingest reliability, or operational safety. Serverless-specific material stays secondary unless the query asks for it.`;
+    return `Read this as a change briefing for ${releasePhrase}. The useful signal is whether the change affects query latency, ranking quality, recall, memory use, indexing behavior, mapping choices, resilience, or upgrade risk. Serverless-specific material stays secondary unless the query asks for it.`;
   }
   if (isFailureStoreTopic(answer, evidence)) {
     return `Failure store docs separate two problems: errors raised inside ingest pipelines and documents rejected during indexing. The useful workflow is to capture failed indexing operations, inspect why they failed, and recover or replay the affected documents instead of losing them in logs. Start with ${location} to see which failure path applies.`;
@@ -401,7 +402,7 @@ export function buildWhatNewSummary(answer: AnswerResponse | null, evidence: For
   if (isChunkLinkTopic(answer, evidence)) {
     return [
       "Stable anchors and canonical source metadata become part of every indexed chunk.",
-      "Reader-facing documentation links and source-code provenance are kept separate."
+      "Reader-facing documentation links and source file links are kept separate."
     ];
   }
   if (isReleaseIntelligenceTopic(answer, evidence)) {
@@ -421,7 +422,7 @@ export function buildWhatToNotice(answer: AnswerResponse | null, evidence: Forma
   if (isChunkLinkTopic(answer, evidence)) {
     return [
       "Look for stable anchors and section-level links, not only page URLs.",
-      "Check whether reader-facing docs links and source-code provenance are stored separately.",
+      "Check whether reader-facing docs links and source file links are stored separately.",
       "Notice whether metadata fields are consistent enough to support filtering and deduplication."
     ];
   }
@@ -465,6 +466,11 @@ export function buildWhyItMattersSummary(answer: AnswerResponse | null, evidence
   if (isHybridRerankTopic(answer, evidence)) {
     return "This matters because users get broader recall from hybrid search and cleaner final ordering from reranking without scanning repetitive result cards.";
   }
+  if (isReleaseIntelligenceTopic(answer, evidence)) {
+    const primary = evidence[0];
+    const impact = engineeringImpactPhrase(primary) || "query behavior, operations, or upgrade planning";
+    return `This matters because the change can affect ${impact}. Treat feature notes and caveats together before changing production search behavior.`;
+  }
   if (answer?.important) {
     return cleanClaim(answer.important) || answer.important;
   }
@@ -501,7 +507,7 @@ function prioritizeEvidence(evidence: FormattedEvidence[]): FormattedEvidence[] 
 }
 
 function sourceQualityScore(item: FormattedEvidence): number {
-  const text = `${item.title} ${item.heading_path ?? ""} ${item.excerpt} ${item.path ?? ""}`.toLowerCase();
+  const text = `${item.title} ${item.heading_path ?? ""} ${item.excerpt} ${item.path ?? ""} ${item.source_url}`.toLowerCase();
   let score = item.score ?? 0;
   if (item.repo === "elastic/docs-content") {
     score += 0.12;
@@ -509,8 +515,8 @@ function sourceQualityScore(item: FormattedEvidence): number {
   if (item.content_type === "release_note" || /release-notes|breaking-changes|whats-new/.test(text)) {
     score += 0.16;
   }
-  if (/serverless/.test(text) && !/serverless/.test(allAnswerText(null, [item]))) {
-    score -= 0.08;
+  if (/serverless/.test(text)) {
+    score -= 0.2;
   }
   if (item.sourceType === "conceptual" || item.sourceType === "procedural" || item.sourceType === "troubleshooting") {
     score += 0.08;
@@ -541,7 +547,7 @@ function buildSupportingContext(evidence: FormattedEvidence[]): string {
     return "No related source adds a clearly different angle yet.";
   }
   const supporting = evidence.slice(1, 4).map((item) => item.display.title).join(", ");
-  return `${supporting} add context, edge cases, or implementation detail.`;
+  return `${supporting} add examples, edge cases, or implementation detail.`;
 }
 
 function sourceLocationPhrase(display: DisplayMetadata): string {
@@ -748,19 +754,20 @@ function releaseWhatNewItems(evidence: FormattedEvidence[]): string[] {
     .map((item) => {
       const topic = topicLabelFor(item.topic);
       const version = item.version ? ` in ${item.version}` : "";
+      const impact = engineeringImpactPhrase(item);
       if (item.topic === "vector_search") {
-        return `Vector search${version}: check for changes to memory use, filtered retrieval, reranking, or inference behavior.`;
+        return `Vector search${version}: review changes to ${impact || "memory use, filtered retrieval, reranking, or inference behavior"}.`;
       }
       if (item.topic === "performance") {
-        return `Performance${version}: review latency, memory, and query-execution impact, including any tradeoff.`;
+        return `Performance${version}: review ${impact || "latency, memory, and query-execution impact"}, including any tradeoff.`;
       }
       if (item.topic === "ingestion") {
-        return `Ingestion${version}: review pipeline behavior, failure handling, mapping impact, or data freshness.`;
+        return `Ingestion${version}: review ${impact || "pipeline behavior, failure handling, mapping impact, or data freshness"}.`;
       }
       if (item.topic === "esql") {
-        return `ES|QL${version}: inspect joins, lookup behavior, query syntax, or execution limits.`;
+        return `ES|QL${version}: inspect ${impact || "joins, lookup behavior, query syntax, or execution limits"}.`;
       }
-      return `${capitalize(topic)}${version}: identify the behavior change and its operational impact before adopting it.`;
+      return `${capitalize(topic)}${version}: identify the behavior change${impact ? ` and its impact on ${impact}` : " and its operational impact"}.`;
     });
   return dedupeText(items).slice(0, 5);
 }
@@ -777,6 +784,24 @@ function releaseLookForItems(evidence: FormattedEvidence[]): string[] {
     "Prefer release-note sections that state a concrete behavior change over generic overview pages."
   ].filter(Boolean) as string[];
   return dedupeText(items).slice(0, 5);
+}
+
+function engineeringImpactPhrase(item?: FormattedEvidence | null): string {
+  if (!item) {
+    return "";
+  }
+  const text = `${item.title} ${item.heading_path ?? ""} ${item.claim} ${item.excerpt}`.toLowerCase();
+  const impacts = [
+    /latency|faster|speed|throughput/.test(text) ? "query latency" : null,
+    /ranking|rerank|scoring|precision|quality/.test(text) ? "ranking quality" : null,
+    /recall|hybrid|semantic|knn|vector/.test(text) ? "recall" : null,
+    /memory|bbq|quant/.test(text) ? "memory use" : null,
+    /indexing|ingest|pipeline|bulk/.test(text) ? "indexing behavior" : null,
+    /mapping|field|schema|template/.test(text) ? "mapping consequences" : null,
+    /recover|resilien|failure|retry|circuit breaker/.test(text) ? "resilience" : null,
+    /breaking|upgrade|deprecat|removed/.test(text) ? "upgrade risk" : null,
+  ].filter(Boolean) as string[];
+  return dedupeText(impacts).slice(0, 3).join(", ");
 }
 
 function capitalize(text: string): string {

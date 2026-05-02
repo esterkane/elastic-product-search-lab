@@ -32,7 +32,7 @@ export function ResultCard({ result }: ResultCardProps) {
           {renderHighlightedSnippet(formatted.snippet ?? result.snippet, result.highlights ?? [])}
         </blockquote>
       )}
-      <p className="match-reason">{formatted.explanation}</p>
+      <p className="source-summary">{formatted.explanation}</p>
       <p className="result-takeaway">{formatted.takeaway}</p>
       <p className="look-for-note">{formatted.whatToLookFor}</p>
       <SourceMetadata display={formatted.display} compact />

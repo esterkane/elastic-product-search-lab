@@ -46,7 +46,7 @@ describe("AnswerPanel", () => {
   it("builds a grounded panel from search hits when answer synthesis is unavailable", () => {
     render(<AnswerPanel answer={null} searchHits={hybridRetrievalSearch.hits} />);
 
-    expect(screen.getByText(/using the ranked search evidence directly/i)).toBeInTheDocument();
+    expect(screen.getByText(/using ranked release sources directly/i)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Ranking and reranking" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Read docs/i })).toHaveAttribute(
       "href",
@@ -57,7 +57,7 @@ describe("AnswerPanel", () => {
   it("shows a clean pre-search empty state instead of a fake answer", () => {
     render(<AnswerPanel answer={null} />);
 
-    expect(screen.getByRole("heading", { name: "Ask a question to build an answer" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Pick a version range and topic" })).toBeInTheDocument();
     expect(screen.queryByText(/Run a search to get a direct/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Evidence" })).not.toBeInTheDocument();
   });

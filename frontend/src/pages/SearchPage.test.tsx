@@ -29,10 +29,10 @@ describe("SearchPage", () => {
     expect(screen.queryByText(/Improvement Suggestions/i)).not.toBeInTheDocument();
   });
 
-  it("keeps advanced controls collapsed by default", () => {
+  it("keeps secondary controls collapsed by default", () => {
     render(<SearchPage />);
 
-    const advanced = screen.getByText("Advanced options").closest("details");
+    const advanced = screen.getByText("Secondary filters").closest("details");
     expect(advanced).not.toHaveAttribute("open");
   });
 
@@ -43,7 +43,7 @@ describe("SearchPage", () => {
 
     await waitFor(() => {
       expect(search).toHaveBeenCalledWith(expect.objectContaining({
-        query: expect.stringContaining("hybrid retrieval improvements"),
+        query: expect.stringContaining("vector search memory improvements"),
         topic: "vector_search",
         version_range: { from: "9.0", to: "9.2" },
         time_range: "latest"
@@ -57,8 +57,6 @@ describe("SearchPage", () => {
   it("shows version-aware release intelligence controls", () => {
     render(<SearchPage />);
 
-    fireEvent.click(screen.getByText("Advanced options"));
-
     expect(screen.getByLabelText(/Topic/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Version from/i)).toHaveValue("9.0");
     expect(screen.getByLabelText(/Version to/i)).toHaveValue("9.2");
@@ -69,7 +67,7 @@ describe("SearchPage", () => {
     render(<SearchPage />);
 
     const answerHeading = screen.getByRole("heading", { name: "Answer" });
-    const resultsHeading = screen.getByRole("heading", { name: /Search Results/i });
+    const resultsHeading = screen.getByRole("heading", { name: /Sources/i });
 
     expect(answerHeading.compareDocumentPosition(resultsHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });

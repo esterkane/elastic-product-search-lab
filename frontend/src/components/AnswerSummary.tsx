@@ -60,7 +60,15 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
         )}
         <div className="insight-block">
           <h3>Related sources</h3>
-          <p>{model.supportingContext}</p>
+          {model.supportingSources.length > 0 ? (
+            <ul>
+              {model.supportingSources.slice(0, 3).map((source) => (
+                <li key={`${source.title}-${source.url}`}>{source.display.title}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>{model.supportingContext}</p>
+          )}
         </div>
       </div>
     </section>

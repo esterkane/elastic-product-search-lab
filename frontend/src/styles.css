@@ -125,7 +125,8 @@ a:focus-visible {
 
 .filter-row,
 .metadata-row,
-.release-row {
+.release-row,
+.source-filter-row {
   display: grid;
   gap: 12px;
   align-items: end;
@@ -137,6 +138,10 @@ a:focus-visible {
 
 .release-row {
   grid-template-columns: minmax(220px, 1.3fr) repeat(3, minmax(140px, 1fr));
+}
+
+.source-filter-row {
+  grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr);
 }
 
 .metadata-row {
@@ -362,7 +367,7 @@ button:disabled {
   background: #ffe08a;
 }
 
-.match-reason {
+.source-summary {
   margin-bottom: 10px;
   color: #405168;
   font-size: 0.94rem;
@@ -865,6 +870,7 @@ button:disabled {
   }
 
   .filter-row,
+  .source-filter-row,
   .metadata-row,
   .release-row,
   .answer-results-grid {

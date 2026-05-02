@@ -44,7 +44,7 @@ export function SearchBar({ query, onQueryChange, onSubmit, isLoading, advanced 
     <form className="search-form" onSubmit={onSubmit}>
       <div className="query-row">
         <label className="query-field">
-          <span>Query</span>
+          <span>Release question</span>
           <input
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
@@ -57,88 +57,91 @@ export function SearchBar({ query, onQueryChange, onSubmit, isLoading, advanced 
         </button>
       </div>
 
+      <div className="release-row" aria-label="Release intelligence filters">
+        <label>
+          <span>Topic</span>
+          <select value={advanced.topic} onChange={(event) => advanced.onTopicChange(event.target.value as ChangeTopic | "")}>
+            <option value="">All topics</option>
+            {advanced.topics.map((item) => (
+              <option value={item.value} key={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          <span>Version from</span>
+          <input
+            list="version-options"
+            value={advanced.versionFrom}
+            onChange={(event) => advanced.onVersionFromChange(event.target.value)}
+            placeholder="8.0"
+          />
+        </label>
+
+        <label>
+          <span>Version to</span>
+          <input
+            list="version-options"
+            value={advanced.versionTo}
+            onChange={(event) => advanced.onVersionToChange(event.target.value)}
+            placeholder="Latest"
+          />
+        </label>
+
+        <label>
+          <span>Time range</span>
+          <select value={advanced.timeRange} onChange={(event) => advanced.onTimeRangeChange(event.target.value as TimeRange)}>
+            {advanced.timeRanges.map((item) => (
+              <option value={item.value} key={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="source-filter-row">
+        <label>
+          <span>Repo filter</span>
+          <select value={advanced.repo} onChange={(event) => advanced.onRepoChange(event.target.value)}>
+            <option value="">All repos</option>
+            {advanced.repos.map((item) => (
+              <option value={item} key={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          <span>Content type filter</span>
+          <select value={advanced.contentType} onChange={(event) => advanced.onContentTypeChange(event.target.value)}>
+            <option value="">All types</option>
+            {advanced.contentTypes.map((item) => (
+              <option value={item} key={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <datalist id="version-options">
+        {advanced.versions.map((item) => (
+          <option value={item} key={item} />
+        ))}
+      </datalist>
+
       <details className="advanced-options">
-        <summary>Advanced options</summary>
+        <summary>Secondary filters</summary>
         <div className="advanced-options__content">
-          <div className="release-row" aria-label="Release intelligence filters">
-            <label>
-              <span>Topic</span>
-              <select value={advanced.topic} onChange={(event) => advanced.onTopicChange(event.target.value as ChangeTopic | "")}>
-                <option value="">All topics</option>
-                {advanced.topics.map((item) => (
-                  <option value={item.value} key={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              <span>Version from</span>
-              <select value={advanced.versionFrom} onChange={(event) => advanced.onVersionFromChange(event.target.value)}>
-                <option value="">Any 8.x/9.x</option>
-                {advanced.versions.map((item) => (
-                  <option value={item} key={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              <span>Version to</span>
-              <select value={advanced.versionTo} onChange={(event) => advanced.onVersionToChange(event.target.value)}>
-                <option value="">Latest</option>
-                {advanced.versions.map((item) => (
-                  <option value={item} key={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              <span>Time range</span>
-              <select value={advanced.timeRange} onChange={(event) => advanced.onTimeRangeChange(event.target.value as TimeRange)}>
-                {advanced.timeRanges.map((item) => (
-                  <option value={item.value} key={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
           <div className="filter-row">
-            <label>
-              <span>Repo</span>
-              <select value={advanced.repo} onChange={(event) => advanced.onRepoChange(event.target.value)}>
-                <option value="">All repos</option>
-                {advanced.repos.map((item) => (
-                  <option value={item} key={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
-
             <label>
               <span>License</span>
               <select value={advanced.licenseFamily} onChange={(event) => advanced.onLicenseFamilyChange(event.target.value)}>
                 <option value="">All licenses</option>
                 {advanced.licenseFamilies.map((item) => (
-                  <option value={item} key={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              <span>Content type</span>
-              <select value={advanced.contentType} onChange={(event) => advanced.onContentTypeChange(event.target.value)}>
-                <option value="">All types</option>
-                {advanced.contentTypes.map((item) => (
                   <option value={item} key={item}>
                     {item}
                   </option>

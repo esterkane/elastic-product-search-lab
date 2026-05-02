@@ -18,10 +18,10 @@ export function AnswerPanel({ answer, searchHits = [], isLoading = false }: Answ
     return (
       <section className="answer-explorer answer-explorer-empty" aria-label="Answer explorer">
         <div className="answer-empty-card">
-          <p className="eyebrow">Start here</p>
-          <h2>Ask a question to build an answer</h2>
+          <p className="eyebrow">Release briefing</p>
+          <h2>Pick a version range and topic</h2>
           <p>
-            Search will return a concise explanation, highlighted evidence, and the best documentation link to open first.
+            Search will summarize what changed, why it matters, what to inspect, and the best Elasticsearch source to open first.
           </p>
         </div>
       </section>
@@ -52,7 +52,7 @@ export function AnswerPanel({ answer, searchHits = [], isLoading = false }: Answ
             <QueryInsights primaryTitle={model.primaryEvidence.title} />
           </>
         ) : (
-          <p className="empty-state">Evidence excerpts will appear here after the answer endpoint returns grounded sources.</p>
+          <p className="empty-state">Short excerpts will appear here after the answer endpoint returns release sources.</p>
         )}
       </section>
 
@@ -101,10 +101,10 @@ function answerFromSearchHits(hits: SearchHit[]): AnswerResponse | null {
 
   return {
     summary: usefulHits[0]?.snippet ?? "The search results contain relevant documentation evidence.",
-    direct_answer: "The strongest result points to documentation evidence that should be opened first.",
+    direct_answer: "The strongest result points to an Elasticsearch source that should be opened first.",
     explanation:
-      "The answer endpoint did not return a full synthesis, so the page is using the ranked search evidence directly. Start with the first source, then use the related sources only when they add a different example, caveat, or implementation detail.",
-    important: "This keeps the page grounded in available evidence instead of showing an empty placeholder.",
+      "The answer endpoint did not return a full synthesis, so the page is using ranked release sources directly. Start with the first source, then use related sources only when they add an example, caveat, or implementation detail.",
+    important: "This keeps the briefing tied to concrete Elasticsearch changes while synthesis is unavailable.",
     confidence: usefulHits.length >= 2 ? "medium" : "low",
     evidence,
     links: sources,

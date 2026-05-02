@@ -120,7 +120,7 @@ describe("resultFormatter", () => {
       ]
     });
 
-    expect(model.directAnswer).toMatch(/vector search changes in 9\.1|Prioritize the vector search changes in 9\.1/i);
+    expect(model.directAnswer).toMatch(/Elasticsearch 9\.1 changes vector search|vector search changes in 9\.1/i);
     expect(model.whatNew[0]).toMatch(/Vector search in 9\.1/i);
     expect(model.whatNew[0]).toMatch(/memory use|filtered retrieval|reranking|inference/i);
     expect(model.whatNew[0]).not.toMatch(/can be achieved by providing/i);
