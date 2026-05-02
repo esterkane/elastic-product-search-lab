@@ -13,8 +13,8 @@ export function QueryInsights({ primaryTitle }: QueryInsightsProps) {
     <aside className="answer-tip" aria-label="Evidence reading tip">
       <Lightbulb aria-hidden="true" size={17} />
       <p>
-        Start with <strong>{primaryTitle}</strong>. It is the primary proof; supporting evidence and source navigation
-        stay separate so you can verify without rereading the same claim.
+        Start with <strong>{primaryTitle}</strong>. Use it to understand the main idea, then scan the other excerpts only
+        for caveats, examples, or implementation details.
       </p>
     </aside>
   );

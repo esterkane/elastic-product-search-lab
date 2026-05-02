@@ -49,7 +49,7 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
           </ul>
         </div>
         <div className="insight-block">
-          <h3>Supporting context</h3>
+          <h3>Other useful sources</h3>
           <p>{model.supportingContext}</p>
         </div>
         {model.bestSource && (

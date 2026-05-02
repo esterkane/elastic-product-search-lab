@@ -19,7 +19,8 @@ describe("resultFormatter", () => {
     expect(model.primaryEvidence?.role).toBe("primary");
     expect(model.supportingEvidence[0].title).toBe("Lab hybrid retrieval example");
     expect(model.explanation).toMatch(/two-stage retrieval pattern|hybrid retrieval/i);
-    expect(model.supportingContext).toMatch(/Supporting evidence/i);
+    expect(model.supportingContext).toMatch(/examples|caveats|implementation detail/i);
+    expect(model.supportingContext).not.toMatch(/supporting evidence|primary proof|matched by/i);
   });
 
   it("groups the first hit as primary and keeps related matches secondary", () => {

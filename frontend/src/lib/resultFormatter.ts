@@ -122,7 +122,7 @@ export function formatEvidence(item: AnswerResponse["evidence"][number]): Format
   return {
     ...item,
     title: display.title,
-    claim: claim || `Matched ${display.title}; open the cited section to verify the exact passage.`,
+    claim: claim || `Open ${display.title} to inspect the exact source detail.`,
     excerpt: shortestFaithfulExcerpt(excerpt || item.excerpt),
     concept: insight.concept,
     takeaway: insight.takeaway,
@@ -301,7 +301,7 @@ export function buildWhatNewSummary(answer: AnswerResponse | null, evidence: For
       "Reader-facing documentation links and source-code provenance are kept separate."
     ];
   }
-  return ["The retrieved sources point to an improvement or updated workflow; verify the primary source before changing implementation."];
+  return ["The retrieved sources point to an improvement or updated workflow; verify the read-first source before changing implementation."];
 }
 
 export function buildWhatToNotice(answer: AnswerResponse | null, evidence: FormattedEvidence[] = []): string[] {
@@ -327,8 +327,8 @@ export function buildWhatToNotice(answer: AnswerResponse | null, evidence: Forma
     ];
   }
   return [
-    primary?.whatToLookFor ?? "Look for the recommendation, caveat, or implementation detail in the primary source.",
-    "Use supporting sources to confirm adjacent cases rather than rereading the same claim."
+    primary?.whatToLookFor ?? "Look for the recommendation, caveat, or implementation detail in the read-first source.",
+    "Use the other sources to compare adjacent cases instead of rereading the same claim."
   ];
 }
 
@@ -375,17 +375,16 @@ function evidenceTags(item: AnswerResponse["evidence"][number]): string[] {
     item.repo === "elastic/docs-content" ? "docs" : null,
     item.repo?.includes("labs") ? "lab" : null,
     item.content_type,
-    item.license_family,
-    item.role === "primary" ? "primary evidence" : "supporting evidence"
+    item.license_family
   ].filter(Boolean) as string[]));
 }
 
 function buildSupportingContext(evidence: FormattedEvidence[]): string {
   if (evidence.length <= 1) {
-    return "There is one primary source; use it as the main verification point.";
+    return "Use the read-first source to confirm the main idea and inspect the caveat or implementation detail.";
   }
   const supporting = evidence.slice(1, 3).map((item) => item.display.title).join(" and ");
-  return `Supporting evidence from ${supporting} is related context, not a replacement for the primary proof.`;
+  return `${supporting} add examples, caveats, or implementation detail around the main idea.`;
 }
 
 function sourceLocationPhrase(display: DisplayMetadata): string {
@@ -449,7 +448,7 @@ function buildSourceInsight(input: {
   return {
     concept: input.contentType === "lab" ? "Supporting example" : "Documentation guidance",
     summary: `This source provides ${input.contentType === "lab" ? "an example" : "documentation context"} related to the query.`,
-    takeaway: input.score && input.score < 0.015 ? "Treat this as related context rather than primary proof." : "Use this to verify the primary idea in context.",
+    takeaway: input.score && input.score < 0.015 ? "Use this as background, then verify the main idea in the read-first source." : "Use this to verify the main idea in context.",
     whatToLookFor: "Look for the recommendation, caveat, or implementation detail that connects to your question."
   };
 }
@@ -528,7 +527,7 @@ function inferExplanation(answer: AnswerResponse | null): string {
     return "No evidence has been retrieved yet. Run a search to generate a source-backed explanation.";
   }
   const primary = answer.evidence[0];
-  return `The primary evidence says: ${cleanClaim(primary.claim ?? primary.excerpt, primary.title, primary.heading_path)} This is the best place to start because it is the highest-ranked grounded source for the query.`;
+  return `${cleanClaim(primary.claim ?? primary.excerpt, primary.title, primary.heading_path)} This is the clearest place to start because it connects the answer to a specific documentation section.`;
 }
 
 function inferImportance(answer: AnswerResponse | null): string {
@@ -543,8 +542,8 @@ function inferTakeaways(answer: AnswerResponse | null): string[] {
     return ["Run a search to see source-backed takeaways."];
   }
   return [
-    "Open the primary source first.",
-    "Use supporting evidence to verify adjacent workflows or implementation details."
+    "Open the read-first source before scanning related matches.",
+    "Use the other sources to verify adjacent workflows or implementation details."
   ];
 }
 

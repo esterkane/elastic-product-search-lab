@@ -11,9 +11,10 @@ describe("AnswerPanel", () => {
     expect(screen.getByText("high confidence")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "What to notice" })).toBeInTheDocument();
     expect(screen.getByText(/Look for the split between first-stage retrieval/i)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Supporting context" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Other useful sources" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Read first" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Ranking and reranking" })).toBeInTheDocument();
+    expect(screen.queryByText(/matched by|semantic evidence|keyword\/BM25|primary proof|supporting context/i)).not.toBeInTheDocument();
     expect(container.querySelectorAll("mark").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Hybrid", { selector: "mark" })).toHaveLength(2);
   });

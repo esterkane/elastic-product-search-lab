@@ -12,7 +12,7 @@ export function EvidenceCard({ evidence, primary = false }: EvidenceCardProps) {
     <article className={`evidence-card ${primary ? "evidence-card-primary" : ""}`}>
       <div className="evidence-card__header">
         <div>
-          <p className="evidence-kicker">{primary ? "Primary proof" : "Supporting evidence"}</p>
+          <p className="evidence-kicker">{primary ? "Best excerpt" : "Useful excerpt"}</p>
           <h3>{evidence.title}</h3>
           <p className="evidence-concept">{evidence.concept}</p>
           <SourceMetadata display={evidence.display} />

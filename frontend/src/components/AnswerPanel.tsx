@@ -26,7 +26,7 @@ export function AnswerPanel({ answer, isLoading = false }: AnswerPanelProps) {
             <EvidenceCard evidence={model.primaryEvidence} primary />
             {model.supportingEvidence.length > 0 && (
               <div className="supporting-evidence">
-                <p className="result-group-label">Supporting evidence</p>
+                <p className="result-group-label">More useful excerpts</p>
                 {model.supportingEvidence.slice(0, 2).map((item) => (
                   <EvidenceCard evidence={item} key={`${item.title}-${item.reader_url}-${item.source_url}`} />
                 ))}
