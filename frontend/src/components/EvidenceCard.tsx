@@ -14,6 +14,7 @@ export function EvidenceCard({ evidence, primary = false }: EvidenceCardProps) {
         <div>
           <p className="evidence-kicker">{primary ? "Primary proof" : "Supporting evidence"}</p>
           <h3>{evidence.title}</h3>
+          <p className="evidence-concept">{evidence.concept}</p>
           <SourceMetadata display={evidence.display} />
         </div>
       </div>
@@ -22,8 +23,8 @@ export function EvidenceCard({ evidence, primary = false }: EvidenceCardProps) {
           <span key={tag}>{tag}</span>
         ))}
       </div>
-      {evidence.claim && evidence.claim !== evidence.excerpt && <p className="evidence-claim">{evidence.claim}</p>}
-      <p className="match-reason">{evidence.matchExplanation}</p>
+      <p className="evidence-claim">{evidence.takeaway}</p>
+      <p className="look-for-note">{evidence.whatToLookFor}</p>
       <blockquote className="evidence-snippet">{renderHighlightedText(evidence.excerpt, evidence.highlight_terms)}</blockquote>
       <div className="answer-evidence__links">
         <a className="evidence-cta evidence-cta-primary" href={evidence.reader_url} target="_blank" rel="noreferrer">

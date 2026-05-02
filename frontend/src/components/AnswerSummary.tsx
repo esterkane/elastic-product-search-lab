@@ -25,11 +25,11 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
         <h3>Explanation</h3>
         <p>{model.explanation}</p>
       </div>
-      {model.whatNew.length > 0 && (
+      {model.whatToNotice.length > 0 && (
         <div className="insight-block insight-block-new">
-          <h3>What&apos;s new</h3>
+          <h3>What to notice</h3>
           <ul>
-            {model.whatNew.slice(0, 4).map((item) => (
+            {model.whatToNotice.slice(0, 4).map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
@@ -54,7 +54,7 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
         </div>
         {model.bestSource && (
           <div className="insight-block">
-            <h3>Where to read next</h3>
+            <h3>Read first</h3>
             <SourceMetadata display={model.bestSource.display} includeTitle />
             <a className="best-link" href={model.bestSource.url} target="_blank" rel="noreferrer">
               <MapPin aria-hidden="true" size={15} />

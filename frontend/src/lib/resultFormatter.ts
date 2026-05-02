@@ -4,7 +4,9 @@ export type ConfidenceLevel = "high" | "medium" | "low";
 
 export type FormattedEvidence = AnswerResponse["evidence"][number] & {
   claim: string;
-  matchExplanation: string;
+  concept: string;
+  takeaway: string;
+  whatToLookFor: string;
   role: "primary" | "supporting";
   tags: string[];
   display: DisplayMetadata;
@@ -16,6 +18,7 @@ export type AnswerViewModel = {
   whatNew: string[];
   important: string;
   keyTakeaways: string[];
+  whatToNotice: string[];
   supportingContext: string;
   confidence: ConfidenceLevel;
   bestSource: FormattedSource | null;
@@ -45,8 +48,10 @@ export type FormattedSource = Source & {
 
 export type NormalizedSearchResult = SearchHit & {
   display: DisplayMetadata;
+  concept: string;
   explanation: string;
   takeaway: string;
+  whatToLookFor: string;
   links: {
     source: string;
   };
@@ -78,6 +83,7 @@ export function formatAnswer(answer: AnswerResponse | null): AnswerViewModel {
     whatNew: synthesis.whatNew,
     important: synthesis.whyItMatters,
     keyTakeaways: answer?.key_takeaways?.length ? answer.key_takeaways : inferTakeaways(answer),
+    whatToNotice: buildWhatToNotice(answer, evidence),
     supportingContext: synthesis.supportingContext,
     confidence: answer?.confidence ?? inferConfidence(answer),
     bestSource,
@@ -106,12 +112,21 @@ export function formatEvidence(item: AnswerResponse["evidence"][number]): Format
   });
   const excerpt = cleanClaim(item.excerpt, item.title, item.heading_path);
   const claim = cleanClaim(item.claim ?? item.excerpt, item.title, item.heading_path);
+  const insight = buildSourceInsight({
+    title: display.title,
+    section: display.section,
+    text: `${claim} ${excerpt}`,
+    contentType: item.content_type,
+    score: item.score
+  });
   return {
     ...item,
     title: display.title,
     claim: claim || `Matched ${display.title}; open the cited section to verify the exact passage.`,
     excerpt: shortestFaithfulExcerpt(excerpt || item.excerpt),
-    matchExplanation: buildMatchExplanation(item, display),
+    concept: insight.concept,
+    takeaway: insight.takeaway,
+    whatToLookFor: insight.whatToLookFor,
     role: item.role ?? "supporting",
     tags: evidenceTags(item),
     display
@@ -127,13 +142,22 @@ export function formatSearchResult(hit: SearchHit): NormalizedSearchResult {
     sourceType: hit.content_type
   });
   const excerpt = cleanClaim(hit.snippet ?? "", display.title, display.section);
+  const insight = buildSourceInsight({
+    title: display.title,
+    section: display.section,
+    text: `${hit.title ?? ""} ${hit.heading_path ?? ""} ${excerpt}`,
+    contentType: hit.content_type,
+    score: hit.score
+  });
   return {
     ...hit,
     title: display.title,
     snippet: excerpt || undefined,
     display,
-    explanation: explainResult(hit, display),
-    takeaway: resultTakeaway(hit, display),
+    concept: insight.concept,
+    explanation: insight.summary,
+    takeaway: insight.takeaway,
+    whatToLookFor: insight.whatToLookFor,
     links: {
       source: hit.source_url
     }
@@ -280,6 +304,34 @@ export function buildWhatNewSummary(answer: AnswerResponse | null, evidence: For
   return ["The retrieved sources point to an improvement or updated workflow; verify the primary source before changing implementation."];
 }
 
+export function buildWhatToNotice(answer: AnswerResponse | null, evidence: FormattedEvidence[] = []): string[] {
+  const primary = evidence[0];
+  if (isChunkLinkTopic(answer, evidence)) {
+    return [
+      "Look for stable anchors and section-level links, not only page URLs.",
+      "Check whether reader-facing docs links and source-code provenance are stored separately.",
+      "Notice whether metadata fields are consistent enough to support filtering and deduplication."
+    ];
+  }
+  if (isHybridRerankTopic(answer, evidence)) {
+    return [
+      "Look for the split between first-stage retrieval and final-stage ranking.",
+      "Check the candidate limit before reranking; that is where latency and quality trade off.",
+      "Notice whether the source describes recall, precision, or final ordering."
+    ];
+  }
+  if (isRerankPerformanceTopic(answer, evidence)) {
+    return [
+      "Look for the performance claim and the conditions under which it applies.",
+      "Check whether the source is describing ranking quality, latency, or both."
+    ];
+  }
+  return [
+    primary?.whatToLookFor ?? "Look for the recommendation, caveat, or implementation detail in the primary source.",
+    "Use supporting sources to confirm adjacent cases rather than rereading the same claim."
+  ];
+}
+
 export function buildWhyItMattersSummary(answer: AnswerResponse | null, evidence: FormattedEvidence[] = []): string {
   if (isChunkLinkTopic(answer, evidence)) {
     return "This matters because stable metadata prevents duplicate evidence, supports reliable filters, and lets users jump directly to the exact documentation section.";
@@ -336,13 +388,6 @@ function buildSupportingContext(evidence: FormattedEvidence[]): string {
   return `Supporting evidence from ${supporting} is related context, not a replacement for the primary proof.`;
 }
 
-function buildMatchExplanation(item: AnswerResponse["evidence"][number], display: DisplayMetadata): string {
-  const terms = item.highlight_terms?.filter(Boolean).slice(0, 4) ?? [];
-  const termText = terms.length > 0 ? ` It matched question terms such as ${terms.join(", ")}.` : "";
-  const roleText = item.role === "primary" ? "Primary proof" : "Supporting context";
-  return `${roleText} from ${sourceLocationPhrase(display)}.${termText}`;
-}
-
 function sourceLocationPhrase(display: DisplayMetadata): string {
   if (display.section && display.filePath) {
     return `${display.section} in ${display.filePath}`;
@@ -351,6 +396,62 @@ function sourceLocationPhrase(display: DisplayMetadata): string {
     return display.filePath;
   }
   return display.title;
+}
+
+function buildSourceInsight(input: {
+  title: string;
+  section?: string;
+  text: string;
+  contentType?: string | null;
+  score?: number;
+}): { concept: string; summary: string; takeaway: string; whatToLookFor: string } {
+  const text = input.text.toLowerCase();
+  if (/rerank|reranking/.test(text) && /performance|improv|latency|precision|quality/.test(text)) {
+    return {
+      concept: "Reranking quality and cost",
+      summary: "This result is about using reranking to improve the final ordering after retrieval has already found plausible matches.",
+      takeaway: "Focus on whether the source is claiming better precision, acceptable latency, or both.",
+      whatToLookFor: "Look for the performance claim, candidate-set size, and any latency caveat."
+    };
+  }
+  if (/hybrid|bm25|semantic|dense|vector/.test(text) && /rerank|rank/.test(text)) {
+    return {
+      concept: "Two-stage retrieval workflow",
+      summary: "This result explains the pattern of retrieving broadly first, then applying a narrower ranking step.",
+      takeaway: "Use it to decide where recall ends and precision-oriented reranking begins.",
+      whatToLookFor: "Look for the workflow step, top-k candidate count, and final-ordering recommendation."
+    };
+  }
+  if (/anchor|source_url|reader_url|source link|links|path|chunk/.test(text)) {
+    return {
+      concept: "Stable source linking",
+      summary: "This result is about preserving enough source metadata to reopen the exact documentation location.",
+      takeaway: "Use it to verify how links, headings, and provenance should be stored with chunks.",
+      whatToLookFor: "Look for anchors, page links, source URLs, and section-level linking guidance."
+    };
+  }
+  if (/performance|latency|faster|speed|throughput/.test(text)) {
+    return {
+      concept: "Performance tradeoff",
+      summary: "This result is about operational behavior, so the useful part is the condition under which performance changes.",
+      takeaway: "Use it to understand the practical cost or benefit before changing the workflow.",
+      whatToLookFor: "Look for the metric, benchmark condition, and limitation."
+    };
+  }
+  if (/step|configure|create|add|use|install|enable/.test(text)) {
+    return {
+      concept: "Implementation guidance",
+      summary: "This result appears procedural; the useful part is the decision point or setup step.",
+      takeaway: "Use it to identify the next concrete action to try.",
+      whatToLookFor: "Look for required fields, configuration values, or ordered steps."
+    };
+  }
+  return {
+    concept: input.contentType === "lab" ? "Supporting example" : "Documentation guidance",
+    summary: `This source provides ${input.contentType === "lab" ? "an example" : "documentation context"} related to the query.`,
+    takeaway: input.score && input.score < 0.015 ? "Treat this as related context rather than primary proof." : "Use this to verify the primary idea in context.",
+    whatToLookFor: "Look for the recommendation, caveat, or implementation detail that connects to your question."
+  };
 }
 
 function topicFromEvidence(answer: AnswerResponse, evidence: FormattedEvidence[]): string {
@@ -457,18 +558,6 @@ function inferConfidence(answer: AnswerResponse | null): ConfidenceLevel {
     return "medium";
   }
   return "low";
-}
-
-function explainResult(hit: SearchHit, display: DisplayMetadata): string {
-  const channel = hit.match_reason ?? "Matched by indexed evidence.";
-  return `${channel} The clean source location is ${display.cleanPath || display.title}.`;
-}
-
-function resultTakeaway(hit: SearchHit, display: DisplayMetadata): string {
-  if ((hit.score ?? 0) < 0.015) {
-    return "Treat this as related context rather than primary proof.";
-  }
-  return `Use this result to verify the answer in ${display.section ? `the ${display.section} section` : "the cited source"}.`;
 }
 
 function cleanTitle(title: string, headingPath?: string | null): string {

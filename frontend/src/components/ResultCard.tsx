@@ -1,6 +1,7 @@
 import { ExternalLink } from "lucide-react";
 import type { SearchHit } from "../lib/api";
 import { formatSearchResult, type NormalizedSearchResult } from "../lib/resultFormatter";
+import { SourceMetadata } from "./SourceMetadata";
 
 type ResultCardProps = {
   result: SearchHit | NormalizedSearchResult;
@@ -16,26 +17,7 @@ export function ResultCard({ result }: ResultCardProps) {
       <div className="result-card__header">
         <div>
           <h3 id={`result-${result.id}`}>{title}</h3>
-          <dl className="metadata-list metadata-list-inline">
-            {formatted.display.section && (
-              <div>
-                <dt>Section</dt>
-                <dd>{formatted.display.section}</dd>
-              </div>
-            )}
-            {formatted.display.filePath && (
-              <div>
-                <dt>File</dt>
-                <dd>{formatted.display.filePath}</dd>
-              </div>
-            )}
-            {formatted.display.repo && (
-              <div>
-                <dt>Repo</dt>
-                <dd>{formatted.display.repo}</dd>
-              </div>
-            )}
-          </dl>
+          <p className="evidence-concept">{formatted.concept}</p>
         </div>
         <span className="score" aria-label={`Search score ${result.score.toFixed(3)}`}>
           score {result.score.toFixed(3)}
@@ -50,8 +32,10 @@ export function ResultCard({ result }: ResultCardProps) {
           {renderHighlightedSnippet(formatted.snippet ?? result.snippet, result.highlights ?? [])}
         </blockquote>
       )}
-      {result.match_reason && <p className="match-reason">{formatted.explanation}</p>}
+      <p className="match-reason">{formatted.explanation}</p>
       <p className="result-takeaway">{formatted.takeaway}</p>
+      <p className="look-for-note">{formatted.whatToLookFor}</p>
+      <SourceMetadata display={formatted.display} compact />
       {breakdown && (
         <details className="score-details">
           <summary>Show scoring details</summary>

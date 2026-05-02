@@ -492,6 +492,24 @@ button:disabled {
   line-height: 1.55;
 }
 
+.evidence-concept {
+  margin: 2px 0 6px;
+  color: #0b6f85;
+  font-size: 0.96rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.look-for-note {
+  border-left: 3px solid #7db8c5;
+  margin: 9px 0 10px;
+  padding-left: 10px;
+  color: #344255;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
 .tag-row {
   display: flex;
   flex-wrap: wrap;
@@ -523,8 +541,8 @@ button:disabled {
 
 .insight-block-new {
   margin-bottom: 12px;
-  border-color: #c9d8e8;
-  background: #f5f9ff;
+  border-color: #8bc2ce;
+  background: #f2fbfa;
 }
 
 .insight-block h3 {

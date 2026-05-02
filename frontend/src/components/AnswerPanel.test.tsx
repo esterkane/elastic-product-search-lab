@@ -9,9 +9,10 @@ describe("AnswerPanel", () => {
     expect(screen.getByText(/Use hybrid retrieval to gather candidates/i)).toBeInTheDocument();
     expect(screen.getByText(/two-stage retrieval pattern/i)).toBeInTheDocument();
     expect(screen.getByText("high confidence")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "What's new" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "What to notice" })).toBeInTheDocument();
+    expect(screen.getByText(/Look for the split between first-stage retrieval/i)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Supporting context" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Where to read next" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Read first" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Ranking and reranking" })).toBeInTheDocument();
     expect(container.querySelectorAll("mark").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Hybrid", { selector: "mark" })).toHaveLength(2);
