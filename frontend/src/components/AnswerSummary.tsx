@@ -22,12 +22,12 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
         {isLoading ? "Building a grounded answer from the strongest evidence." : model.directAnswer}
       </p>
       <div className="explain-block">
-        <h3>Explanation</h3>
+        <h3>Brief explanation</h3>
         <p>{model.explanation}</p>
       </div>
       {model.whatToNotice.length > 0 && (
         <div className="insight-block insight-block-new">
-          <h3>What to notice</h3>
+          <h3>What to look for</h3>
           <ul>
             {model.whatToNotice.slice(0, 4).map((item) => (
               <li key={item}>{item}</li>
@@ -41,15 +41,7 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
           <p>{model.important}</p>
         </div>
         <div className="insight-block">
-          <h3>Key takeaways</h3>
-          <ul>
-            {model.keyTakeaways.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="insight-block">
-          <h3>Other useful sources</h3>
+          <h3>Related sources</h3>
           <p>{model.supportingContext}</p>
         </div>
         {model.bestSource && (

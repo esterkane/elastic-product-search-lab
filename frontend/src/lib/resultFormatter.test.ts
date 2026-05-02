@@ -19,6 +19,7 @@ describe("resultFormatter", () => {
     expect(model.primaryEvidence?.role).toBe("primary");
     expect(model.supportingEvidence[0].title).toBe("Lab hybrid retrieval example");
     expect(model.explanation).toMatch(/two-stage retrieval pattern|hybrid retrieval/i);
+    expect(model.whatToNotice[0]).toMatch(/first-stage retrieval/i);
     expect(model.supportingContext).toMatch(/examples|caveats|implementation detail/i);
     expect(model.supportingContext).not.toMatch(/supporting evidence|primary proof|matched by/i);
   });
@@ -95,6 +96,36 @@ describe("resultFormatter", () => {
     expect(model.directAnswer).not.toMatch(/^Performance Elastic Rerank shows/);
     expect(buildAnswerSummary(hybridRetrievalAnswer, [model.primaryEvidence!])).toMatch(/hybrid retrieval/i);
     expect(buildWhatNewSummary(hybridRetrievalAnswer, [model.primaryEvidence!]).length).toBeGreaterThan(0);
+  });
+
+  it("turns failure store sources into decision-oriented guidance", () => {
+    const model = formatAnswer({
+      ...hybridRetrievalAnswer,
+      summary: "Failure stores help with indexing failures.",
+      direct_answer: "Failure stores help with indexing failures.",
+      important: "",
+      evidence: [
+        {
+          ...hybridRetrievalAnswer.evidence[0],
+          title: "Failure stores",
+          heading_path: "Failure stores > Indexing failures",
+          path: "manage-data/data-store/data-streams/failure-store.md",
+          claim:
+            "Failure stores capture indexing failures for later review, while ingest pipeline errors are handled by the pipeline.",
+          excerpt:
+            "Failure stores capture indexing failures for later review, while ingest pipeline errors are handled by the pipeline.",
+          highlight_terms: ["failure stores", "indexing failures", "ingest pipeline"]
+        }
+      ],
+      links: [],
+      best_source: undefined,
+      supporting_sources: []
+    });
+
+    expect(model.directAnswer).toMatch(/failure store/i);
+    expect(model.explanation).toMatch(/ingest pipeline|indexing/i);
+    expect(model.whatToNotice).toEqual(expect.arrayContaining([expect.stringMatching(/failure happens/i)]));
+    expect(model.important).toMatch(/fix a pipeline|replay workflow/i);
   });
 
   it("suppresses evidence claims that repeat synthesized answer text", () => {
