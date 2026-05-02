@@ -3,10 +3,13 @@ import { AnswerPanel } from "./AnswerPanel";
 import { hybridRetrievalAnswer } from "../test/fixtures";
 
 describe("AnswerPanel", () => {
-  it("renders a grounded summary and highlighted evidence", () => {
+  it("renders a grounded summary, confidence, and highlighted evidence", () => {
     const { container } = render(<AnswerPanel answer={hybridRetrievalAnswer} />);
 
     expect(screen.getByText(/Hybrid retrieval improvements should combine lexical/i)).toBeInTheDocument();
+    expect(screen.getByText("high confidence")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "What's new" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Where to read next" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Ranking and reranking" })).toBeInTheDocument();
     expect(container.querySelectorAll("mark").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Hybrid", { selector: "mark" })).toHaveLength(2);

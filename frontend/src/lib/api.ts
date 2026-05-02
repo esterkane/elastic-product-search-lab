@@ -41,6 +41,9 @@ export type Source = {
   title: string;
   url: string;
   link_label?: string;
+  repo?: string | null;
+  path?: string | null;
+  heading_path?: string | null;
 };
 
 export type RetrievalWarning = {
@@ -57,11 +60,31 @@ export type SearchResponse = {
 
 export type AnswerResponse = {
   summary: string;
+  direct_answer?: string;
+  what_new?: string | null;
+  important?: string | null;
+  confidence?: "high" | "medium" | "low";
+  best_source?: Source | null;
+  supporting_sources?: Source[];
+  evidence_quotes?: string[];
+  provenance?: {
+    title: string;
+    repo?: string | null;
+    path?: string | null;
+    heading_path?: string | null;
+    source_url: string;
+    reader_url: string;
+  }[];
   evidence: {
     title: string;
     heading_path?: string | null;
     repo?: string | null;
     path?: string | null;
+    content_type?: string | null;
+    license_family?: string | null;
+    score?: number;
+    role?: "primary" | "supporting";
+    claim?: string;
     excerpt: string;
     highlight_terms: string[];
     reader_url: string;

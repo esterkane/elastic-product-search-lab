@@ -1,7 +1,8 @@
 import { FormEvent, useMemo, useState } from "react";
 import { AlertCircle, CheckCircle2, Loader2, RefreshCw, Search } from "lucide-react";
 import { AnswerPanel } from "../components/AnswerPanel";
-import { ResultCard } from "../components/ResultCard";
+import { ResultList } from "../components/ResultList";
+import { SearchBar } from "../components/SearchBar";
 import {
   answer,
   ingestRepo,
@@ -125,103 +126,31 @@ export function SearchPage() {
         </button>
       </header>
 
-      <form className="search-form" onSubmit={handleSubmit}>
-        <div className="query-row">
-          <label className="query-field">
-            <span>Query</span>
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Ask a documentation question"
-            />
-          </label>
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? <Loader2 aria-hidden="true" className="spin" size={18} /> : <Search aria-hidden="true" size={18} />}
-            <span>{isLoading ? "Searching" : "Search"}</span>
-          </button>
-        </div>
-
-        <details className="advanced-options">
-          <summary>Advanced options</summary>
-          <div className="advanced-options__content">
-            <div className="filter-row">
-              <label>
-                <span>Repo</span>
-                <select value={repo} onChange={(event) => setRepo(event.target.value)}>
-                  <option value="">All repos</option>
-                  {REPOS.map((item) => (
-                    <option value={item} key={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                <span>License</span>
-                <select value={licenseFamily} onChange={(event) => setLicenseFamily(event.target.value)}>
-                  <option value="">All licenses</option>
-                  {LICENSE_FAMILIES.map((item) => (
-                    <option value={item} key={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                <span>Content type</span>
-                <select value={contentType} onChange={(event) => setContentType(event.target.value)}>
-                  <option value="">All types</option>
-                  {CONTENT_TYPES.map((item) => (
-                    <option value={item} key={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="checkbox-field">
-                <input
-                  type="checkbox"
-                  checked={explainScores}
-                  onChange={(event) => setExplainScores(event.target.checked)}
-                />
-                <span>Explain scores</span>
-              </label>
-
-              <label className="checkbox-field">
-                <input
-                  type="checkbox"
-                  checked={boostDocumentation}
-                  onChange={(event) => setBoostDocumentation(event.target.checked)}
-                />
-                <span>Boost docs</span>
-              </label>
-            </div>
-
-            <div className="metadata-row">
-              <label>
-                <span>Path</span>
-                <input
-                  value={path}
-                  onChange={(event) => setPath(event.target.value)}
-                  placeholder="solutions/search/ranking/semantic-reranking.md"
-                />
-              </label>
-
-              <label>
-                <span>Heading</span>
-                <input
-                  value={headingPath}
-                  onChange={(event) => setHeadingPath(event.target.value)}
-                  placeholder="Semantic reranking [semantic-reranking]"
-                />
-              </label>
-            </div>
-          </div>
-        </details>
-      </form>
+      <SearchBar
+        query={query}
+        onQueryChange={setQuery}
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+        advanced={{
+          repo,
+          path,
+          headingPath,
+          contentType,
+          licenseFamily,
+          boostDocumentation,
+          explainScores,
+          repos: REPOS,
+          contentTypes: CONTENT_TYPES,
+          licenseFamilies: LICENSE_FAMILIES,
+          onRepoChange: setRepo,
+          onPathChange: setPath,
+          onHeadingPathChange: setHeadingPath,
+          onContentTypeChange: setContentType,
+          onLicenseFamilyChange: setLicenseFamily,
+          onBoostDocumentationChange: setBoostDocumentation,
+          onExplainScoresChange: setExplainScores
+        }}
+      />
 
       {error && (
         <div className="alert" role="alert">
@@ -259,15 +188,7 @@ export function SearchPage() {
             <Search aria-hidden="true" size={18} />
             <h2 id="results-heading">Search Results</h2>
           </div>
-          {searchData?.hits.length ? (
-            <div className="result-stack">
-              {searchData.hits.map((result) => (
-                <ResultCard key={result.id} result={result} />
-              ))}
-            </div>
-          ) : (
-            <p className="empty-state">Run a search to see ranked evidence.</p>
-          )}
+          <ResultList hits={searchData?.hits ?? []} />
         </section>
       </div>
     </main>

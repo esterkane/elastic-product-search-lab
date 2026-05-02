@@ -225,28 +225,29 @@ def test_answer_endpoint_returns_structured_grounded_evidence() -> None:
     assert "answer" not in body
     assert "sources" not in body
     assert "Combine lexical and dense retrieval" in body["summary"]
-    assert body["evidence"][0] == {
+    assert body["direct_answer"] == body["summary"]
+    assert body["confidence"] == "high"
+    assert body["best_source"]["url"] == "https://www.elastic.co/docs/guide/page#combine"
+    assert body["important"]
+    assert body["evidence"][0] | {
         "title": "Hybrid search notebook",
         "heading_path": "Guide > Hybrid",
         "repo": "elastic/docs-content",
         "path": "guide/page.md",
+        "content_type": "guide",
+        "license_family": "elastic-license",
+        "score": 0.97,
+        "role": "primary",
+        "claim": "Combine lexical and dense retrieval, then rerank the merged candidate set before presenting evidence.",
         "excerpt": "Combine lexical and dense retrieval, then rerank the merged candidate set before presenting evidence.",
         "highlight_terms": ["retrieval"],
         "reader_url": "https://www.elastic.co/docs/guide/page#combine",
         "source_url": "https://example.test/hybrid#combine",
         "link_label": "Read documentation",
-    }
-    assert body["links"][:2] == [
-        {
-            "title": "Hybrid search notebook",
-            "url": "https://www.elastic.co/docs/guide/page#combine",
-            "link_label": "Read documentation",
-        },
-        {
-            "title": "Query rules notebook",
-            "url": "https://www.elastic.co/docs/rules/page#rules",
-            "link_label": "Read documentation",
-        },
+    } == body["evidence"][0]
+    assert [(link["title"], link["url"], link["link_label"]) for link in body["links"][:2]] == [
+        ("Hybrid search notebook", "https://www.elastic.co/docs/guide/page#combine", "Read documentation"),
+        ("Query rules notebook", "https://www.elastic.co/docs/rules/page#rules", "Read documentation"),
     ]
 
 

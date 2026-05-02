@@ -52,7 +52,7 @@ describe("SearchPage", () => {
   it("renders the answer region before the results region", () => {
     render(<SearchPage />);
 
-    const answerHeading = screen.getByRole("heading", { name: /Answer With Evidence/i });
+    const answerHeading = screen.getByRole("heading", { name: "Answer" });
     const resultsHeading = screen.getByRole("heading", { name: /Search Results/i });
 
     expect(answerHeading.compareDocumentPosition(resultsHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();

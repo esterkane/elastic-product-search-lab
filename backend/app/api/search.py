@@ -81,6 +81,8 @@ class SourceAttribution(BaseModel):
 
 
 LinkLabel = Literal["Read documentation", "View source"]
+ConfidenceLevel = Literal["high", "medium", "low"]
+EvidenceRole = Literal["primary", "supporting"]
 
 
 class AnswerEvidence(BaseModel):
@@ -88,6 +90,11 @@ class AnswerEvidence(BaseModel):
     heading_path: str | None = None
     repo: str | None = None
     path: str | None = None
+    content_type: str | None = None
+    license_family: str | None = None
+    score: float = 0
+    role: EvidenceRole = "supporting"
+    claim: str
     excerpt: str
     highlight_terms: list[str]
     reader_url: str
@@ -99,6 +106,18 @@ class AnswerLink(BaseModel):
     title: str
     url: str
     link_label: LinkLabel
+    repo: str | None = None
+    path: str | None = None
+    heading_path: str | None = None
+
+
+class SourceProvenance(BaseModel):
+    title: str
+    repo: str | None = None
+    path: str | None = None
+    heading_path: str | None = None
+    source_url: str
+    reader_url: str
 
 
 class WarningResponse(BaseModel):
@@ -136,6 +155,14 @@ class AnswerRequest(SearchRequest):
 
 class AnswerResponse(BaseModel):
     summary: str
+    direct_answer: str
+    what_new: str | None = None
+    important: str | None = None
+    confidence: ConfidenceLevel
+    best_source: AnswerLink | None = None
+    supporting_sources: list[AnswerLink] = Field(default_factory=list)
+    evidence_quotes: list[str] = Field(default_factory=list)
+    provenance: list[SourceProvenance] = Field(default_factory=list)
     evidence: list[AnswerEvidence]
     links: list[AnswerLink]
     warnings: list[WarningResponse] = Field(default_factory=list)
@@ -171,8 +198,17 @@ async def answer(request: AnswerRequest, retrieval_service: RetrievalDependency)
     )
     hits = [hit for hit in result.get("hits", []) if isinstance(hit, RankedHit)]
     evidence = answer_evidence(request.query, hits, limit=3)
+    answer_model = synthesize_answer_model(request.query, evidence)
     return AnswerResponse(
-        summary=synthesize_answer(request.query, evidence),
+        summary=answer_model["direct_answer"],
+        direct_answer=answer_model["direct_answer"],
+        what_new=answer_model["what_new"],
+        important=answer_model["important"],
+        confidence=answer_model["confidence"],
+        best_source=answer_model["best_source"],
+        supporting_sources=answer_model["supporting_sources"],
+        evidence_quotes=answer_model["evidence_quotes"],
+        provenance=answer_model["provenance"],
         evidence=evidence,
         links=answer_links(evidence, limit=3),
         warnings=warning_responses(result.get("warnings", [])),
@@ -270,14 +306,22 @@ def answer_evidence(query: str, hits: list[RankedHit], limit: int = 3) -> list[A
         repo = metadata_value(metadata, "repo")
         path = metadata_value(metadata, "path")
         heading_path = metadata_value(metadata, "heading_path")
+        content_type = metadata_value(metadata, "content_type")
+        license_family = metadata_value(metadata, "license_family")
         reader_url = reader_url_for(metadata, hit.source_url)
         link_label: LinkLabel = "Read documentation" if reader_url != hit.source_url else "View source"
+        role: EvidenceRole = "primary" if not evidence else "supporting"
         evidence.append(
             AnswerEvidence(
                 title=title,
                 heading_path=heading_path,
                 repo=repo,
                 path=path,
+                content_type=content_type,
+                license_family=license_family,
+                score=hit.score,
+                role=role,
+                claim=excerpt,
                 excerpt=excerpt,
                 highlight_terms=highlight_terms(query, hit.text),
                 reader_url=reader_url,
@@ -305,22 +349,114 @@ def answer_links(evidence: list[AnswerEvidence], limit: int = 3) -> list[AnswerL
         if url in seen:
             continue
         seen.add(url)
-        links.append(AnswerLink(title=item.title, url=url, link_label=item.link_label))
+        links.append(
+            AnswerLink(
+                title=item.title,
+                url=url,
+                link_label=item.link_label,
+                repo=item.repo,
+                path=item.path,
+                heading_path=item.heading_path,
+            )
+        )
         if len(links) >= limit:
             break
     return links
 
 
 def synthesize_answer(query: str, evidence: list[AnswerEvidence]) -> str:
+    return synthesize_answer_model(query, evidence)["direct_answer"]
+
+
+def synthesize_answer_model(query: str, evidence: list[AnswerEvidence]) -> dict:
     if not evidence:
-        return f"No grounded sources were found for '{query}'."
+        direct = f"No grounded sources were found for '{query}'."
+        return {
+            "direct_answer": direct,
+            "what_new": None,
+            "important": "Try a narrower query or sync the indexed sources before searching again.",
+            "confidence": "low",
+            "best_source": None,
+            "supporting_sources": [],
+            "evidence_quotes": [],
+            "provenance": [],
+        }
 
-    lead = f"The strongest evidence indicates: {evidence[0].excerpt}"
-    if len(evidence) == 1:
-        return lead
+    direct = direct_answer_from_evidence(query, evidence)
+    links = answer_links(evidence, limit=3)
+    return {
+        "direct_answer": direct,
+        "what_new": what_new_summary(query, evidence),
+        "important": why_it_matters(query, evidence),
+        "confidence": confidence_level(evidence),
+        "best_source": links[0] if links else None,
+        "supporting_sources": links[1:],
+        "evidence_quotes": dedupe_text([item.excerpt for item in evidence])[:3],
+        "provenance": [
+            SourceProvenance(
+                title=item.title,
+                repo=item.repo,
+                path=item.path,
+                heading_path=item.heading_path,
+                source_url=item.source_url,
+                reader_url=item.reader_url,
+            )
+            for item in evidence
+        ],
+    }
 
-    supporting = " ".join(f"Supporting evidence adds: {item.excerpt}" for item in evidence[1:3])
-    return f"{lead} {supporting}".strip()
+
+def direct_answer_from_evidence(query: str, evidence: list[AnswerEvidence]) -> str:
+    primary = evidence[0].claim
+    if is_change_query(query):
+        return f"The clearest update: {primary}"
+    return f"The best answer is: {primary}"
+
+
+def what_new_summary(query: str, evidence: list[AnswerEvidence]) -> str | None:
+    if not is_change_query(query):
+        return None
+    new_terms = ("new", "improve", "improvement", "update", "release", "feature", "workflow", "approach")
+    for item in evidence:
+        if any(term in item.claim.lower() for term in new_terms):
+            return ensure_sentence(item.claim)
+    return "The retrieved evidence points to a newer or improved workflow, but no explicit release note was found."
+
+
+def why_it_matters(query: str, evidence: list[AnswerEvidence]) -> str:
+    if not evidence:
+        return "No grounded evidence was available."
+    if "rerank" in query.lower() or any("rerank" in item.claim.lower() for item in evidence):
+        return "This matters because reranking can improve final precision after hybrid retrieval has already found a useful candidate pool."
+    if "metadata" in query.lower() or "filter" in query.lower():
+        return "This matters because consistent metadata makes source filtering, provenance, and answer grounding predictable."
+    return "This matters because the answer is tied to specific documentation sections and source provenance instead of unsupported generated text."
+
+
+def confidence_level(evidence: list[AnswerEvidence]) -> ConfidenceLevel:
+    if len(evidence) >= 2 and evidence[0].score >= 0.03:
+        return "high"
+    if evidence and evidence[0].score >= 0.015:
+        return "medium"
+    return "low"
+
+
+def is_change_query(query: str) -> bool:
+    return any(
+        term in query.lower()
+        for term in ("new", "what changed", "change", "changed", "improve", "improvement", "release", "feature", "update")
+    )
+
+
+def dedupe_text(items: list[str]) -> list[str]:
+    output: list[str] = []
+    seen: set[str] = set()
+    for item in items:
+        key = re.sub(r"\W+", " ", item.lower()).strip()
+        if key and key not in seen:
+            seen.add(key)
+            output.append(item)
+    return output
 
 
 def evidence_points(query: str, hits: list[RankedHit]) -> list[tuple[str, str]]:
