@@ -124,12 +124,26 @@ export function SearchPage() {
     };
 
     try {
-      const [searchResult, answerResult] = await Promise.all([
+      const [searchOutcome, answerOutcome] = await Promise.allSettled([
         search(request),
         answer(request)
       ]);
-      setSearchData(searchResult);
-      setAnswerData(answerResult);
+      if (searchOutcome.status === "fulfilled") {
+        setSearchData(searchOutcome.value);
+      } else {
+        setSearchData(null);
+      }
+      if (answerOutcome.status === "fulfilled") {
+        setAnswerData(answerOutcome.value);
+      } else {
+        setAnswerData(null);
+      }
+      if (searchOutcome.status === "rejected") {
+        throw searchOutcome.reason;
+      }
+      if (answerOutcome.status === "rejected") {
+        setError("Search results loaded, but answer synthesis did not respond. Showing ranked evidence instead.");
+      }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Search failed.");
     } finally {
@@ -235,7 +249,7 @@ export function SearchPage() {
       )}
 
       <div className="answer-results-grid">
-        <AnswerPanel answer={answerData} isLoading={isLoading} />
+        <AnswerPanel answer={answerData} searchHits={searchData?.hits ?? []} isLoading={isLoading} />
 
         <section className="panel results-panel" aria-labelledby="results-heading">
           <div className="panel-heading">

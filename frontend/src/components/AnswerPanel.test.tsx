@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import { AnswerPanel } from "./AnswerPanel";
-import { hybridRetrievalAnswer } from "../test/fixtures";
+import { hybridRetrievalAnswer, hybridRetrievalSearch } from "../test/fixtures";
 
 describe("AnswerPanel", () => {
   it("renders a grounded summary, confidence, and highlighted evidence", () => {
@@ -41,5 +41,24 @@ describe("AnswerPanel", () => {
       "href",
       "https://github.com/elastic/elasticsearch-labs/blob/abc/supporting-blog-content/hybrid/README.md#hybrid-retrieval"
     );
+  });
+
+  it("builds a grounded panel from search hits when answer synthesis is unavailable", () => {
+    render(<AnswerPanel answer={null} searchHits={hybridRetrievalSearch.hits} />);
+
+    expect(screen.getByText(/using the ranked search evidence directly/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Ranking and reranking" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Read docs/i })).toHaveAttribute(
+      "href",
+      "https://www.elastic.co/docs/solutions/search/ranking#two-stage-retrieval-pipelines"
+    );
+  });
+
+  it("shows a clean pre-search empty state instead of a fake answer", () => {
+    render(<AnswerPanel answer={null} />);
+
+    expect(screen.getByRole("heading", { name: "Ask a question to build an answer" })).toBeInTheDocument();
+    expect(screen.queryByText(/Run a search to get a direct/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Evidence" })).not.toBeInTheDocument();
   });
 });

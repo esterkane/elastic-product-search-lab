@@ -1,4 +1,4 @@
-import type { AnswerResponse } from "../lib/api";
+import type { AnswerResponse, SearchHit } from "../lib/api";
 import { formatAnswer } from "../lib/resultFormatter";
 import { AnswerSummary } from "./AnswerSummary";
 import { EvidenceCard } from "./EvidenceCard";
@@ -7,11 +7,28 @@ import { SourceNavigator } from "./SourceNavigator";
 
 type AnswerPanelProps = {
   answer: AnswerResponse | null;
+  searchHits?: SearchHit[];
   isLoading?: boolean;
 };
 
-export function AnswerPanel({ answer, isLoading = false }: AnswerPanelProps) {
-  const model = formatAnswer(answer);
+export function AnswerPanel({ answer, searchHits = [], isLoading = false }: AnswerPanelProps) {
+  const effectiveAnswer = answerHasEvidence(answer) ? answer : answerFromSearchHits(searchHits);
+
+  if (!effectiveAnswer && !isLoading) {
+    return (
+      <section className="answer-explorer answer-explorer-empty" aria-label="Answer explorer">
+        <div className="answer-empty-card">
+          <p className="eyebrow">Start here</p>
+          <h2>Ask a question to build an answer</h2>
+          <p>
+            Search will return a concise explanation, highlighted evidence, and the best documentation link to open first.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  const model = formatAnswer(effectiveAnswer);
 
   return (
     <section className="answer-explorer" aria-label="Answer explorer">
@@ -42,4 +59,67 @@ export function AnswerPanel({ answer, isLoading = false }: AnswerPanelProps) {
       <SourceNavigator bestSource={model.bestSource} supportingSources={model.supportingSources} />
     </section>
   );
+}
+
+function answerHasEvidence(answer: AnswerResponse | null): answer is AnswerResponse {
+  return Boolean(answer?.evidence?.length);
+}
+
+function answerFromSearchHits(hits: SearchHit[]): AnswerResponse | null {
+  const usefulHits = hits.filter((hit) => hit.snippet && hit.source_url).slice(0, 3);
+  if (usefulHits.length === 0) {
+    return null;
+  }
+
+  const evidence = usefulHits.map((hit, index) => {
+    const readerUrl = readerUrlFor(hit);
+    return {
+      title: hit.title ?? hit.heading_path ?? hit.path ?? "Untitled source",
+      heading_path: hit.heading_path,
+      repo: hit.repo,
+      path: hit.path,
+      content_type: hit.content_type,
+      license_family: hit.license_family,
+      score: hit.score,
+      role: index === 0 ? "primary" as const : "supporting" as const,
+      claim: hit.snippet ?? "",
+      excerpt: hit.snippet ?? "",
+      highlight_terms: hit.highlights ?? [],
+      reader_url: readerUrl,
+      source_url: hit.source_url,
+      link_label: hit.repo === "elastic/docs-content" ? "Read documentation" as const : "View source" as const
+    };
+  });
+  const sources = evidence.map((item) => ({
+    title: item.title,
+    url: item.reader_url,
+    link_label: item.link_label,
+    repo: item.repo,
+    path: item.path,
+    heading_path: item.heading_path
+  }));
+
+  return {
+    summary: usefulHits[0]?.snippet ?? "The search results contain relevant documentation evidence.",
+    direct_answer: "The strongest result points to documentation evidence that should be opened first.",
+    explanation:
+      "The answer endpoint did not return a full synthesis, so the page is using the ranked search evidence directly. Start with the first source, then use the related sources only when they add a different example, caveat, or implementation detail.",
+    important: "This keeps the page grounded in available evidence instead of showing an empty placeholder.",
+    confidence: usefulHits.length >= 2 ? "medium" : "low",
+    evidence,
+    links: sources,
+    best_source: sources[0],
+    supporting_sources: sources.slice(1),
+    warnings: [],
+    degraded: false
+  };
+}
+
+function readerUrlFor(hit: SearchHit): string {
+  if (hit.repo !== "elastic/docs-content" || !hit.path) {
+    return hit.source_url;
+  }
+  const anchor = hit.source_url.includes("#") ? hit.source_url.slice(hit.source_url.indexOf("#")) : "";
+  const docsPath = hit.path.replace(/\.(md|mdx)$/i, "");
+  return `https://www.elastic.co/docs/${docsPath}${anchor}`;
 }

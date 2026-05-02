@@ -235,6 +235,30 @@ button:disabled {
   gap: 16px;
 }
 
+.answer-explorer-empty {
+  align-content: start;
+}
+
+.answer-empty-card {
+  background: #ffffff;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgb(8 54 66 / 8%);
+  padding: 20px;
+}
+
+.answer-empty-card h2 {
+  font-size: 1.35rem;
+  margin: 4px 0 8px;
+}
+
+.answer-empty-card p:last-child {
+  color: #516071;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
 .answer-summary-panel,
 .evidence-panel,
 .source-navigator {
