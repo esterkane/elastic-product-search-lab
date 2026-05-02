@@ -120,6 +120,53 @@ class PostgresFTSRepository:
             )
         return hits
 
+    async def hydrate(self, hits: list[RankedHit]) -> list[RankedHit]:
+        if not hits:
+            return hits
+        ids = [hit.id for hit in hits]
+        statement = text(
+            f"""
+            SELECT id, content, metadata, source_url, repo, path
+            FROM {self.table_name}
+            WHERE id = ANY(:ids)
+            """
+        )
+        try:
+            async with self.engine.connect() as connection:
+                result = await connection.execute(statement, {"ids": ids})
+        except SQLAlchemyError as exc:
+            if is_missing_relation(exc):
+                return hits
+            raise
+
+        rows = {str(row["id"]): row for row in result.mappings()}
+        hydrated: list[RankedHit] = []
+        for hit in hits:
+            row = rows.get(hit.id)
+            if not row:
+                hydrated.append(hit)
+                continue
+            metadata = normalize_metadata(
+                dict(row["metadata"] or hit.metadata or {}),
+                source_url=str(row["source_url"] or hit.source_url),
+                repo=str(row["repo"] or hit.metadata.get("repo") or ""),
+                path=str(row["path"] or hit.metadata.get("path") or ""),
+            )
+            hydrated.append(
+                RankedHit(
+                    id=hit.id,
+                    score=hit.score,
+                    metadata=metadata,
+                    source_url=str(row["source_url"] or hit.source_url),
+                    text=str(row["content"] or hit.text or ""),
+                    lexical_score=hit.lexical_score,
+                    dense_score=hit.dense_score,
+                    fusion_score=hit.fusion_score,
+                    rerank_score=hit.rerank_score,
+                )
+            )
+        return hydrated
+
 
 class RerankerClient:
     def __init__(self, endpoint_url: str, model: str | None = None, timeout: float = 30.0) -> None:
@@ -234,6 +281,25 @@ class RetrievalService:
                     stage="semantic_retrieval",
                 )
             )
+
+        if dense_hits and hasattr(self.lexical_repository, "hydrate"):
+            try:
+                dense_hits = await retryable_stage(
+                    "content_hydration",
+                    lambda: self.lexical_repository.hydrate(dense_hits),  # type: ignore[attr-defined]
+                    self.retry_policy,
+                    telemetry,
+                    self.telemetry_hook,
+                )
+            except Exception:
+                logger.warning("dense hit hydration unavailable", exc_info=True)
+                warnings.append(
+                    RetrievalWarning(
+                        code="content_hydration_unavailable",
+                        message="Semantic results were returned without full chunk text; evidence excerpts may be limited.",
+                        stage="content_hydration",
+                    )
+                )
 
         fused = boost_ranked_hits(reciprocal_rank_fusion(lexical_hits, dense_hits), effective_boosts)[:20]
         ranked = fused
@@ -472,13 +538,12 @@ def postgres_metadata_expression(key: str, key_param: str) -> str:
 
 
 def boost_ranked_hits(hits: list[RankedHit], boosts: dict[str, dict[str, float]]) -> list[RankedHit]:
-    if not boosts:
-        return hits
-
     boosted: list[RankedHit] = []
     for hit in hits:
         boost = metadata_boost_score(hit.metadata, boosts)
         score = hit.score * (1.0 + boost)
+        if is_archived_source(hit.metadata, hit.source_url):
+            score *= 0.05
         boosted.append(
             RankedHit(
                 id=hit.id,
@@ -493,6 +558,18 @@ def boost_ranked_hits(hits: list[RankedHit], boosts: dict[str, dict[str, float]]
             )
         )
     return sorted(boosted, key=lambda hit: (-hit.score, hit.id))
+
+
+def is_archived_source(metadata: VectorPayload | dict[str, object], source_url: str = "") -> bool:
+    repo = str(metadata.get("repo") or "").lower()
+    path = str(metadata.get("path") or "").replace("\\", "/").strip("/").lower()
+    heading = str(metadata.get("heading_path") or metadata.get("title") or "").lower()
+    url = source_url.lower()
+    if repo == "elastic/docs-content" and (path == "archive.md" or path.startswith("archive/")):
+        return True
+    if "/docs/archive" in url or "/archive.md" in url:
+        return True
+    return "documentation archive" in heading
 
 
 def diversify_hits(hits: list[RankedHit], limit: int) -> list[RankedHit]:

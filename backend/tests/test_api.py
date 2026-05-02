@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 
 from backend.app.api.admin import get_ingestion_service
 from backend.app.dependencies import build_retrieval_service, get_async_engine
-from backend.app.api.search import answer_evidence, answer_links, get_retrieval_service, reader_url_for, synthesize_answer
+from backend.app.api.search import answer_evidence, answer_links, best_snippet, get_retrieval_service, reader_url_for, synthesize_answer
 from backend.app.main import create_app
 from backend.app.retrieval.service import RankedHit, RetrievalWarning
 
@@ -396,6 +396,109 @@ def test_answer_summary_uses_grounded_evidence_text() -> None:
 
     assert "Hybrid retrieval improvements should merge lexical and semantic candidates" in summary
     assert "Ranking and reranking" not in summary
+
+
+def test_answer_summary_does_not_promote_boilerplate_paths() -> None:
+    evidence = answer_evidence(
+        "What is the best way to index documentation chunks with stable source links?",
+        [
+            RankedHit(
+                id="archive",
+                score=0.7,
+                metadata={
+                    "repo": "elastic/docs-content",
+                    "path": "archive.md",
+                    "title": "Documentation archive",
+                    "heading_path": "Documentation archive > Documentation archive",
+                    "final_rank": 1,
+                },
+                source_url="https://github.com/elastic/docs-content/blob/main/archive.md",
+                text="Documentation archive Documentation archive > Documentation archive documentation.",
+                lexical_score=0.5,
+                dense_score=0.6,
+            ),
+            RankedHit(
+                id="links",
+                score=0.6,
+                metadata={
+                    "repo": "elastic/docs-content",
+                    "path": "contribute-docs/syntax-quick-reference.md",
+                    "title": "Syntax quick reference",
+                    "heading_path": "Syntax quick reference > Links",
+                    "final_rank": 2,
+                },
+                source_url="https://github.com/elastic/docs-content/blob/main/contribute-docs/syntax-quick-reference.md#links",
+                text="Create links to other documentation pages with stable relative paths so readers can open the exact source location.",
+                lexical_score=0.4,
+                dense_score=0.55,
+            ),
+        ],
+    )
+
+    summary = synthesize_answer("What is the best way to index documentation chunks with stable source links?", evidence)
+
+    assert "Documentation archive Documentation archive" not in summary
+    assert "Index documentation as section-aware chunks" in summary
+    assert evidence[0].title == "Syntax quick reference"
+    assert evidence[0].highlight_terms == ["link", "links", "page", "path", "source", "stable"]
+
+
+def test_answer_evidence_skips_documentation_archive_sources() -> None:
+    evidence = answer_evidence(
+        "stable source links",
+        [
+            RankedHit(
+                id="archive",
+                score=0.9,
+                metadata={
+                    "repo": "elastic/docs-content",
+                    "path": "archive.md",
+                    "title": "Documentation archive",
+                    "heading_path": "Documentation archive > Documentation archive",
+                    "final_rank": 1,
+                },
+                source_url="https://github.com/elastic/docs-content/blob/main/archive.md#documentation-archive",
+                text="Documentation archive explains older documentation locations and archive navigation.",
+                lexical_score=0.6,
+                dense_score=0.7,
+            ),
+            RankedHit(
+                id="links",
+                score=0.5,
+                metadata={
+                    "repo": "elastic/docs-content",
+                    "path": "contribute-docs/syntax-quick-reference.md",
+                    "title": "Syntax quick reference",
+                    "heading_path": "Syntax quick reference > Links",
+                    "final_rank": 2,
+                },
+                source_url="https://github.com/elastic/docs-content/blob/main/contribute-docs/syntax-quick-reference.md#links",
+                text="Use section anchors and stable links so readers can open the exact documentation source.",
+                lexical_score=0.4,
+                dense_score=0.5,
+            ),
+        ],
+    )
+
+    assert [item.title for item in evidence] == ["Syntax quick reference"]
+
+
+def test_best_snippet_rejects_title_only_documentation_boilerplate() -> None:
+    assert best_snippet(
+        "stable source links",
+        "Documentation archive Documentation archive > Documentation archive documentation.",
+        title="Documentation archive",
+        heading_path="Documentation archive > Documentation archive",
+    ) is None
+
+
+def test_best_snippet_rejects_title_only_lab_boilerplate() -> None:
+    assert best_snippet(
+        "documentation chunks",
+        "Elasticsearch Examples & Apps Elasticsearch Examples & Apps > Document Chunking lab.",
+        title="Elasticsearch Examples & Apps",
+        heading_path="Elasticsearch Examples & Apps > Document Chunking",
+    ) is None
 
 
 def test_analyze_endpoint_returns_recommendations_with_evidence() -> None:

@@ -10,6 +10,7 @@ from backend.app.retrieval.service import (
     RetrievalService,
     RetryPolicy,
     boost_ranked_hits,
+    is_archived_source,
     reciprocal_rank_fusion,
 )
 from backend.app.vector.qdrant_client import SearchHit
@@ -129,6 +130,33 @@ def test_metadata_boosts_change_final_fusion_order() -> None:
 
     assert [hit.id for hit in boosted] == ["b", "a"]
     assert boosted[0].fusion_score == boosted[0].score
+
+
+def test_archive_sources_are_demoted_after_fusion() -> None:
+    archived = RankedHit(
+        id="archive",
+        score=0.9,
+        fusion_score=0.9,
+        metadata={
+            "repo": "elastic/docs-content",
+            "path": "archive.md",
+            "title": "Documentation archive",
+            "heading_path": "Documentation archive > Documentation archive",
+        },
+        source_url="https://www.elastic.co/docs/archive#documentation-archive",
+    )
+    current = RankedHit(
+        id="current",
+        score=0.2,
+        fusion_score=0.2,
+        metadata=metadata("Syntax quick reference", "documentation"),
+        source_url="https://example.test/current",
+    )
+
+    boosted = boost_ranked_hits([archived, current], {})
+
+    assert is_archived_source(archived.metadata, archived.source_url)
+    assert [hit.id for hit in boosted] == ["current", "archive"]
 
 
 @pytest.mark.anyio

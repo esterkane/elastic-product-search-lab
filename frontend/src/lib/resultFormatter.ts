@@ -74,20 +74,23 @@ export function groupRelatedResults(hits: SearchHit[]): { primary: NormalizedSea
 }
 
 export function formatEvidence(item: AnswerResponse["evidence"][number]): FormattedEvidence {
+  const display = normalizeDisplayMetadata({
+    title: item.title,
+    heading_path: item.heading_path,
+    repo: item.repo,
+    path: item.path,
+    sourceType: item.content_type
+  });
+  const excerpt = cleanClaim(item.excerpt, item.title, item.heading_path);
+  const claim = cleanClaim(item.claim ?? item.excerpt, item.title, item.heading_path);
   return {
     ...item,
-    title: cleanTitle(item.title, item.heading_path),
-    claim: cleanClaim(item.claim ?? item.excerpt, item.title, item.heading_path),
-    excerpt: cleanClaim(item.excerpt, item.title, item.heading_path),
+    title: display.title,
+    claim: claim || `Matched ${display.title}; open the cited section to verify the exact passage.`,
+    excerpt: excerpt || item.excerpt,
     role: item.role ?? "supporting",
     tags: evidenceTags(item),
-    display: normalizeDisplayMetadata({
-      title: item.title,
-      heading_path: item.heading_path,
-      repo: item.repo,
-      path: item.path,
-      sourceType: item.content_type
-    })
+    display
   };
 }
 
@@ -103,7 +106,7 @@ export function formatSearchResult(hit: SearchHit): NormalizedSearchResult {
   return {
     ...hit,
     title: display.title,
-    snippet: excerpt,
+    snippet: excerpt || undefined,
     display,
     explanation: explainResult(hit, display),
     takeaway: resultTakeaway(hit, display),
@@ -271,7 +274,21 @@ function cleanClaim(text: string, title?: string | null, headingPath?: string | 
       cleaned = `${prefix}.`;
     }
   }
-  return stripRepeatedLeadingPhrase(cleaned);
+  cleaned = stripRepeatedLeadingPhrase(cleaned);
+  if (isBoilerplateClaim(cleaned, titleText, section)) {
+    return "";
+  }
+  return cleaned;
+}
+
+function isBoilerplateClaim(text: string, title?: string | null, section?: string | null): boolean {
+  const cleaned = stripTrailingDocumentation(cleanText(text)).replace(/\.$/, "");
+  if (!cleaned) {
+    return true;
+  }
+  return [title, section]
+    .filter(Boolean)
+    .some((value) => normalizedEquals(cleaned, value ?? "") || normalizedEquals(cleaned, `${value} documentation`));
 }
 
 function stripRepeatedLeadingPhrase(text: string): string {

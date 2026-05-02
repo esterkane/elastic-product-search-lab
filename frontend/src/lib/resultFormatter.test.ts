@@ -35,7 +35,7 @@ describe("resultFormatter", () => {
     expect(display.cleanPath).toBe("Section: Documentation archive | archive.md | elastic/docs-content");
   });
 
-  it("cleans duplicated snippet text from formatted results", () => {
+  it("removes duplicated boilerplate snippets from formatted results", () => {
     const result = formatSearchResult({
       id: "archive",
       title: "Documentation archive",
@@ -52,7 +52,7 @@ describe("resultFormatter", () => {
     });
 
     expect(result.title).toBe("Documentation archive");
-    expect(result.snippet).toBe("Documentation archive.");
+    expect(result.snippet).toBeUndefined();
     expect(result.display.cleanPath).not.toContain("Documentation archive > Documentation archive");
   });
 });

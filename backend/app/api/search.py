@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from backend.app.dependencies import get_retrieval_service
 from backend.app.ingest.parser import stable_anchor
 from backend.app.ingest.metadata import normalize_boosts, normalize_filters, normalize_metadata
-from backend.app.retrieval.service import RankedHit, RetrievalService, RetrievalWarning, canonical_source_key
+from backend.app.retrieval.service import RankedHit, RetrievalService, RetrievalWarning, canonical_source_key, is_archived_source
 
 
 router = APIRouter(prefix="/api/v1", tags=["search"])
@@ -301,17 +301,20 @@ def answer_evidence(query: str, hits: list[RankedHit], limit: int = 3) -> list[A
     seen: set[str] = set()
     for hit in sorted(hits, key=evidence_sort_key):
         metadata = normalize_metadata(hit.metadata, source_url=hit.source_url)
+        if is_archived_source(metadata, hit.source_url):
+            continue
         source_key = canonical_source_key(hit.source_url)
         if not hit.source_url or source_key in seen:
             continue
-        excerpt = best_snippet(query, hit.text)
-        if not excerpt:
-            continue
-        seen.add(source_key)
         title = metadata_value(metadata, "title") or metadata_value(metadata, "heading_path") or hit.id
         repo = metadata_value(metadata, "repo")
         path = metadata_value(metadata, "path")
         heading_path = metadata_value(metadata, "heading_path")
+        excerpt = best_snippet(query, hit.text, title=title, heading_path=heading_path)
+        if not excerpt:
+            continue
+        seen.add(source_key)
+        claim = evidence_claim(query, excerpt, title, heading_path)
         content_type = metadata_value(metadata, "content_type")
         license_family = metadata_value(metadata, "license_family")
         reader_url = reader_url_for(metadata, hit.source_url)
@@ -327,9 +330,9 @@ def answer_evidence(query: str, hits: list[RankedHit], limit: int = 3) -> list[A
                 license_family=license_family,
                 score=hit.score,
                 role=role,
-                claim=excerpt,
+                claim=claim,
                 excerpt=excerpt,
-                highlight_terms=highlight_terms(query, hit.text),
+                highlight_terms=highlight_terms(query, excerpt),
                 reader_url=reader_url,
                 source_url=hit.source_url,
                 link_label=link_label,
@@ -344,7 +347,8 @@ def evidence_sort_key(hit: RankedHit) -> tuple[int, int, float, str]:
     repo = str(hit.metadata.get("repo") or "")
     final_rank = int(hit.metadata.get("final_rank") or 9999)
     docs_priority = 0 if repo == "elastic/docs-content" else 1
-    return (docs_priority, final_rank, -hit.score, hit.id)
+    archive_priority = 1 if is_archived_source(hit.metadata, hit.source_url) else 0
+    return (archive_priority, docs_priority, final_rank, -hit.score, hit.id)
 
 
 def answer_links(evidence: list[AnswerEvidence], limit: int = 3) -> list[AnswerLink]:
@@ -376,14 +380,14 @@ def synthesize_answer(query: str, evidence: list[AnswerEvidence]) -> str:
 
 def synthesize_answer_model(query: str, evidence: list[AnswerEvidence]) -> dict:
     if not evidence:
-        direct = f"No grounded sources were found for '{query}'."
+        direct = intent_direct_answer(query, evidence) or f"No grounded sources were found for '{query}'."
         return {
             "direct_answer": direct,
-            "explanation": "No source-backed explanation can be produced until retrieval returns evidence.",
+            "explanation": intent_explanation(query, evidence) or "No source-backed explanation can be produced until retrieval returns evidence.",
             "what_new": None,
             "what_new_items": [],
-            "important": "Try a narrower query or sync the indexed sources before searching again.",
-            "key_takeaways": ["No grounded evidence was available.", "Sync sources or narrow the query before relying on the answer."],
+            "important": why_it_matters(query, evidence) if is_chunk_link_query(query) else "Try a narrower query or sync the indexed sources before searching again.",
+            "key_takeaways": key_takeaways(query, evidence) if is_chunk_link_query(query) else ["No grounded evidence was available.", "Sync sources or narrow the query before relying on the answer."],
             "confidence": "low",
             "best_source": None,
             "supporting_sources": [],
@@ -419,6 +423,9 @@ def synthesize_answer_model(query: str, evidence: list[AnswerEvidence]) -> dict:
 
 
 def direct_answer_from_evidence(query: str, evidence: list[AnswerEvidence]) -> str:
+    intent_answer = intent_direct_answer(query, evidence)
+    if intent_answer:
+        return intent_answer
     primary = evidence[0].claim
     if is_change_query(query):
         return f"The clearest update: {primary}"
@@ -436,10 +443,12 @@ def what_new_summary(query: str, evidence: list[AnswerEvidence]) -> str | None:
 
 
 def why_it_matters(query: str, evidence: list[AnswerEvidence]) -> str:
-    if not evidence:
-        return "No grounded evidence was available."
     if "rerank" in query.lower() or any("rerank" in item.claim.lower() for item in evidence):
         return "This matters because reranking can improve final precision after hybrid retrieval has already found a useful candidate pool."
+    if is_chunk_link_query(query):
+        return "This matters because stable chunk metadata lets the UI open the exact documentation section, highlight the relevant passage, and avoid duplicate source cards after reindexing."
+    if not evidence:
+        return "No grounded evidence was available."
     if "metadata" in query.lower() or "filter" in query.lower():
         return "This matters because consistent metadata makes source filtering, provenance, and answer grounding predictable."
     return "This matters because the answer is tied to specific documentation sections and source provenance instead of unsupported generated text."
@@ -448,6 +457,9 @@ def why_it_matters(query: str, evidence: list[AnswerEvidence]) -> str:
 def explanation_from_evidence(query: str, evidence: list[AnswerEvidence]) -> str:
     primary = evidence[0]
     source_family = "Elastic documentation" if primary.repo == "elastic/docs-content" else "Elastic source material"
+    query_explanation = intent_explanation(query, evidence)
+    if query_explanation:
+        return query_explanation
     if primary.score < 0.015:
         return (
             f"The best match is weak, so treat this as supporting context from {source_family}. "
@@ -477,6 +489,12 @@ def what_new_items(query: str, evidence: list[AnswerEvidence]) -> list[str]:
 
 
 def key_takeaways(query: str, evidence: list[AnswerEvidence]) -> list[str]:
+    if is_chunk_link_query(query):
+        return [
+            "Store repo, path, heading, anchor, license, content type, source_url, and reader_url with every chunk.",
+            "Use deterministic chunk IDs so unchanged documentation is not reindexed as duplicate evidence.",
+            "Prefer section-level links over page-level links when the heading anchor is available.",
+        ]
     if not evidence:
         return ["No grounded evidence was available."]
     primary = evidence[0]
@@ -502,6 +520,35 @@ def is_change_query(query: str) -> bool:
         term in query.lower()
         for term in ("new", "what changed", "change", "changed", "improve", "improvement", "release", "feature", "update")
     )
+
+
+def is_chunk_link_query(query: str) -> bool:
+    lower = query.lower()
+    return (
+        any(term in lower for term in ("chunk", "chunks", "chunking", "index documentation", "index docs"))
+        and any(term in lower for term in ("stable", "source link", "source links", "provenance", "canonical"))
+    )
+
+
+def intent_direct_answer(query: str, evidence: list[AnswerEvidence]) -> str | None:
+    if is_chunk_link_query(query):
+        return (
+            "Index documentation as section-aware chunks with canonical repo, file path, heading, stable anchor, "
+            "license, content type, and both reader and source URLs stored on every chunk."
+        )
+    return None
+
+
+def intent_explanation(query: str, evidence: list[AnswerEvidence]) -> str | None:
+    if is_chunk_link_query(query):
+        source_hint = evidence[0].title if evidence else "the strongest indexed source"
+        return (
+            f"Use {source_hint} as the first source to verify the linking behavior, then store enough metadata "
+            "for each chunk to rebuild the user-facing docs URL and the GitHub provenance URL independently. "
+            "That makes search results stable across syncs and lets the answer UI highlight the exact passage "
+            "instead of showing only a raw file path."
+        )
+    return None
 
 
 def dedupe_text(items: list[str]) -> list[str]:
@@ -560,11 +607,23 @@ def heading_anchor(metadata: dict) -> str | None:
     return stable_anchor(heading)
 
 
-def best_snippet(query: str, text: str, max_chars: int = 360) -> str | None:
+def best_snippet(
+    query: str,
+    text: str,
+    max_chars: int = 360,
+    title: str | None = None,
+    heading_path: str | None = None,
+) -> str | None:
     sentences = [clean_sentence(sentence) for sentence in split_sentences(text)]
-    sentences = [sentence for sentence in sentences if not should_skip_sentence(sentence)]
+    sentences = [
+        sentence
+        for sentence in sentences
+        if not should_skip_sentence(sentence) and not is_boilerplate_sentence(sentence, title, heading_path)
+    ]
     if not sentences:
-        cleaned = clean_sentence(text)
+        cleaned = clean_evidence_sentence(text, title, heading_path)
+        if is_boilerplate_sentence(cleaned, title, heading_path):
+            return None
         return truncate_sentence(cleaned, max_chars=max_chars) if cleaned else None
 
     terms = meaningful_terms(query)
@@ -592,6 +651,13 @@ def highlight_terms(query: str, text: str, max_terms: int = 6) -> list[str]:
     return matched[:max_terms]
 
 
+def evidence_claim(query: str, excerpt: str, title: str, heading_path: str | None) -> str:
+    cleaned = clean_evidence_sentence(excerpt, title, heading_path)
+    if is_chunk_link_query(query):
+        return "This source is relevant to stable documentation links and should be checked for the exact section or link syntax."
+    return cleaned
+
+
 def match_reason(hit: RankedHit) -> str:
     channels: list[str] = []
     if hit.lexical_score > 0:
@@ -614,11 +680,16 @@ def split_sentences(text: str) -> list[str]:
 
 
 def clean_sentence(text: str) -> str:
+    text = re.sub(r":::\{[^}]+\}|:::", " ", text)
+    text = re.sub(r"<br\s*/?>", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"<[^>]+>", " ", text)
     text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
     text = re.sub(r"\{\{([^}]+)\}\}", r"\1", text)
     text = re.sub(r"\[([a-z0-9_-]+)\]", "", text, flags=re.IGNORECASE)
     text = re.sub(r"`([^`]+)`", r"\1", text)
     text = text.replace("**", "")
+    text = re.sub(r"\s*[✅❌]\s*", " ", text)
+    text = re.sub(r"\b(open|dos|don ts)\b[: ]*", " ", text, flags=re.IGNORECASE)
     return re.sub(r"\s+", " ", text).strip()
 
 
@@ -635,6 +706,76 @@ def should_skip_sentence(text: str) -> bool:
     return False
 
 
+def is_boilerplate_sentence(text: str, title: str | None = None, heading_path: str | None = None) -> bool:
+    cleaned = clean_evidence_sentence(text, title, heading_path)
+    if not cleaned:
+        return True
+    lower = cleaned.lower().strip(" .")
+    if lower in {"documentation", "overview"}:
+        return True
+    if re.fullmatch(r"[a-z0-9 /_&-]+ (documentation|guide|lab)", lower):
+        return True
+    if title and normalized_text(cleaned) in {
+        normalized_text(title),
+        normalized_text(f"{title} documentation"),
+        normalized_text(f"{title} guide"),
+        normalized_text(f"{title} lab"),
+    }:
+        return True
+    heading = heading_path.split(">")[-1].strip() if heading_path else None
+    if heading_path and normalized_text(cleaned) in {
+        normalized_text(heading_path),
+        normalized_text(f"{heading_path} documentation"),
+        normalized_text(f"{heading_path} guide"),
+        normalized_text(f"{heading_path} lab"),
+    }:
+        return True
+    if heading and normalized_text(cleaned) in {
+        normalized_text(heading),
+        normalized_text(f"{heading} documentation"),
+        normalized_text(f"{heading} guide"),
+        normalized_text(f"{heading} lab"),
+    }:
+        return True
+    return False
+
+
+def clean_evidence_sentence(text: str, title: str | None = None, heading_path: str | None = None) -> str:
+    cleaned = clean_sentence(text)
+    prefixes = [value for value in [title, heading_path, heading_path.split(">")[-1].strip() if heading_path else None] if value]
+    for prefix in prefixes:
+        prefix_clean = clean_sentence(prefix)
+        if not prefix_clean:
+            continue
+        duplicated = f"{prefix_clean} {prefix_clean}"
+        if cleaned.lower().startswith(duplicated.lower()):
+            cleaned = cleaned[len(prefix_clean):].strip()
+        breadcrumb = f"{prefix_clean} > {prefix_clean}"
+        if cleaned.lower().startswith(breadcrumb.lower()):
+            cleaned = cleaned[len(breadcrumb):].strip(" .:-")
+        doc_suffix = f"{prefix_clean} documentation"
+        if normalized_text(cleaned) == normalized_text(doc_suffix):
+            return ""
+        guide_suffix = f"{prefix_clean} guide"
+        if normalized_text(cleaned) == normalized_text(guide_suffix):
+            return ""
+        lab_suffix = f"{prefix_clean} lab"
+        if normalized_text(cleaned) == normalized_text(lab_suffix):
+            return ""
+    if heading_path and normalized_text(cleaned) in {
+        normalized_text(heading_path),
+        normalized_text(f"{heading_path} documentation"),
+        normalized_text(f"{heading_path} guide"),
+        normalized_text(f"{heading_path} lab"),
+    }:
+        return ""
+    return ensure_sentence(cleaned) if cleaned else ""
+
+
+def normalized_text(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+
 def truncate_sentence(text: str, max_chars: int = 260) -> str:
     if len(text) <= max_chars:
         return text
@@ -643,8 +784,29 @@ def truncate_sentence(text: str, max_chars: int = 260) -> str:
 
 
 def meaningful_terms(query: str) -> set[str]:
-    stop_words = {"about", "after", "best", "can", "does", "for", "from", "have", "into", "that", "the", "this", "what", "with", "your"}
-    return {term for term in re.findall(r"[a-z0-9]{4,}", query.lower()) if term not in stop_words}
+    stop_words = {
+        "about",
+        "after",
+        "best",
+        "can",
+        "does",
+        "documentation",
+        "docs",
+        "for",
+        "from",
+        "have",
+        "into",
+        "that",
+        "the",
+        "this",
+        "what",
+        "with",
+        "your",
+    }
+    terms = {term for term in re.findall(r"[a-z0-9]{4,}", query.lower()) if term not in stop_words}
+    if is_chunk_link_query(query):
+        terms.update({"anchor", "heading", "link", "links", "page", "path", "section", "source"})
+    return terms
 
 
 def ensure_sentence(text: str) -> str:

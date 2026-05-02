@@ -40,7 +40,7 @@ export function EvidenceCard({ evidence, primary = false }: EvidenceCardProps) {
           <span key={tag}>{tag}</span>
         ))}
       </div>
-      <p className="evidence-claim">{evidence.claim}</p>
+      {evidence.claim && evidence.claim !== evidence.excerpt && <p className="evidence-claim">{evidence.claim}</p>}
       <blockquote className="evidence-snippet">{renderHighlightedText(evidence.excerpt, evidence.highlight_terms)}</blockquote>
       <div className="answer-evidence__links">
         <a className="evidence-cta evidence-cta-primary" href={evidence.reader_url} target="_blank" rel="noreferrer">
