@@ -61,8 +61,11 @@ export type SearchResponse = {
 export type AnswerResponse = {
   summary: string;
   direct_answer?: string;
+  explanation?: string;
   what_new?: string | null;
+  what_new_items?: string[];
   important?: string | null;
+  key_takeaways?: string[];
   confidence?: "high" | "medium" | "low";
   best_source?: Source | null;
   supporting_sources?: Source[];

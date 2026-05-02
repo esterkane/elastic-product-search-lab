@@ -20,10 +20,18 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
       <p className="answer-summary">
         {isLoading ? "Building a grounded answer from the strongest evidence." : model.directAnswer}
       </p>
-      {model.whatNew && (
+      <div className="explain-block">
+        <h3>Explain this result</h3>
+        <p>{model.explanation}</p>
+      </div>
+      {model.whatNew.length > 0 && (
         <div className="insight-block insight-block-new">
           <h3>What&apos;s new</h3>
-          <p>{model.whatNew}</p>
+          <ul>
+            {model.whatNew.slice(0, 4).map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
         </div>
       )}
       <div className="insight-grid">
@@ -31,13 +39,44 @@ export function AnswerSummary({ model, isLoading = false }: AnswerSummaryProps) 
           <h3>Why it matters</h3>
           <p>{model.important}</p>
         </div>
+        <div className="insight-block">
+          <h3>Key takeaways</h3>
+          <ul>
+            {model.keyTakeaways.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
         {model.bestSource && (
           <div className="insight-block">
             <h3>Where to read next</h3>
-            <p>{[model.bestSource.heading_path, model.bestSource.path, model.bestSource.repo].filter(Boolean).join(" - ")}</p>
+            <dl className="metadata-list">
+              <div>
+                <dt>Source</dt>
+                <dd>{model.bestSource.display.title}</dd>
+              </div>
+              {model.bestSource.display.section && (
+                <div>
+                  <dt>Section</dt>
+                  <dd>{model.bestSource.display.section}</dd>
+                </div>
+              )}
+              {model.bestSource.display.filePath && (
+                <div>
+                  <dt>File</dt>
+                  <dd>{model.bestSource.display.filePath}</dd>
+                </div>
+              )}
+              {model.bestSource.display.repo && (
+                <div>
+                  <dt>Repo</dt>
+                  <dd>{model.bestSource.display.repo}</dd>
+                </div>
+              )}
+            </dl>
             <a className="best-link" href={model.bestSource.url} target="_blank" rel="noreferrer">
               <MapPin aria-hidden="true" size={15} />
-              <span>{model.bestSource.link_label ?? "Open source"}</span>
+              <span>{model.bestSource.link_label === "Read documentation" ? "Read docs" : "Open source"}</span>
               <ArrowRight aria-hidden="true" size={15} />
             </a>
           </div>

@@ -1,14 +1,14 @@
 import { ExternalLink } from "lucide-react";
 import type { SearchHit } from "../lib/api";
+import { formatSearchResult, type NormalizedSearchResult } from "../lib/resultFormatter";
 
 type ResultCardProps = {
-  result: SearchHit;
+  result: SearchHit | NormalizedSearchResult;
 };
 
 export function ResultCard({ result }: ResultCardProps) {
-  const title = result.title || result.heading_path || result.path || result.id;
-  const heading = result.heading_path && result.heading_path !== result.title ? result.heading_path : null;
-  const location = [heading, result.path, result.repo].filter(Boolean).join(" - ");
+  const formatted = "display" in result ? result : formatSearchResult(result);
+  const title = formatted.display.title;
   const breakdown = result.score_breakdown;
 
   return (
@@ -16,7 +16,26 @@ export function ResultCard({ result }: ResultCardProps) {
       <div className="result-card__header">
         <div>
           <h3 id={`result-${result.id}`}>{title}</h3>
-          <p className="result-location">{location || "Indexed repository evidence"}</p>
+          <dl className="metadata-list metadata-list-inline">
+            {formatted.display.section && (
+              <div>
+                <dt>Section</dt>
+                <dd>{formatted.display.section}</dd>
+              </div>
+            )}
+            {formatted.display.filePath && (
+              <div>
+                <dt>File</dt>
+                <dd>{formatted.display.filePath}</dd>
+              </div>
+            )}
+            {formatted.display.repo && (
+              <div>
+                <dt>Repo</dt>
+                <dd>{formatted.display.repo}</dd>
+              </div>
+            )}
+          </dl>
         </div>
         <span className="score" aria-label={`Search score ${result.score.toFixed(3)}`}>
           score {result.score.toFixed(3)}
@@ -28,10 +47,11 @@ export function ResultCard({ result }: ResultCardProps) {
       </div>
       {result.snippet && (
         <blockquote className="evidence-snippet">
-          {renderHighlightedSnippet(result.snippet, result.highlights ?? [])}
+          {renderHighlightedSnippet(formatted.snippet ?? result.snippet, result.highlights ?? [])}
         </blockquote>
       )}
-      {result.match_reason && <p className="match-reason">{result.match_reason}</p>}
+      {result.match_reason && <p className="match-reason">{formatted.explanation}</p>}
+      <p className="result-takeaway">{formatted.takeaway}</p>
       {breakdown && (
         <details className="score-details">
           <summary>Show scoring details</summary>

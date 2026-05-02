@@ -156,8 +156,11 @@ class AnswerRequest(SearchRequest):
 class AnswerResponse(BaseModel):
     summary: str
     direct_answer: str
+    explanation: str
     what_new: str | None = None
+    what_new_items: list[str] = Field(default_factory=list)
     important: str | None = None
+    key_takeaways: list[str] = Field(default_factory=list)
     confidence: ConfidenceLevel
     best_source: AnswerLink | None = None
     supporting_sources: list[AnswerLink] = Field(default_factory=list)
@@ -202,8 +205,11 @@ async def answer(request: AnswerRequest, retrieval_service: RetrievalDependency)
     return AnswerResponse(
         summary=answer_model["direct_answer"],
         direct_answer=answer_model["direct_answer"],
+        explanation=answer_model["explanation"],
         what_new=answer_model["what_new"],
+        what_new_items=answer_model["what_new_items"],
         important=answer_model["important"],
+        key_takeaways=answer_model["key_takeaways"],
         confidence=answer_model["confidence"],
         best_source=answer_model["best_source"],
         supporting_sources=answer_model["supporting_sources"],
@@ -373,8 +379,11 @@ def synthesize_answer_model(query: str, evidence: list[AnswerEvidence]) -> dict:
         direct = f"No grounded sources were found for '{query}'."
         return {
             "direct_answer": direct,
+            "explanation": "No source-backed explanation can be produced until retrieval returns evidence.",
             "what_new": None,
+            "what_new_items": [],
             "important": "Try a narrower query or sync the indexed sources before searching again.",
+            "key_takeaways": ["No grounded evidence was available.", "Sync sources or narrow the query before relying on the answer."],
             "confidence": "low",
             "best_source": None,
             "supporting_sources": [],
@@ -386,8 +395,11 @@ def synthesize_answer_model(query: str, evidence: list[AnswerEvidence]) -> dict:
     links = answer_links(evidence, limit=3)
     return {
         "direct_answer": direct,
+        "explanation": explanation_from_evidence(query, evidence),
         "what_new": what_new_summary(query, evidence),
+        "what_new_items": what_new_items(query, evidence),
         "important": why_it_matters(query, evidence),
+        "key_takeaways": key_takeaways(query, evidence),
         "confidence": confidence_level(evidence),
         "best_source": links[0] if links else None,
         "supporting_sources": links[1:],
@@ -431,6 +443,50 @@ def why_it_matters(query: str, evidence: list[AnswerEvidence]) -> str:
     if "metadata" in query.lower() or "filter" in query.lower():
         return "This matters because consistent metadata makes source filtering, provenance, and answer grounding predictable."
     return "This matters because the answer is tied to specific documentation sections and source provenance instead of unsupported generated text."
+
+
+def explanation_from_evidence(query: str, evidence: list[AnswerEvidence]) -> str:
+    primary = evidence[0]
+    source_family = "Elastic documentation" if primary.repo == "elastic/docs-content" else "Elastic source material"
+    if primary.score < 0.015:
+        return (
+            f"The best match is weak, so treat this as supporting context from {source_family}. "
+            "The result indicates the likely topic area, but you should verify the cited source before acting on it."
+        )
+    if len(evidence) == 1:
+        return (
+            f"The primary source says: {primary.claim} This is the main grounded result for the query, "
+            f"and it comes from {source_family}."
+        )
+    supporting = evidence[1]
+    return (
+        f"The primary source says: {primary.claim} A supporting source adds: {supporting.claim} "
+        "Together, these sources give the answer and show where to verify it without relying on repeated snippets."
+    )
+
+
+def what_new_items(query: str, evidence: list[AnswerEvidence]) -> list[str]:
+    if not is_change_query(query):
+        return []
+    items = dedupe_text([ensure_sentence(item.claim) for item in evidence])[:4]
+    if len(items) >= 2:
+        return items
+    if items:
+        items.append("The retrieved sources point to the most relevant changed or improved workflow for this query.")
+    return items
+
+
+def key_takeaways(query: str, evidence: list[AnswerEvidence]) -> list[str]:
+    if not evidence:
+        return ["No grounded evidence was available."]
+    primary = evidence[0]
+    takeaways = [
+        f"Open {primary.title} first; it is the primary proof for this answer.",
+        why_it_matters(query, evidence),
+    ]
+    if len(evidence) > 1:
+        takeaways.append("Use the supporting evidence to confirm related workflows or edge cases.")
+    return dedupe_text(takeaways)[:3]
 
 
 def confidence_level(evidence: list[AnswerEvidence]) -> ConfidenceLevel:

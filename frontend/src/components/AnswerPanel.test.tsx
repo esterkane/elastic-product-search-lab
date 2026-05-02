@@ -20,7 +20,7 @@ describe("AnswerPanel", () => {
 
     const docsEvidence = screen.getByRole("heading", { name: "Ranking and reranking" }).closest("article");
     expect(docsEvidence).not.toBeNull();
-    expect(within(docsEvidence!).getByRole("link", { name: /Read documentation/i })).toHaveAttribute(
+    expect(within(docsEvidence!).getByRole("link", { name: /Read docs/i })).toHaveAttribute(
       "href",
       "https://www.elastic.co/docs/solutions/search/ranking#two-stage-retrieval-pipelines"
     );
@@ -29,7 +29,7 @@ describe("AnswerPanel", () => {
   it("labels non-docs-content evidence links as source links", () => {
     render(<AnswerPanel answer={hybridRetrievalAnswer} />);
 
-    const labLink = screen.getAllByRole("link", { name: /View source/i }).find((link) =>
+    const labLink = screen.getAllByRole("link", { name: /Open source/i }).find((link) =>
       link.getAttribute("href")?.includes("elasticsearch-labs")
     );
 

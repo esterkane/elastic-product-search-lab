@@ -13,7 +13,26 @@ export function EvidenceCard({ evidence, primary = false }: EvidenceCardProps) {
         <div>
           <p className="evidence-kicker">{primary ? "Primary proof" : "Supporting evidence"}</p>
           <h3>{evidence.title}</h3>
-          <p className="result-location">{evidence.provenanceLabel || "Indexed repository evidence"}</p>
+          <dl className="metadata-list metadata-list-inline">
+            {evidence.display.section && (
+              <div>
+                <dt>Section</dt>
+                <dd>{evidence.display.section}</dd>
+              </div>
+            )}
+            {evidence.display.filePath && (
+              <div>
+                <dt>File</dt>
+                <dd>{evidence.display.filePath}</dd>
+              </div>
+            )}
+            {evidence.display.repo && (
+              <div>
+                <dt>Repo</dt>
+                <dd>{evidence.display.repo}</dd>
+              </div>
+            )}
+          </dl>
         </div>
       </div>
       <div className="tag-row">
@@ -25,7 +44,7 @@ export function EvidenceCard({ evidence, primary = false }: EvidenceCardProps) {
       <blockquote className="evidence-snippet">{renderHighlightedText(evidence.excerpt, evidence.highlight_terms)}</blockquote>
       <div className="answer-evidence__links">
         <a className="evidence-cta evidence-cta-primary" href={evidence.reader_url} target="_blank" rel="noreferrer">
-          <span>{evidence.link_label}</span>
+          <span>{evidence.link_label === "Read documentation" ? "Read docs" : "Open source"}</span>
           <ExternalLink aria-hidden="true" size={15} />
         </a>
         {evidence.reader_url !== evidence.source_url && (
