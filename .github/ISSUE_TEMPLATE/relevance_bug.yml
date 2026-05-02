@@ -1,5 +1,5 @@
 name: Relevance bug
-description: Report a search, reranking, answer, or recommendation quality issue.
+description: Report a search, reranking, answer, or release-intelligence quality issue.
 title: "[Relevance]: "
 labels: ["relevance", "bug"]
 body:
@@ -15,7 +15,7 @@ body:
     id: expected
     attributes:
       label: Expected result
-      description: Describe the result, source, or recommendation you expected.
+      description: Describe the answer, release note, source, or version/topic behavior you expected.
     validations:
       required: true
   - type: textarea

@@ -41,7 +41,7 @@ Then verify:
 
 ## Provenance Rules
 
-All ingestion, retrieval, answer, and recommendation changes must preserve canonical source metadata:
+All ingestion, retrieval, answer, and release-intelligence changes must preserve canonical source metadata:
 
 - `repo`
 - `repo_url`
@@ -51,7 +51,7 @@ All ingestion, retrieval, answer, and recommendation changes must preserve canon
 - `content_type`
 - `license_family`
 
-Do not generate an answer, recommendation, or evaluation fixture that cannot be traced back to direct source links. If content is transformed, chunked, summarized, embedded, reranked, or fused, the source URL and license family must remain attached to the derived record.
+Do not generate an answer, release briefing, or evaluation fixture that cannot be traced back to direct source links. If content is transformed, chunked, summarized, embedded, reranked, or fused, the source URL and license family must remain attached to the derived record.
 
 ## Licensing Rules
 
@@ -67,6 +67,8 @@ Do not generate an answer, recommendation, or evaluation fixture that cannot be 
 - Avoid tests that depend on live model randomness.
 - Prefer mocked embedding/reranking responses in unit tests.
 - Report NDCG@10, MRR@10, and Recall@20 for retrieval-quality changes.
+- Include topic and version-range expectations for release-intelligence changes.
+- Keep serverless-focused results out of the primary answer unless the query or filter explicitly asks for serverless.
 
 ## Pull Request Expectations
 
@@ -75,4 +77,4 @@ A pull request should include:
 - Summary of user-facing behavior changes.
 - Tests or a clear explanation of why tests were not added.
 - Notes about provenance, attribution, and license handling.
-- Evaluation results for retrieval or recommendation behavior changes.
+- Golden-query notes for retrieval, answer synthesis, topic classification, or version filtering changes.

@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   deterministic-eval:
-    name: Deterministic Retrieval Evaluation
+    name: Deterministic Release-Intelligence Evaluation
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -38,7 +38,7 @@ jobs:
         run: python tools/repo_inventory.py
 
       - name: Run deterministic tests
-        run: python -m pytest backend/tests/test_recommendations.py backend/tests/test_ingest_pipeline.py -p no:cacheprovider
+        run: python -m pytest backend/tests -p no:cacheprovider
 
       - name: Record evaluation summary
         run: |
@@ -48,6 +48,7 @@ jobs:
             echo "metrics=NDCG@10,MRR@10,Recall@20"
             echo "deterministic_ordering=true"
             echo "source_attribution_required=true"
+            echo "topic_version_expectations=true"
           } > artifacts/eval/summary.txt
 
       - name: Upload evaluation summary
