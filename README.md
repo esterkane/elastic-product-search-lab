@@ -108,6 +108,10 @@ The table below uses the local 100-query ESCI subset reports in `reports/esci-re
 
 The sample-catalog report is intentionally easier and lives in `reports/relevance-report.md`. The ESCI report is harder and more realistic; it is useful because it shows both improvement and regression by query class.
 
+## Kibana Demo
+
+The Kibana-only walkthrough is documented in `docs/kibana_search_demo.md`. It explains the captured Dev Tools outcomes for index scale, mappings, baseline search, `search_profile` enrichment, `_explain`, `_profile`, slow-query troubleshooting, and field-type mistakes.
+
 ## Search Quality Gate
 
 The gate reads the latest relevance and latency reports and fails if configured thresholds are not met.
