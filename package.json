@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "scripts": {
+    "evaluate:relevance": ".\\.venv\\Scripts\\python.exe scripts/evaluate_relevance.py"
+  }
+}

@@ -1,0 +1,83 @@
+[
+  {
+    "query": "wireless noise cancelling headphones",
+    "judgments": {
+      "P100002": 3,
+      "P100022": 2,
+      "P100013": 0
+    }
+  },
+  {
+    "query": "cheap running shoes",
+    "judgments": {
+      "P100024": 2,
+      "P100003": 1,
+      "P100021": 0
+    }
+  },
+  {
+    "query": "coffee machine with grinder",
+    "judgments": {
+      "P100017": 3,
+      "P100001": 2,
+      "P100011": 0
+    }
+  },
+  {
+    "query": "laptop backpack waterproof",
+    "judgments": {
+      "P100003": 3,
+      "P100013": 1,
+      "P100005": 0
+    }
+  },
+  {
+    "query": "gift for gamer",
+    "judgments": {
+      "P100013": 2,
+      "P100022": 2,
+      "P100010": 1,
+      "P100025": 0
+    }
+  },
+  {
+    "query": "organic baby food",
+    "judgments": {
+      "P100012": 1,
+      "P100011": 0,
+      "P100004": 0
+    }
+  },
+  {
+    "query": "usb c laptop charger",
+    "judgments": {
+      "P100018": 3,
+      "P100013": 2,
+      "P100008": 1
+    }
+  },
+  {
+    "query": "insulated stainless steel water bottle",
+    "judgments": {
+      "P100007": 3,
+      "P100019": 2,
+      "P100023": 1
+    }
+  },
+  {
+    "query": "cast iron pan for camping",
+    "judgments": {
+      "P100023": 3,
+      "P100014": 1,
+      "P100004": 1
+    }
+  },
+  {
+    "query": "waterproof ebook reader",
+    "judgments": {
+      "P100005": 3,
+      "P100013": 0,
+      "P100022": 0
+    }
+  }
+]

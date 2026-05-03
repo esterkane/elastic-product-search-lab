@@ -17,6 +17,16 @@ def precision_at_k(ranked_product_ids: Sequence[str], judgments: Mapping[str, in
     return relevant / min(k, len(top_k))
 
 
+def recall_at_k(ranked_product_ids: Sequence[str], judgments: Mapping[str, int], k: int) -> float:
+    if k <= 0:
+        raise ValueError("k must be positive")
+    relevant_ids = {product_id for product_id, grade in judgments.items() if grade > 0}
+    if not relevant_ids:
+        return 0.0
+    retrieved_relevant = sum(1 for product_id in ranked_product_ids[:k] if product_id in relevant_ids)
+    return retrieved_relevant / len(relevant_ids)
+
+
 def reciprocal_rank(ranked_product_ids: Sequence[str], judgments: Mapping[str, int]) -> float:
     for rank, product_id in enumerate(ranked_product_ids, start=1):
         if judgments.get(product_id, 0) > 0:

@@ -13,3 +13,4 @@ coverage/
 pytest-cache-files-*/
 !data/generated/.gitkeep
 !data/generated/relevance_report.json
+apps/api/*.log

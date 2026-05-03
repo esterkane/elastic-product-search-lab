@@ -126,6 +126,22 @@ npm test
 npm run dev
 ```
 
+
+## Judgment-List Relevance Evaluation
+
+The repo includes a deterministic judgment-list evaluator for comparing search strategies against graded product relevance labels.
+
+```powershell
+npm run evaluate:relevance
+```
+
+The command evaluates `baseline_bm25` and `boosted_bm25`, includes `enriched_profile` as a pending future strategy, and writes:
+
+- `reports/relevance-report.json`
+- `reports/relevance-report.md`
+
+Metrics include Precision@5, Recall@5, MRR@10, nDCG@10, and evaluated query count.
+
 ## Optional Amazon ESCI Dataset
 
 The lab can prepare a small local sample from the public Amazon ESCI product-search dataset. ESCI provides query-product pairs with Exact, Substitute, Complement, and Irrelevant labels, which makes it useful for product search relevance evaluation.
