@@ -4,7 +4,19 @@
 
 ## Summary
 
-Elastic Repo Inventory is a local-first release-intelligence app for Elasticsearch documentation. It ingests selected Elastic source repositories, indexes Markdown chunks with source provenance, and helps search engineers understand what changed across Elasticsearch 8.x and 9.x.
+Elastic Repo Inventory is a local-first release-intelligence app for Elasticsearch documentation. It is designed to help senior search engineers answer: **What changed in Elasticsearch 8.x/9.x, and what matters for my search system?**
+
+The app syncs selected Elastic source repositories, indexes Markdown documentation with stable source provenance, and presents topic- and version-aware briefings instead of a flat list of raw matches. The current workflow focuses on practical engineering areas such as relevance, ingestion, data modeling, vector search, ES|QL, performance, resilience, and observability.
+
+Current capabilities:
+
+- Sync and incrementally index selected Elastic documentation and lab repositories.
+- Filter by topic, version range, time range, repo, content type, license, path, and heading.
+- Combine lexical and vector retrieval with optional reranking.
+- Produce a concise answer, "what's new" bullets, practical impact, evidence excerpts, and direct documentation/source links.
+- Preserve repo, path, heading, license, content type, commit, reader URL, and source URL metadata for every indexed chunk.
+
+This is not production software yet. It is an active prototype for exploring release-aware retrieval, grounded summaries, and evidence navigation over Elastic documentation.
 
 The current product focus is not a generic documentation browser. It is a version- and topic-aware briefing tool for questions like:
 
