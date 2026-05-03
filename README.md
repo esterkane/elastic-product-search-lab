@@ -39,6 +39,8 @@ Start Elasticsearch and Kibana:
 docker compose up -d
 ```
 
+Local Elasticsearch security is enabled. Use the built-in `elastic` superuser for Elasticsearch and Kibana login; the password lives only in your ignored local `.env` file. Do not commit real passwords.
+
 Install Python dependencies:
 
 ```powershell

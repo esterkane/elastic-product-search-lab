@@ -4,29 +4,49 @@ services:
     container_name: elastic-product-search-lab
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=false
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=false
+      - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD:?Set ELASTICSEARCH_PASSWORD in local .env}
       - ES_JAVA_OPTS=-Xms6g -Xmx6g
     ports:
       - "9200:9200"
     volumes:
       - esdata:/usr/share/elasticsearch/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:9200 >/dev/null || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS -u elastic:$${ELASTIC_PASSWORD} http://localhost:9200 >/dev/null || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 12
       start_period: 30s
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION:-9.3.0}
-    container_name: elastic-product-search-lab-kibana
+  elasticsearch-setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:-9.3.0}
     depends_on:
       elasticsearch:
         condition: service_healthy
     environment:
+      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:?Set ELASTICSEARCH_PASSWORD in local .env}
+      - KIBANA_SYSTEM_PASSWORD=${KIBANA_SYSTEM_PASSWORD:?Set KIBANA_SYSTEM_PASSWORD in local .env}
+    command: >
+      bash -c '
+        curl -fsS -u "elastic:$${ELASTICSEARCH_PASSWORD}" \
+          -H "Content-Type: application/json" \
+          -X POST "http://elasticsearch:9200/_security/user/kibana_system/_password" \
+          -d "{\"password\":\"$${KIBANA_SYSTEM_PASSWORD}\"}" >/dev/null
+      '
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION:-9.3.0}
+    container_name: elastic-product-search-lab-kibana
+    depends_on:
+      elasticsearch-setup:
+        condition: service_completed_successfully
+    environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_SYSTEM_PASSWORD:?Set KIBANA_SYSTEM_PASSWORD in local .env}
       - SERVER_HOST=0.0.0.0
-      - XPACK_SECURITY_ENABLED=false
+      - XPACK_SECURITY_ENABLED=true
     ports:
       - "5601:5601"
     healthcheck:

@@ -1,4 +1,12 @@
-﻿import "dotenv/config";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { config as loadDotenv } from "dotenv";
+
+for (const envPath of [resolve(process.cwd(), ".env"), resolve(process.cwd(), "..", "..", ".env")]) {
+  if (existsSync(envPath)) {
+    loadDotenv({ path: envPath, override: false });
+  }
+}
 
 export type ApiConfig = {
   elasticsearchUrl: string;
