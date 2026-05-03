@@ -127,6 +127,26 @@ npm run dev
 ```
 
 
+
+## Search Profile Enrichment
+
+`search_profile` is a deterministic plain-text field built during ingestion from product title, brand, category, description, attributes, material/color, inferred use cases, and tags. It demonstrates that relevance can improve by improving indexed data quality, not only by changing query boosts.
+
+Before enrichment, the strict baseline query can miss intent-heavy queries because the exact words may not all appear in one product record. For example:
+
+| Query | Baseline behavior | Enriched-profile behavior |
+| --- | --- | --- |
+| `wireless noise cancelling headphones` | strict BM25 may return no result if wording differs from product text | `search_profile` adds normalized product/use-case language and retrieves `P100002` |
+| `laptop backpack waterproof` | baseline may miss because the product text does not contain every query term | enriched profile combines category, attributes, and use cases, retrieving `P100003` |
+
+Run the judgment-list evaluation with:
+
+```powershell
+npm run evaluate:relevance
+```
+
+The generated report compares `baseline_bm25`, `boosted_bm25`, and `enriched_profile`, including metric deltas and per-query winners.
+
 ## Judgment-List Relevance Evaluation
 
 The repo includes a deterministic judgment-list evaluator for comparing search strategies against graded product relevance labels.
@@ -135,12 +155,12 @@ The repo includes a deterministic judgment-list evaluator for comparing search s
 npm run evaluate:relevance
 ```
 
-The command evaluates `baseline_bm25` and `boosted_bm25`, includes `enriched_profile` as a pending future strategy, and writes:
+The command evaluates `baseline_bm25`, `boosted_bm25`, and `enriched_profile`, then writes:
 
 - `reports/relevance-report.json`
 - `reports/relevance-report.md`
 
-Metrics include Precision@5, Recall@5, MRR@10, nDCG@10, and evaluated query count.
+Metrics include Precision@5, Recall@5, MRR@10, nDCG@10, evaluated query count, metric deltas, and per-query winners.
 
 ## Optional Amazon ESCI Dataset
 

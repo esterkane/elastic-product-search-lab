@@ -7,6 +7,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from src.ingestion.search_profile import build_search_profile
+
 Availability = Literal["in_stock", "limited_stock", "backorder", "out_of_stock", "discontinued"]
 
 
@@ -54,6 +56,7 @@ class Product(BaseModel):
             ]
             if part
         )
+        document["search_profile"] = build_search_profile(document)
         document["source_versions"] = {
             "sample_jsonl": self.updated_at.isoformat().replace("+00:00", "Z")
         }

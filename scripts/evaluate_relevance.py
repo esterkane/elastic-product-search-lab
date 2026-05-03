@@ -17,7 +17,6 @@ from src.evaluation.relevance_report import (  # noqa: E402
     build_report,
     evaluate_ranking,
     load_product_search_judgments,
-    pending_rows,
     write_json_report,
     write_markdown_report,
 )
@@ -27,15 +26,10 @@ DEFAULT_INDEX = "products-v1"
 DEFAULT_JUDGMENTS_PATH = PROJECT_ROOT / "data" / "judgments" / "product_search_judgments.json"
 DEFAULT_JSON_REPORT_PATH = PROJECT_ROOT / "reports" / "relevance-report.json"
 DEFAULT_MD_REPORT_PATH = PROJECT_ROOT / "reports" / "relevance-report.md"
-PENDING_ENRICHED_PROFILE_NOTE = "Pending: enriched_profile requires enriched product-profile fields in the index."
+
 
 def boosted_bm25_evaluation_query(query: str, size: int) -> dict[str, Any]:
-    """More forgiving BM25 variant for offline comparison.
-
-    The production API still owns user-facing behavior. This evaluator uses a
-    broader second strategy so the judgment list can expose measurable recall
-    and ranking differences against the strict baseline.
-    """
+    """More forgiving BM25 variant for offline comparison."""
 
     return {
         "size": size,
@@ -62,11 +56,33 @@ def boosted_bm25_evaluation_query(query: str, size: int) -> dict[str, Any]:
         "sort": ["_score"],
     }
 
+
+def enriched_profile_query(query: str, size: int) -> dict[str, Any]:
+    """Readable strategy that searches ingestion-time enriched product profiles."""
+
+    return {
+        "size": size,
+        "query": {
+            "multi_match": {
+                "query": query,
+                "fields": ["search_profile^3", "title^2", "category^1.5", "brand", "description^0.5"],
+                "type": "best_fields",
+                "operator": "or",
+                "minimum_should_match": "2<70%",
+                "fuzziness": "AUTO",
+            }
+        },
+        "sort": ["_score"],
+    }
+
+
 def run_search(client: Any, index_name: str, query: str, strategy: str, size: int) -> list[str]:
     if strategy == "baseline_bm25":
         body = baseline_lexical_query(query, size)
     elif strategy == "boosted_bm25":
         body = boosted_bm25_evaluation_query(query, size)
+    elif strategy == "enriched_profile":
+        body = enriched_profile_query(query, size)
     else:
         raise ValueError(f"Unsupported executable strategy: {strategy}")
     return extract_ids(client.search(index=index_name, **body))
@@ -90,12 +106,11 @@ def main() -> int:
         judgments = load_product_search_judgments(args.judgments)
         rows = []
         for query_judgment in judgments:
-            for strategy in ("baseline_bm25", "boosted_bm25"):
+            for strategy in ("baseline_bm25", "boosted_bm25", "enriched_profile"):
                 ranked_product_ids = run_search(client, args.index, query_judgment.query, strategy, args.size)
                 rows.append(evaluate_ranking(strategy, query_judgment.query, query_judgment.judgments, ranked_product_ids))
-        rows.extend(pending_rows("enriched_profile", judgments, PENDING_ENRICHED_PROFILE_NOTE))
 
-        report = build_report(rows, query_count=len(judgments))
+        report = build_report(rows, query_count=len(judgments), baseline_strategy="baseline_bm25")
         write_json_report(report, args.json_report)
         write_markdown_report(report, args.markdown_report)
 
@@ -104,7 +119,8 @@ def main() -> int:
             print(
                 f"{row['strategy']}: status={row['status']} evaluated={row['evaluated_queries']} "
                 f"Precision@5={row['precision_at_5']:.3f} Recall@5={row['recall_at_5']:.3f} "
-                f"MRR@10={row['mrr_at_10']:.3f} nDCG@10={row['ndcg_at_10']:.3f}"
+                f"MRR@10={row['mrr_at_10']:.3f} nDCG@10={row['ndcg_at_10']:.3f} "
+                f"Delta nDCG@10={row['delta_ndcg_at_10']:+.3f}"
             )
         print(f"Wrote {args.json_report}")
         print(f"Wrote {args.markdown_report}")

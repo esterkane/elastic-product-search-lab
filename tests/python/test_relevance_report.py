@@ -5,7 +5,6 @@ from src.evaluation.relevance_report import (
     build_report,
     evaluate_ranking,
     load_product_search_judgments,
-    pending_rows,
     write_json_report,
     write_markdown_report,
 )
@@ -30,9 +29,10 @@ def test_report_generation_from_fixture(tmp_path: Path):
     )
     judgments = load_product_search_judgments(fixture)
     rows = [
-        evaluate_ranking("baseline_bm25", judgments[0].query, judgments[0].judgments, ["P1", "P9"]),
-        evaluate_ranking("baseline_bm25", judgments[1].query, judgments[1].judgments, ["P8", "P3"]),
-        *pending_rows("enriched_profile", judgments, "pending fixture"),
+        evaluate_ranking("baseline_bm25", judgments[0].query, judgments[0].judgments, ["P9", "P2"]),
+        evaluate_ranking("enriched_profile", judgments[0].query, judgments[0].judgments, ["P1", "P2"]),
+        evaluate_ranking("baseline_bm25", judgments[1].query, judgments[1].judgments, ["P8"]),
+        evaluate_ranking("enriched_profile", judgments[1].query, judgments[1].judgments, ["P3"]),
     ]
 
     report = build_report(rows, query_count=len(judgments))
@@ -42,9 +42,10 @@ def test_report_generation_from_fixture(tmp_path: Path):
     write_markdown_report(report, markdown_path)
 
     assert report["query_count"] == 2
+    enriched = next(row for row in report["summary"] if row["strategy"] == "enriched_profile")
+    assert enriched["delta_ndcg_at_10"] > 0
     assert json_path.exists()
     markdown = markdown_path.read_text(encoding="utf-8")
-    assert "Product Search Relevance Report" in markdown
-    assert "baseline_bm25" in markdown
+    assert "Delta nDCG@10" in markdown
     assert "enriched_profile" in markdown
-    assert "pending fixture" in markdown
+    assert "yes" in markdown

@@ -55,6 +55,7 @@ def test_bulk_action_generation_uses_index_and_source_document():
     assert operations[0] == {"index": {"_index": "products-v1", "_id": "P-action-001"}}
     assert operations[1]["product_id"] == "P-action-001"
     assert operations[1]["catalog_text"].startswith("Test Product")
+    assert operations[1]["search_profile"].startswith("Product: Test Product.")
     assert operations[1]["indexed_at"] == "2026-05-01T12:00:00Z"
     assert operations[1]["source_versions"]["sample_jsonl"] == "2026-04-20T10:15:00Z"
 

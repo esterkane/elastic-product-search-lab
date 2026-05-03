@@ -58,52 +58,61 @@ def evaluate_ranking(strategy: str, query: str, judgments: dict[str, int], ranke
     )
 
 
-def pending_rows(strategy: str, judgments: list[QueryJudgment], note: str) -> list[StrategyEvaluationRow]:
-    return [
-        StrategyEvaluationRow(
-            strategy=strategy,
-            query=row.query,
-            status="pending",
-            precision_at_5=0.0,
-            recall_at_5=0.0,
-            mrr_at_10=0.0,
-            ndcg_at_10=0.0,
-            ranked_product_ids=[],
-            note=note,
-        )
-        for row in judgments
-    ]
-
-
-def aggregate_by_strategy(rows: list[StrategyEvaluationRow]) -> list[dict[str, Any]]:
+def aggregate_by_strategy(rows: list[StrategyEvaluationRow], baseline_strategy: str) -> list[dict[str, Any]]:
     grouped: dict[str, list[StrategyEvaluationRow]] = defaultdict(list)
     for row in rows:
         grouped[row.strategy].append(row)
 
-    summary: list[dict[str, Any]] = []
+    raw_summary: dict[str, dict[str, Any]] = {}
     for strategy in sorted(grouped):
         strategy_rows = grouped[strategy]
         ok_rows = [row for row in strategy_rows if row.status == "ok"]
-        summary.append(
-            {
-                "strategy": strategy,
-                "status": "ok" if ok_rows else "pending",
-                "evaluated_queries": len(ok_rows),
-                "pending_queries": len(strategy_rows) - len(ok_rows),
-                "precision_at_5": mean(row.precision_at_5 for row in ok_rows) if ok_rows else 0.0,
-                "recall_at_5": mean(row.recall_at_5 for row in ok_rows) if ok_rows else 0.0,
-                "mrr_at_10": mean(row.mrr_at_10 for row in ok_rows) if ok_rows else 0.0,
-                "ndcg_at_10": mean(row.ndcg_at_10 for row in ok_rows) if ok_rows else 0.0,
-            }
-        )
-    return summary
+        raw_summary[strategy] = {
+            "strategy": strategy,
+            "status": "ok" if ok_rows else "pending",
+            "evaluated_queries": len(ok_rows),
+            "pending_queries": len(strategy_rows) - len(ok_rows),
+            "precision_at_5": mean(row.precision_at_5 for row in ok_rows) if ok_rows else 0.0,
+            "recall_at_5": mean(row.recall_at_5 for row in ok_rows) if ok_rows else 0.0,
+            "mrr_at_10": mean(row.mrr_at_10 for row in ok_rows) if ok_rows else 0.0,
+            "ndcg_at_10": mean(row.ndcg_at_10 for row in ok_rows) if ok_rows else 0.0,
+        }
+
+    baseline = raw_summary.get(baseline_strategy, {})
+    for summary in raw_summary.values():
+        summary["delta_precision_at_5"] = summary["precision_at_5"] - baseline.get("precision_at_5", 0.0)
+        summary["delta_recall_at_5"] = summary["recall_at_5"] - baseline.get("recall_at_5", 0.0)
+        summary["delta_mrr_at_10"] = summary["mrr_at_10"] - baseline.get("mrr_at_10", 0.0)
+        summary["delta_ndcg_at_10"] = summary["ndcg_at_10"] - baseline.get("ndcg_at_10", 0.0)
+    return [raw_summary[strategy] for strategy in sorted(raw_summary)]
 
 
-def build_report(rows: list[StrategyEvaluationRow], query_count: int) -> dict[str, Any]:
+def _score_tuple(row: StrategyEvaluationRow) -> tuple[float, float, float, float]:
+    return (row.ndcg_at_10, row.mrr_at_10, row.recall_at_5, row.precision_at_5)
+
+
+def winners_by_query(rows: list[StrategyEvaluationRow]) -> dict[str, list[str]]:
+    grouped: dict[str, list[StrategyEvaluationRow]] = defaultdict(list)
+    for row in rows:
+        if row.status == "ok":
+            grouped[row.query].append(row)
+    winners: dict[str, list[str]] = {}
+    for query, query_rows in grouped.items():
+        best_score = max(_score_tuple(row) for row in query_rows)
+        if best_score == (0.0, 0.0, 0.0, 0.0):
+            winners[query] = []
+            continue
+        winners[query] = [row.strategy for row in query_rows if _score_tuple(row) == best_score]
+    return winners
+
+
+def build_report(rows: list[StrategyEvaluationRow], query_count: int, baseline_strategy: str = "baseline_bm25") -> dict[str, Any]:
+    winners = winners_by_query(rows)
     return {
         "query_count": query_count,
-        "summary": aggregate_by_strategy(rows),
-        "per_query": [asdict(row) for row in rows],
+        "baseline_strategy": baseline_strategy,
+        "summary": aggregate_by_strategy(rows, baseline_strategy),
+        "per_query": [{**asdict(row), "winners": winners.get(row.query, [])} for row in rows],
     }
 
 
@@ -118,16 +127,18 @@ def write_markdown_report(report: dict[str, Any], path: Path) -> None:
         "# Product Search Relevance Report",
         "",
         f"Evaluated queries: {report['query_count']}",
+        f"Baseline strategy: `{report['baseline_strategy']}`",
         "",
         "## Strategy Summary",
         "",
-        "| Strategy | Status | Evaluated Queries | Pending Queries | Precision@5 | Recall@5 | MRR@10 | nDCG@10 |",
+        "| Strategy | Status | Evaluated Queries | Precision@5 | Recall@5 | MRR@10 | nDCG@10 | Delta nDCG@10 |",
         "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for row in report["summary"]:
         lines.append(
-            f"| {row['strategy']} | {row['status']} | {row['evaluated_queries']} | {row['pending_queries']} | "
-            f"{row['precision_at_5']:.3f} | {row['recall_at_5']:.3f} | {row['mrr_at_10']:.3f} | {row['ndcg_at_10']:.3f} |"
+            f"| {row['strategy']} | {row['status']} | {row['evaluated_queries']} | "
+            f"{row['precision_at_5']:.3f} | {row['recall_at_5']:.3f} | {row['mrr_at_10']:.3f} | "
+            f"{row['ndcg_at_10']:.3f} | {row['delta_ndcg_at_10']:+.3f} |"
         )
 
     lines.extend(
@@ -135,15 +146,16 @@ def write_markdown_report(report: dict[str, Any], path: Path) -> None:
             "",
             "## Per-Query Results",
             "",
-            "| Query | Strategy | Status | Precision@5 | Recall@5 | MRR@10 | nDCG@10 | Top Results | Note |",
-            "| --- | --- | --- | ---: | ---: | ---: | ---: | --- | --- |",
+            "| Query | Strategy | Winner | Precision@5 | Recall@5 | MRR@10 | nDCG@10 | Top Results |",
+            "| --- | --- | --- | ---: | ---: | ---: | ---: | --- |",
         ]
     )
     for row in report["per_query"]:
         top_results = ", ".join(row["ranked_product_ids"][:5]) or "none"
+        winner = "tie" if row["strategy"] in row["winners"] and len(row["winners"]) > 1 else ("yes" if row["strategy"] in row["winners"] else "")
         lines.append(
-            f"| {row['query']} | {row['strategy']} | {row['status']} | {row['precision_at_5']:.3f} | "
-            f"{row['recall_at_5']:.3f} | {row['mrr_at_10']:.3f} | {row['ndcg_at_10']:.3f} | {top_results} | {row['note']} |"
+            f"| {row['query']} | {row['strategy']} | {winner} | {row['precision_at_5']:.3f} | "
+            f"{row['recall_at_5']:.3f} | {row['mrr_at_10']:.3f} | {row['ndcg_at_10']:.3f} | {top_results} |"
         )
 
     lines.extend(
@@ -151,7 +163,7 @@ def write_markdown_report(report: dict[str, Any], path: Path) -> None:
             "",
             "## Notes",
             "",
-            "`enriched_profile` is included as a pending strategy until enriched product-profile fields are added to the index.",
+            "`search_profile` is deterministic ingestion-time text enrichment built from product fields. The `enriched_profile` strategy searches that field plus title/category/brand context.",
             "Metrics are deterministic and use the checked-in judgment list under `data/judgments/product_search_judgments.json`.",
         ]
     )

@@ -68,3 +68,7 @@ def test_attributes_and_source_versions_are_flattened():
 
     assert properties["attributes"]["type"] == "flattened"
     assert properties["source_versions"]["type"] == "flattened"
+
+
+def test_search_profile_is_text():
+    assert load_properties()["search_profile"]["type"] == "text"

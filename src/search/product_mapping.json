@@ -1,78 +1,84 @@
 {
-  "settings": {
-    "analysis": {
-      "normalizer": {
-        "lowercase_normalizer": {
-          "type": "custom",
-          "filter": ["lowercase", "asciifolding"]
-        }
-      }
-    }
-  },
-  "mappings": {
-    "dynamic": "strict",
-    "properties": {
-      "product_id": {
-        "type": "keyword"
-      },
-      "title": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256,
-            "normalizer": "lowercase_normalizer"
-          }
-        }
-      },
-      "description": {
-        "type": "text"
-      },
-      "brand": {
-        "type": "keyword",
-        "normalizer": "lowercase_normalizer"
-      },
-      "category": {
-        "type": "keyword",
-        "normalizer": "lowercase_normalizer"
-      },
-      "attributes": {
-        "type": "flattened"
-      },
-      "price": {
-        "type": "scaled_float",
-        "scaling_factor": 100
-      },
-      "currency": {
-        "type": "keyword"
-      },
-      "availability": {
-        "type": "keyword"
-      },
-      "popularity_score": {
-        "type": "float"
-      },
-      "seller_id": {
-        "type": "keyword"
-      },
-      "source_versions": {
-        "type": "flattened"
-      },
-      "updated_at": {
-        "type": "date"
-      },
-      "indexed_at": {
-        "type": "date"
-      },
-      "catalog_text": {
-        "type": "text"
-      },
-      "embedding": {
-        "type": "dense_vector",
-        "dims": 384,
-        "index": true,
-        "similarity": "cosine"
-      }
-    }
-  }
+    "settings":  {
+                     "analysis":  {
+                                      "normalizer":  {
+                                                         "lowercase_normalizer":  {
+                                                                                      "type":  "custom",
+                                                                                      "filter":  [
+                                                                                                     "lowercase",
+                                                                                                     "asciifolding"
+                                                                                                 ]
+                                                                                  }
+                                                     }
+                                  }
+                 },
+    "mappings":  {
+                     "dynamic":  "strict",
+                     "properties":  {
+                                        "product_id":  {
+                                                           "type":  "keyword"
+                                                       },
+                                        "title":  {
+                                                      "type":  "text",
+                                                      "fields":  {
+                                                                     "keyword":  {
+                                                                                     "type":  "keyword",
+                                                                                     "ignore_above":  256,
+                                                                                     "normalizer":  "lowercase_normalizer"
+                                                                                 }
+                                                                 }
+                                                  },
+                                        "description":  {
+                                                            "type":  "text"
+                                                        },
+                                        "brand":  {
+                                                      "type":  "keyword",
+                                                      "normalizer":  "lowercase_normalizer"
+                                                  },
+                                        "category":  {
+                                                         "type":  "keyword",
+                                                         "normalizer":  "lowercase_normalizer"
+                                                     },
+                                        "attributes":  {
+                                                           "type":  "flattened"
+                                                       },
+                                        "price":  {
+                                                      "type":  "scaled_float",
+                                                      "scaling_factor":  100
+                                                  },
+                                        "currency":  {
+                                                         "type":  "keyword"
+                                                     },
+                                        "availability":  {
+                                                             "type":  "keyword"
+                                                         },
+                                        "popularity_score":  {
+                                                                 "type":  "float"
+                                                             },
+                                        "seller_id":  {
+                                                          "type":  "keyword"
+                                                      },
+                                        "source_versions":  {
+                                                                "type":  "flattened"
+                                                            },
+                                        "updated_at":  {
+                                                           "type":  "date"
+                                                       },
+                                        "indexed_at":  {
+                                                           "type":  "date"
+                                                       },
+                                        "catalog_text":  {
+                                                             "type":  "text"
+                                                         },
+                                        "embedding":  {
+                                                          "type":  "dense_vector",
+                                                          "dims":  384,
+                                                          "index":  true,
+                                                          "similarity":  "cosine"
+                                                      },
+                                        "search_profile":  {
+                                                               "type":  "text"
+                                                           }
+                                    }
+                 }
 }

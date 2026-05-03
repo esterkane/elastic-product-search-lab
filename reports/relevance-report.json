@@ -1,4 +1,5 @@
 {
+  "baseline_strategy": "baseline_bm25",
   "per_query": [
     {
       "mrr_at_10": 0.0,
@@ -9,7 +10,11 @@
       "ranked_product_ids": [],
       "recall_at_5": 0.0,
       "status": "ok",
-      "strategy": "baseline_bm25"
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25",
+        "enriched_profile"
+      ]
     },
     {
       "mrr_at_10": 1.0,
@@ -22,7 +27,28 @@
       ],
       "recall_at_5": 0.5,
       "status": "ok",
-      "strategy": "boosted_bm25"
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25",
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.7871546029909718,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "wireless noise cancelling headphones",
+      "ranked_product_ids": [
+        "P100002"
+      ],
+      "recall_at_5": 0.5,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25",
+        "enriched_profile"
+      ]
     },
     {
       "mrr_at_10": 0.0,
@@ -33,7 +59,8 @@
       "ranked_product_ids": [],
       "recall_at_5": 0.0,
       "status": "ok",
-      "strategy": "baseline_bm25"
+      "strategy": "baseline_bm25",
+      "winners": []
     },
     {
       "mrr_at_10": 0.0,
@@ -44,7 +71,20 @@
       "ranked_product_ids": [],
       "recall_at_5": 0.0,
       "status": "ok",
-      "strategy": "boosted_bm25"
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "cheap running shoes",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
     },
     {
       "mrr_at_10": 0.0,
@@ -55,7 +95,10 @@
       "ranked_product_ids": [],
       "recall_at_5": 0.0,
       "status": "ok",
-      "strategy": "baseline_bm25"
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
     },
     {
       "mrr_at_10": 0.0,
@@ -66,7 +109,29 @@
       "ranked_product_ids": [],
       "recall_at_5": 0.0,
       "status": "ok",
-      "strategy": "boosted_bm25"
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "note": "",
+      "precision_at_5": 0.5,
+      "query": "coffee machine with grinder",
+      "ranked_product_ids": [
+        "P100017",
+        "P100001",
+        "P100011",
+        "P100021"
+      ],
+      "recall_at_5": 1.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
     },
     {
       "mrr_at_10": 0.0,
@@ -77,7 +142,10 @@
       "ranked_product_ids": [],
       "recall_at_5": 0.0,
       "status": "ok",
-      "strategy": "baseline_bm25"
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
     },
     {
       "mrr_at_10": 1.0,
@@ -90,7 +158,28 @@
       ],
       "recall_at_5": 0.5,
       "status": "ok",
-      "strategy": "boosted_bm25"
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.9173194127129571,
+      "note": "",
+      "precision_at_5": 0.3333333333333333,
+      "query": "laptop backpack waterproof",
+      "ranked_product_ids": [
+        "P100003",
+        "P100005",
+        "P100022"
+      ],
+      "recall_at_5": 0.5,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
     },
     {
       "mrr_at_10": 0.0,
@@ -101,7 +190,10 @@
       "ranked_product_ids": [],
       "recall_at_5": 0.0,
       "status": "ok",
-      "strategy": "baseline_bm25"
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
     },
     {
       "mrr_at_10": 0.0,
@@ -112,7 +204,28 @@
       "ranked_product_ids": [],
       "recall_at_5": 0.0,
       "status": "ok",
-      "strategy": "boosted_bm25"
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.8145672023038535,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "gift for gamer",
+      "ranked_product_ids": [
+        "P100010",
+        "P100013",
+        "P100022"
+      ],
+      "recall_at_5": 1.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
     },
     {
       "mrr_at_10": 0.0,
@@ -123,7 +236,8 @@
       "ranked_product_ids": [],
       "recall_at_5": 0.0,
       "status": "ok",
-      "strategy": "baseline_bm25"
+      "strategy": "baseline_bm25",
+      "winners": []
     },
     {
       "mrr_at_10": 0.0,
@@ -134,7 +248,20 @@
       "ranked_product_ids": [],
       "recall_at_5": 0.0,
       "status": "ok",
-      "strategy": "boosted_bm25"
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "organic baby food",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
     },
     {
       "mrr_at_10": 1.0,
@@ -147,7 +274,10 @@
       ],
       "recall_at_5": 0.3333333333333333,
       "status": "ok",
-      "strategy": "baseline_bm25"
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
     },
     {
       "mrr_at_10": 1.0,
@@ -160,7 +290,28 @@
       ],
       "recall_at_5": 0.3333333333333333,
       "status": "ok",
-      "strategy": "boosted_bm25"
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "usb c laptop charger",
+      "ranked_product_ids": [
+        "P100018",
+        "P100013",
+        "P100008"
+      ],
+      "recall_at_5": 1.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
     },
     {
       "mrr_at_10": 1.0,
@@ -173,7 +324,11 @@
       ],
       "recall_at_5": 0.3333333333333333,
       "status": "ok",
-      "strategy": "baseline_bm25"
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25",
+        "enriched_profile"
+      ]
     },
     {
       "mrr_at_10": 1.0,
@@ -187,7 +342,29 @@
       ],
       "recall_at_5": 0.6666666666666666,
       "status": "ok",
-      "strategy": "boosted_bm25"
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25",
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.9467676761267002,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "insulated stainless steel water bottle",
+      "ranked_product_ids": [
+        "P100007",
+        "P100019"
+      ],
+      "recall_at_5": 0.6666666666666666,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25",
+        "enriched_profile"
+      ]
     },
     {
       "mrr_at_10": 0.0,
@@ -198,7 +375,11 @@
       "ranked_product_ids": [],
       "recall_at_5": 0.0,
       "status": "ok",
-      "strategy": "baseline_bm25"
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25",
+        "enriched_profile"
+      ]
     },
     {
       "mrr_at_10": 1.0,
@@ -211,7 +392,28 @@
       ],
       "recall_at_5": 0.3333333333333333,
       "status": "ok",
-      "strategy": "boosted_bm25"
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25",
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.8609101556836468,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "cast iron pan for camping",
+      "ranked_product_ids": [
+        "P100023"
+      ],
+      "recall_at_5": 0.3333333333333333,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25",
+        "enriched_profile"
+      ]
     },
     {
       "mrr_at_10": 0.0,
@@ -222,7 +424,11 @@
       "ranked_product_ids": [],
       "recall_at_5": 0.0,
       "status": "ok",
-      "strategy": "baseline_bm25"
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25",
+        "enriched_profile"
+      ]
     },
     {
       "mrr_at_10": 1.0,
@@ -235,122 +441,37 @@
       ],
       "recall_at_5": 1.0,
       "status": "ok",
-      "strategy": "boosted_bm25"
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25",
+        "enriched_profile"
+      ]
     },
     {
-      "mrr_at_10": 0.0,
-      "ndcg_at_10": 0.0,
-      "note": "Pending: enriched_profile requires enriched product-profile fields in the index.",
-      "precision_at_5": 0.0,
-      "query": "wireless noise cancelling headphones",
-      "ranked_product_ids": [],
-      "recall_at_5": 0.0,
-      "status": "pending",
-      "strategy": "enriched_profile"
-    },
-    {
-      "mrr_at_10": 0.0,
-      "ndcg_at_10": 0.0,
-      "note": "Pending: enriched_profile requires enriched product-profile fields in the index.",
-      "precision_at_5": 0.0,
-      "query": "cheap running shoes",
-      "ranked_product_ids": [],
-      "recall_at_5": 0.0,
-      "status": "pending",
-      "strategy": "enriched_profile"
-    },
-    {
-      "mrr_at_10": 0.0,
-      "ndcg_at_10": 0.0,
-      "note": "Pending: enriched_profile requires enriched product-profile fields in the index.",
-      "precision_at_5": 0.0,
-      "query": "coffee machine with grinder",
-      "ranked_product_ids": [],
-      "recall_at_5": 0.0,
-      "status": "pending",
-      "strategy": "enriched_profile"
-    },
-    {
-      "mrr_at_10": 0.0,
-      "ndcg_at_10": 0.0,
-      "note": "Pending: enriched_profile requires enriched product-profile fields in the index.",
-      "precision_at_5": 0.0,
-      "query": "laptop backpack waterproof",
-      "ranked_product_ids": [],
-      "recall_at_5": 0.0,
-      "status": "pending",
-      "strategy": "enriched_profile"
-    },
-    {
-      "mrr_at_10": 0.0,
-      "ndcg_at_10": 0.0,
-      "note": "Pending: enriched_profile requires enriched product-profile fields in the index.",
-      "precision_at_5": 0.0,
-      "query": "gift for gamer",
-      "ranked_product_ids": [],
-      "recall_at_5": 0.0,
-      "status": "pending",
-      "strategy": "enriched_profile"
-    },
-    {
-      "mrr_at_10": 0.0,
-      "ndcg_at_10": 0.0,
-      "note": "Pending: enriched_profile requires enriched product-profile fields in the index.",
-      "precision_at_5": 0.0,
-      "query": "organic baby food",
-      "ranked_product_ids": [],
-      "recall_at_5": 0.0,
-      "status": "pending",
-      "strategy": "enriched_profile"
-    },
-    {
-      "mrr_at_10": 0.0,
-      "ndcg_at_10": 0.0,
-      "note": "Pending: enriched_profile requires enriched product-profile fields in the index.",
-      "precision_at_5": 0.0,
-      "query": "usb c laptop charger",
-      "ranked_product_ids": [],
-      "recall_at_5": 0.0,
-      "status": "pending",
-      "strategy": "enriched_profile"
-    },
-    {
-      "mrr_at_10": 0.0,
-      "ndcg_at_10": 0.0,
-      "note": "Pending: enriched_profile requires enriched product-profile fields in the index.",
-      "precision_at_5": 0.0,
-      "query": "insulated stainless steel water bottle",
-      "ranked_product_ids": [],
-      "recall_at_5": 0.0,
-      "status": "pending",
-      "strategy": "enriched_profile"
-    },
-    {
-      "mrr_at_10": 0.0,
-      "ndcg_at_10": 0.0,
-      "note": "Pending: enriched_profile requires enriched product-profile fields in the index.",
-      "precision_at_5": 0.0,
-      "query": "cast iron pan for camping",
-      "ranked_product_ids": [],
-      "recall_at_5": 0.0,
-      "status": "pending",
-      "strategy": "enriched_profile"
-    },
-    {
-      "mrr_at_10": 0.0,
-      "ndcg_at_10": 0.0,
-      "note": "Pending: enriched_profile requires enriched product-profile fields in the index.",
-      "precision_at_5": 0.0,
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "note": "",
+      "precision_at_5": 1.0,
       "query": "waterproof ebook reader",
-      "ranked_product_ids": [],
-      "recall_at_5": 0.0,
-      "status": "pending",
-      "strategy": "enriched_profile"
+      "ranked_product_ids": [
+        "P100005"
+      ],
+      "recall_at_5": 1.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25",
+        "enriched_profile"
+      ]
     }
   ],
   "query_count": 10,
   "summary": [
     {
+      "delta_mrr_at_10": 0.0,
+      "delta_ndcg_at_10": 0.0,
+      "delta_precision_at_5": 0.0,
+      "delta_recall_at_5": 0.0,
       "evaluated_queries": 10,
       "mrr_at_10": 0.2,
       "ndcg_at_10": 0.14905050684523952,
@@ -361,6 +482,10 @@
       "strategy": "baseline_bm25"
     },
     {
+      "delta_mrr_at_10": 0.39999999999999997,
+      "delta_ndcg_at_10": 0.37668993132880785,
+      "delta_precision_at_5": 0.39999999999999997,
+      "delta_recall_at_5": 0.26666666666666666,
       "evaluated_queries": 10,
       "mrr_at_10": 0.6,
       "ndcg_at_10": 0.5257404381740474,
@@ -371,13 +496,17 @@
       "strategy": "boosted_bm25"
     },
     {
-      "evaluated_queries": 0,
-      "mrr_at_10": 0.0,
-      "ndcg_at_10": 0.0,
-      "pending_queries": 10,
-      "precision_at_5": 0.0,
-      "recall_at_5": 0.0,
-      "status": "pending",
+      "delta_mrr_at_10": 0.6000000000000001,
+      "delta_ndcg_at_10": 0.5836213981365734,
+      "delta_precision_at_5": 0.48333333333333334,
+      "delta_recall_at_5": 0.5333333333333333,
+      "evaluated_queries": 10,
+      "mrr_at_10": 0.8,
+      "ndcg_at_10": 0.7326719049818129,
+      "pending_queries": 0,
+      "precision_at_5": 0.6833333333333333,
+      "recall_at_5": 0.6,
+      "status": "ok",
       "strategy": "enriched_profile"
     }
   ]
