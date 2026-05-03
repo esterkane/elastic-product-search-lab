@@ -1,6 +1,6 @@
 # Elastic Product Search Relevance Lab
 
-This project demonstrates measurable e-commerce search improvement with Elasticsearch. It covers product mappings, deterministic ingestion, `search_profile` enrichment, BM25 search strategies, judgment-list evaluation, relevance metrics, latency benchmarks, and local quality gates that compare relevance and performance together.
+This project demonstrates a measurable e-commerce search evaluation workflow with Elasticsearch. It compares product mappings, deterministic ingestion, `search_profile` enrichment, BM25 search strategies, judgment-list relevance metrics, latency benchmarks, and local quality gates that compare relevance and performance together.
 
 ## Why This Exists
 
@@ -14,7 +14,7 @@ Product search relevance is not guesswork. Search changes should be evaluated wi
 - [x] BM25 and boosted search strategies
 - [x] Judgment-list relevance evaluation
 - [x] Latency benchmarking with p50/p95/p99
-- [x] CI and local search quality gates
+- [x] CI checks plus local search quality gates
 - [x] JSON and Markdown reports for review
 
 ## Architecture
@@ -111,6 +111,8 @@ The sample-catalog report is intentionally easier and lives in `reports/relevanc
 ## Kibana Demo
 
 The Kibana-only walkthrough is documented in `docs/kibana_search_demo.md`. It explains the captured Dev Tools outcomes for index scale, mappings, baseline search, `search_profile` enrichment, `_explain`, `_profile`, slow-query troubleshooting, and field-type mistakes.
+
+Use this page as the Kibana UI test script for the project. The collapsible Dev Tools queries can be run directly in Kibana to verify the index, inspect mappings, compare good and bad query shapes, profile latency, and document why specific field types are used.
 
 ## Search Quality Gate
 
