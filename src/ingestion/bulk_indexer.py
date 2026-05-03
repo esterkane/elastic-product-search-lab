@@ -35,11 +35,17 @@ def log_event(event: str, **fields: Any) -> None:
     LOGGER.info(json.dumps({"event": event, **fields}, sort_keys=True))
 
 
-def chunked(items: Sequence[Product], batch_size: int) -> Iterable[list[Product]]:
+def chunked(items: Iterable[Product], batch_size: int) -> Iterable[list[Product]]:
     if batch_size < 1:
         raise ValueError("batch_size must be at least 1")
-    for start in range(0, len(items), batch_size):
-        yield list(items[start : start + batch_size])
+    batch: list[Product] = []
+    for item in items:
+        batch.append(item)
+        if len(batch) == batch_size:
+            yield batch
+            batch = []
+    if batch:
+        yield batch
 
 
 def product_document_id(product: Product) -> str:
@@ -88,7 +94,7 @@ def _split_bulk_result(
 
 def bulk_index_products(
     client: Any,
-    products: Sequence[Product],
+    products: Iterable[Product],
     index_name: str,
     batch_size: int = 100,
     max_retries: int = 3,
@@ -105,7 +111,7 @@ def bulk_index_products(
     failed_count = 0
     retry_count = 0
 
-    for batch in chunked(list(products), batch_size):
+    for batch in chunked(products, batch_size):
         pending = batch
         attempt = 0
 

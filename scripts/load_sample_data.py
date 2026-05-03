@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 
 from pydantic import ValidationError
@@ -23,16 +24,18 @@ DEFAULT_SAMPLE_PATH = PROJECT_ROOT / "data" / "sample" / "products.jsonl"
 
 
 def load_products(path: Path) -> list[Product]:
-    products: list[Product] = []
+    return list(iter_products(path))
+
+
+def iter_products(path: Path) -> Iterator[Product]:
     with path.open("r", encoding="utf-8") as sample_file:
         for line_number, line in enumerate(sample_file, start=1):
             if not line.strip():
                 continue
             try:
-                products.append(Product.model_validate(json.loads(line)))
+                yield Product.model_validate(json.loads(line))
             except (json.JSONDecodeError, ValidationError) as exc:
                 raise ValueError(f"Invalid product record on line {line_number}: {exc}") from exc
-    return products
 
 
 def parse_args() -> argparse.Namespace:
@@ -51,7 +54,7 @@ def main() -> int:
     try:
         ensure_reachable(client)
         create_index(client, args.index, recreate=False)
-        products = load_products(args.input)
+        products = iter_products(args.input)
         summary = bulk_index_products(client, products, args.index, batch_size=args.batch_size)
         client.indices.refresh(index=args.index)
         count = client.count(index=args.index, query={"match_all": {}})["count"]

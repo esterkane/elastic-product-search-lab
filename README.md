@@ -177,6 +177,22 @@ The full dataset is not committed because it is large raw benchmark data. Downlo
 .\.venv\Scripts\python.exe scripts\evaluate_search.py --judgments data\generated\esci_judgments.jsonl
 ```
 
+To prepare and index the complete local ESCI export instead of the capped sample:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\prepare_esci_sample.py `
+  --products data\raw\esci\shopping_queries_dataset_products.parquet `
+  --examples data\raw\esci\shopping_queries_dataset_examples.parquet `
+  --full
+.\.venv\Scripts\python.exe scripts\create_index.py --recreate
+.\.venv\Scripts\python.exe scripts\load_sample_data.py `
+  --input data\generated\esci_full_products.jsonl `
+  --batch-size 500
+.\.venv\Scripts\python.exe scripts\evaluate_search.py --judgments data\generated\esci_full_judgments.jsonl
+```
+
+The full raw files and generated full JSONL files remain local because `data/raw/*` and `data/generated/*` are ignored by Git.
+
 See `docs/esci_dataset.md` for details.
 
 ## Optional Hybrid Search

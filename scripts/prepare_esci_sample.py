@@ -1,4 +1,4 @@
-"""Prepare a lightweight sample from a local Amazon ESCI dataset copy."""
+"""Prepare local JSONL files from an Amazon ESCI dataset copy."""
 
 from __future__ import annotations
 
@@ -14,6 +14,8 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_PRODUCTS_OUT = PROJECT_ROOT / "data" / "generated" / "esci_products.jsonl"
 DEFAULT_JUDGMENTS_OUT = PROJECT_ROOT / "data" / "generated" / "esci_judgments.jsonl"
+DEFAULT_FULL_PRODUCTS_OUT = PROJECT_ROOT / "data" / "generated" / "esci_full_products.jsonl"
+DEFAULT_FULL_JUDGMENTS_OUT = PROJECT_ROOT / "data" / "generated" / "esci_full_judgments.jsonl"
 
 LABEL_TO_GRADE = {
     "e": 3,
@@ -106,6 +108,35 @@ def transform_judgment(record: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def prepare_esci_dataset(
+    products: list[dict[str, Any]],
+    examples: list[dict[str, Any]],
+    max_queries: int,
+    max_products: int,
+    seed: int = 7,
+    full: bool = False,
+    all_locales: bool = False,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    scoped_examples = list(examples) if all_locales else english_only(examples)
+    scoped_products = list(products) if all_locales else english_only(products)
+
+    if full:
+        selected_examples = [row for row in scoped_examples if row.get("query") and row.get("product_id")]
+    else:
+        selected_queries = set(sample_queries(scoped_examples, max_queries, seed))
+        selected_examples = [row for row in scoped_examples if str(row.get("query")) in selected_queries]
+
+    selected_product_ids = {str(row["product_id"]) for row in selected_examples if row.get("product_id")}
+    product_lookup = {str(row["product_id"]): row for row in scoped_products if row.get("product_id")}
+    selected_products = [product_lookup[product_id] for product_id in sorted(selected_product_ids) if product_id in product_lookup]
+    if not full:
+        selected_products = selected_products[:max_products]
+    kept_product_ids = {str(row["product_id"]) for row in selected_products}
+    selected_examples = [row for row in selected_examples if str(row.get("product_id")) in kept_product_ids]
+
+    return [transform_product(row) for row in selected_products], [transform_judgment(row) for row in selected_examples]
+
+
 def prepare_esci_sample(
     products: list[dict[str, Any]],
     examples: list[dict[str, Any]],
@@ -113,19 +144,15 @@ def prepare_esci_sample(
     max_products: int,
     seed: int = 7,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    english_examples = english_only(examples)
-    english_products = english_only(products)
-    selected_queries = set(sample_queries(english_examples, max_queries, seed))
-    selected_examples = [row for row in english_examples if str(row.get("query")) in selected_queries]
-
-    selected_product_ids = {str(row["product_id"]) for row in selected_examples if row.get("product_id")}
-    product_lookup = {str(row["product_id"]): row for row in english_products if row.get("product_id")}
-    selected_products = [product_lookup[product_id] for product_id in sorted(selected_product_ids) if product_id in product_lookup]
-    selected_products = selected_products[:max_products]
-    kept_product_ids = {str(row["product_id"]) for row in selected_products}
-    selected_examples = [row for row in selected_examples if str(row.get("product_id")) in kept_product_ids]
-
-    return [transform_product(row) for row in selected_products], [transform_judgment(row) for row in selected_examples]
+    return prepare_esci_dataset(
+        products,
+        examples,
+        max_queries=max_queries,
+        max_products=max_products,
+        seed=seed,
+        full=False,
+        all_locales=False,
+    )
 
 
 def write_jsonl(path: Path, records: list[dict[str, Any]]) -> None:
@@ -136,26 +163,35 @@ def write_jsonl(path: Path, records: list[dict[str, Any]]) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Prepare a small local sample from Amazon ESCI files.")
+    parser = argparse.ArgumentParser(description="Prepare local product and judgment JSONL files from Amazon ESCI files.")
     parser.add_argument("--products", type=Path, required=True, help="Path to ESCI products parquet, CSV, or JSONL file.")
     parser.add_argument("--examples", type=Path, required=True, help="Path to ESCI examples parquet, CSV, or JSONL file.")
+    parser.add_argument("--full", action="store_true", help="Prepare every matching local record instead of a capped sample.")
+    parser.add_argument("--all-locales", action="store_true", help="Keep every locale instead of filtering to English/US records.")
     parser.add_argument("--max-queries", type=int, default=100)
     parser.add_argument("--max-products", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=7)
-    parser.add_argument("--products-out", type=Path, default=DEFAULT_PRODUCTS_OUT)
-    parser.add_argument("--judgments-out", type=Path, default=DEFAULT_JUDGMENTS_OUT)
-    return parser.parse_args()
+    parser.add_argument("--products-out", type=Path)
+    parser.add_argument("--judgments-out", type=Path)
+    args = parser.parse_args()
+    if args.products_out is None:
+        args.products_out = DEFAULT_FULL_PRODUCTS_OUT if args.full else DEFAULT_PRODUCTS_OUT
+    if args.judgments_out is None:
+        args.judgments_out = DEFAULT_FULL_JUDGMENTS_OUT if args.full else DEFAULT_JUDGMENTS_OUT
+    return args
 
 
 def main() -> int:
     args = parse_args()
     try:
-        products, judgments = prepare_esci_sample(
+        products, judgments = prepare_esci_dataset(
             read_records(args.products),
             read_records(args.examples),
             max_queries=args.max_queries,
             max_products=args.max_products,
             seed=args.seed,
+            full=args.full,
+            all_locales=args.all_locales,
         )
         write_jsonl(args.products_out, products)
         write_jsonl(args.judgments_out, judgments)

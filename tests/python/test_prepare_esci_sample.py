@@ -1,6 +1,12 @@
 import json
 
-from scripts.prepare_esci_sample import map_esci_label, prepare_esci_sample, read_records, write_jsonl
+from scripts.prepare_esci_sample import (
+    map_esci_label,
+    prepare_esci_dataset,
+    prepare_esci_sample,
+    read_records,
+    write_jsonl,
+)
 
 
 def test_map_esci_label_supports_codes_and_names():
@@ -61,6 +67,47 @@ def test_prepare_esci_sample_caps_queries_and_products():
 
     assert len(transformed_products) == 1
     assert len(judgments) == 1
+
+
+def test_prepare_esci_dataset_full_mode_keeps_all_matching_english_records():
+    products = [
+        {"product_id": "P1", "product_title": "Mouse", "product_brand": "A", "product_locale": "us"},
+        {"product_id": "P2", "product_title": "Keyboard", "product_brand": "A", "product_locale": "us"},
+        {"product_id": "P3", "product_title": "Filtered", "product_brand": "A", "product_locale": "jp"},
+    ]
+    examples = [
+        {"query": "mouse", "product_id": "P1", "product_locale": "us", "esci_label": "E"},
+        {"query": "keyboard", "product_id": "P2", "product_locale": "us", "esci_label": "S"},
+        {"query": "filtered", "product_id": "P3", "product_locale": "jp", "esci_label": "E"},
+    ]
+
+    transformed_products, judgments = prepare_esci_dataset(
+        products,
+        examples,
+        max_queries=1,
+        max_products=1,
+        full=True,
+    )
+
+    assert [product["product_id"] for product in transformed_products] == ["P1", "P2"]
+    assert [judgment["product_id"] for judgment in judgments] == ["P1", "P2"]
+
+
+def test_prepare_esci_dataset_all_locales_keeps_non_english_when_requested():
+    products = [{"product_id": "P1", "product_title": "Japanese Product", "product_brand": "A", "product_locale": "jp"}]
+    examples = [{"query": "gift", "product_id": "P1", "product_locale": "jp", "esci_label": "C"}]
+
+    transformed_products, judgments = prepare_esci_dataset(
+        products,
+        examples,
+        max_queries=1,
+        max_products=1,
+        full=True,
+        all_locales=True,
+    )
+
+    assert transformed_products[0]["product_id"] == "P1"
+    assert judgments[0]["grade"] == 1
 
 
 def test_read_and_write_jsonl_fixture(tmp_path):
