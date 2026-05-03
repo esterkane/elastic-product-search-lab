@@ -1,5 +1,9 @@
 # Elastic Repo Inventory
 
+> **Work in progress:** This repository is an active prototype. APIs, data models, indexing behavior, UI copy, and deployment defaults may change as the release-intelligence workflow is refined.
+
+## Summary
+
 Elastic Repo Inventory is a local-first release-intelligence app for Elasticsearch documentation. It ingests selected Elastic source repositories, indexes Markdown chunks with source provenance, and helps search engineers understand what changed across Elasticsearch 8.x and 9.x.
 
 The current product focus is not a generic documentation browser. It is a version- and topic-aware briefing tool for questions like:
