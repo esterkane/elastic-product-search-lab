@@ -1,0 +1,6722 @@
+{
+  "baseline_strategy": "baseline_bm25",
+  "per_query": [
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "!awnmower tires without rims",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.1,
+      "ndcg_at_10": 0.010256826585794012,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "!awnmower tires without rims",
+      "ranked_product_ids": [
+        "B001THCJDE",
+        "B01BWMK2OI",
+        "B014H1430K",
+        "B0756N728C",
+        "B0859NJFKN",
+        "B08CRKMBN8",
+        "B07TKHX6BN",
+        "B07TMLMTWM",
+        "B000N6CTSC",
+        "B01M3SJ699"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "!awnmower tires without rims",
+      "ranked_product_ids": [
+        "B01BWMK2OI",
+        "B01ANIT126",
+        "B00ID51M9W",
+        "B014H1430K",
+        "B0859NJFKN",
+        "B0756N728C",
+        "B08CRKMBN8",
+        "B071ZX9JB7",
+        "B01M5FTE56",
+        "B01M715X5D"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "!qscreen fence without holes",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.2,
+      "ndcg_at_10": 0.085143117641621,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "!qscreen fence without holes",
+      "ranked_product_ids": [
+        "B082TZYKX4",
+        "B091TV7GL2",
+        "B01CDUJQIQ",
+        "B0001ZWZ8O",
+        "B08NG85RHL",
+        "B08CH1CV97",
+        "B074LBP1P8",
+        "B00INAW10G",
+        "B00KC65Z3E",
+        "B00XKIOLK4"
+      ],
+      "recall_at_5": 0.06666666666666667,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "!qscreen fence without holes",
+      "ranked_product_ids": [
+        "B082TZYKX4",
+        "B004VQE1DG",
+        "B091CPZ39Z",
+        "B00INAW10G",
+        "B00KC65Z3E",
+        "B01N0C1Y78",
+        "B091TV7GL2",
+        "B00GGWP9Z2",
+        "B01N9TJS1B",
+        "B00XKIOLK4"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.2504014551022894,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "# 10 self-seal envelopes without window",
+      "ranked_product_ids": [
+        "B08Y8VX63W",
+        "B08V352RY5",
+        "B08Y8TWR38",
+        "B08CK95JS3",
+        "B071VC47NS",
+        "B08Y97TG79",
+        "B01D0OANU4",
+        "B08CHKRPHD",
+        "B007YX2KB8",
+        "B07RP3F2LW"
+      ],
+      "recall_at_5": 0.029411764705882353,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.3024038304938509,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "# 10 self-seal envelopes without window",
+      "ranked_product_ids": [
+        "B07R4TGNCF",
+        "B078S5ZL5D",
+        "B078HHGY2L",
+        "B06W5294BW",
+        "B007YX2KB8",
+        "B07RP3F2LW",
+        "B07K4SGXRP",
+        "B08ZNLGLPF",
+        "B003BLQHYI",
+        "B07R2FCTJG"
+      ],
+      "recall_at_5": 0.058823529411764705,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.26847216343456615,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "# 10 self-seal envelopes without window",
+      "ranked_product_ids": [
+        "B08V352RY5",
+        "B078S5ZL5D",
+        "B071VC47NS",
+        "B0153SIHL2",
+        "B079H6L3CK",
+        "B08Y8TWR38",
+        "B08CK95JS3",
+        "B06WLLH755",
+        "B01D0OANU4",
+        "B07566JS34"
+      ],
+      "recall_at_5": 0.029411764705882353,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.3291896329197993,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "# 2 pencils not sharpened",
+      "ranked_product_ids": [
+        "B087J9MBXJ",
+        "B07Q391X7B",
+        "B07NH2D2CP",
+        "B06VSJ9LZ6",
+        "B072283ZL8",
+        "B07G7F6JZ6",
+        "B0891SSBJT",
+        "B07G2RYY6H",
+        "B07JZJLHCF",
+        "B07G2Q28PG"
+      ],
+      "recall_at_5": 0.05555555555555555,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "# 2 pencils not sharpened",
+      "ranked_product_ids": [
+        "B08DLXH86D",
+        "B088SZQY8R",
+        "B07PBT2K43",
+        "B075KKZSKC",
+        "B01FWSJQU4",
+        "B07PLL65S1",
+        "B07QX47R3W",
+        "B01FWSJQZO",
+        "B01FWSJSJ8",
+        "B01FWSJQHC"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "# 2 pencils not sharpened",
+      "ranked_product_ids": [
+        "B08158738F",
+        "B07RLBY1K2",
+        "B07ZQF4SCY",
+        "B07QPXWR15",
+        "B010WB6456",
+        "B08DTFXYF5",
+        "B07QX47R3W",
+        "B07PBT2K43",
+        "B07PQ6DR13",
+        "B07V227TD7"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.22009176629808017,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "# cellist thats not a hashtag",
+      "ranked_product_ids": [
+        "B08J5KBGPP"
+      ],
+      "recall_at_5": 0.07142857142857142,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "# cellist thats not a hashtag",
+      "ranked_product_ids": [
+        "B08J5KBGPP",
+        "B096LZW7J1",
+        "B096LXN8QP",
+        "B096LXW2LJ",
+        "B096LXNCN3",
+        "1091347697",
+        "B096LYWHC1",
+        "B096LMZMYT",
+        "1677867973",
+        "1092553924"
+      ],
+      "recall_at_5": 0.35714285714285715,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.7630946912803436,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "# cellist thats not a hashtag",
+      "ranked_product_ids": [
+        "1091347697",
+        "B0851M1499",
+        "1092553924",
+        "1677867973",
+        "B07NV8DB9Q",
+        "B07PCQGJW5",
+        "B07XZSBWX7",
+        "B08J5KBGPP",
+        "B096LZW7J1",
+        "B096LXN8QP"
+      ],
+      "recall_at_5": 0.2857142857142857,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.7104770117651424,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "# do not disturb",
+      "ranked_product_ids": [
+        "B0935926GC",
+        "B0023LX6FK",
+        "B00DSZPCB6",
+        "B00EPKRHTI",
+        "B07K8XRWK2",
+        "B00O5IUQ7U",
+        "B084VP3SG9",
+        "B089ZQJNGT",
+        "B06WGRKM3L",
+        "B07GVSVS5N"
+      ],
+      "recall_at_5": 0.1,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.6402900881481707,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "# do not disturb",
+      "ranked_product_ids": [
+        "B0935926GC",
+        "B0023LX6FK",
+        "B00DSZPCB6",
+        "B00EPKRHTI",
+        "B07K8XRWK2",
+        "B00O5IUQ7U",
+        "B07SW2TCTF",
+        "B084VP3SG9",
+        "B089ZQJNGT",
+        "B06WGRKM3L"
+      ],
+      "recall_at_5": 0.1,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.2735872697693364,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "# do not disturb",
+      "ranked_product_ids": [
+        "B01M64Y71U",
+        "B08VRWTQ97",
+        "B08HVFJVXT",
+        "B08HVN9DSV",
+        "B08TB4QVGN",
+        "B08B13XXCY",
+        "B08NG44GRM",
+        "B08NG6DXQK",
+        "B08NG7DGBP",
+        "B08NG7TXLG"
+      ],
+      "recall_at_5": 0.05,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.2894748880215386,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "# mom life",
+      "ranked_product_ids": [
+        "B07P653H3H",
+        "B07P99MVHJ",
+        "B07D1B9126",
+        "B07T277YBN",
+        "B07S8MNZPR",
+        "B07JH59BH7",
+        "B081D98139",
+        "B07GC9DZ2N",
+        "0800734327",
+        "B088CWQXVW"
+      ],
+      "recall_at_5": 0.15384615384615385,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.16667014736155777,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "# mom life",
+      "ranked_product_ids": [
+        "B07T277YBN",
+        "B07P653H3H",
+        "B07P99MVHJ",
+        "B07D1B9126",
+        "B07S8MNZPR",
+        "B073XLWDCM",
+        "B07JH59BH7",
+        "B081D98139",
+        "B07GC9DZ2N",
+        "0800734327"
+      ],
+      "recall_at_5": 0.15384615384615385,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "# mom life",
+      "ranked_product_ids": [
+        "B07MDJP4SN",
+        "B00DYOQJV8",
+        "B00DYOQKJ4",
+        "B00DYOQKP8",
+        "B00DYOQLKM",
+        "B07FN2M68P",
+        "B07FN6GTRB",
+        "B07QFCB8S9",
+        "B004RFI8OO",
+        "B00BTWEUPE"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.9580777588003657,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "# sharp not hashtag shirt",
+      "ranked_product_ids": [
+        "B07KFSSV7K",
+        "B07MKLHJT4",
+        "B073X2GY3N",
+        "B07S9PFC38",
+        "B074T22KRC",
+        "B00S8SEJKI",
+        "B01LIW1XOA",
+        "B072XRGBPX",
+        "B07BKFBMNY",
+        "B07BZ7PHYL"
+      ],
+      "recall_at_5": 0.13157894736842105,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.9580777588003657,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "# sharp not hashtag shirt",
+      "ranked_product_ids": [
+        "B07KFSSV7K",
+        "B07MKLHJT4",
+        "B073X2GY3N",
+        "B07S9PFC38",
+        "B074T22KRC",
+        "B00S8SEJKI",
+        "B01LIW1XOA",
+        "B072XRGBPX",
+        "B07BKFBMNY",
+        "B07BZ7PHYL"
+      ],
+      "recall_at_5": 0.13157894736842105,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "# sharp not hashtag shirt",
+      "ranked_product_ids": [
+        "B07N4NBRC1",
+        "B07NV8DB9Q",
+        "B07PCQGJW5",
+        "B07XZSBWX7",
+        "B07KFSSV7K",
+        "B07M7G13WD",
+        "B07MPNC5D2",
+        "B07CQNB4JP",
+        "B095JRXQ9C",
+        "B07NP3C83C"
+      ],
+      "recall_at_5": 0.13157894736842105,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#1 best and not expensive bath back brush cream color",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#1 best and not expensive bath back brush cream color",
+      "ranked_product_ids": [
+        "B06X1BQ748",
+        "B07CH3X72J",
+        "B07GRDGZMZ",
+        "B07GRHVZPJ",
+        "B0171L4G64",
+        "B018FYTG70",
+        "B07V9YW1HT",
+        "B01IT09GL6",
+        "B0836N1MHH",
+        "B00YE3JVHC"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#1 best and not expensive bath back brush cream color",
+      "ranked_product_ids": [
+        "B06X1BQ748",
+        "B0171L4G64",
+        "B07GRHVZPJ",
+        "B07CH3X72J",
+        "B07GRDGZMZ",
+        "B018FYTG70",
+        "B07ZM99LTB",
+        "B01LXLN9N8",
+        "B00YE3JVHC",
+        "B082WJ439N"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#1 black natural hair dye without ammonia or peroxide",
+      "ranked_product_ids": [
+        "B07CKFPLQV"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.13886244387355454,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#1 black natural hair dye without ammonia or peroxide",
+      "ranked_product_ids": [
+        "B00BWVZ5YC",
+        "B07C4QR12V",
+        "B08SQQB7MV",
+        "B07D5RL5Y4",
+        "B0037XUGYC",
+        "B00X8M0M96",
+        "B001E5EC4A",
+        "B001E5EC5E",
+        "B01IPA7PUY",
+        "B00118YOYI"
+      ],
+      "recall_at_5": 0.030303030303030304,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.16666666666666666,
+      "ndcg_at_10": 0.033599258133718,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#1 black natural hair dye without ammonia or peroxide",
+      "ranked_product_ids": [
+        "B00X8M0M96",
+        "B0037XUGYC",
+        "B07KJQDVM4",
+        "B00BEWWCU4",
+        "B00BOEEX04",
+        "B00BP8OQ4W",
+        "B00PFEFQX2",
+        "B0149MSUGU",
+        "B07KJSBMVC",
+        "B07KJWDSFS"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#1 rated resveratrol supplement without tea leaves",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.3995777949014422,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#1 rated resveratrol supplement without tea leaves",
+      "ranked_product_ids": [
+        "B07Y8XPLK1",
+        "B083F5WC2P",
+        "B0069RN8YI",
+        "B07S391Y5Q",
+        "B01HDV6N6I",
+        "B07WX6TGVG",
+        "B000GOX0JI",
+        "B01N5DAXTU",
+        "B06XTHKHQ3",
+        "B07KX5LXNX"
+      ],
+      "recall_at_5": 0.08333333333333333,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.5880219470291577,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "#1 rated resveratrol supplement without tea leaves",
+      "ranked_product_ids": [
+        "B07Y8XPLK1",
+        "B083F5WC2P",
+        "B08V1FLW6B",
+        "B07S391Y5Q",
+        "B07NRKDQPN",
+        "B002G75WZI",
+        "B07NP1M77P",
+        "B0069RN8YI",
+        "B014PW0NNC",
+        "B086VPGYXM"
+      ],
+      "recall_at_5": 0.1111111111111111,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#1 selling shoes for men without shoeleases",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#1 selling shoes for men without shoeleases",
+      "ranked_product_ids": [
+        "B07GDQLRZM",
+        "B07GDRBMKK",
+        "B07NVRQWBY",
+        "B07GGHCY6H",
+        "B07FQF6986",
+        "B07FQMLNX6",
+        "B07FQPN3C5",
+        "B0893QHGPC",
+        "B07QXPLTWT",
+        "B073BJZ5DS"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#1 selling shoes for men without shoeleases",
+      "ranked_product_ids": [
+        "B07FQF6986",
+        "B07FQMLNX6",
+        "B07FQPN3C5",
+        "B0871RT792",
+        "B07GDQLRZM",
+        "B07NVRQWBY",
+        "B073BJZ5DS",
+        "B07GDRBMKK",
+        "B07GGHCY6H",
+        "B07QXPLTWT"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#1 small corded treadmill without remote control",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.1720732452447385,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#1 small corded treadmill without remote control",
+      "ranked_product_ids": [
+        "B089CH6P5C",
+        "B08SBQRY3W",
+        "B0863LMHWZ",
+        "B07S5969LB",
+        "B08KXP3M2D",
+        "B081JDMJ4J",
+        "B081JMW6FJ",
+        "B08FFHBG22",
+        "B07KTSR8MP",
+        "B08KDPYML6"
+      ],
+      "recall_at_5": 0.07142857142857142,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.10644837059332632,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#1 small corded treadmill without remote control",
+      "ranked_product_ids": [
+        "B089CH6P5C",
+        "B08N9V3MBJ",
+        "B08M5CG4H3",
+        "B08HCGJJJK",
+        "B089LMQ87D",
+        "B08SBQRY3W",
+        "B0863LMHWZ",
+        "B07S5969LB",
+        "B081JDMJ4J",
+        "B081JMW6FJ"
+      ],
+      "recall_at_5": 0.07142857142857142,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.38076355201602463,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "#10 cans applesauce",
+      "ranked_product_ids": [
+        "B00CF5AARQ"
+      ],
+      "recall_at_5": 0.125,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.38076355201602463,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#10 cans applesauce",
+      "ranked_product_ids": [
+        "B00CF5AARQ",
+        "B00T7CKW6Y",
+        "B07WDT3WM9",
+        "B0829FTMMP",
+        "B0967CYJ6H",
+        "B07Z7V9H88",
+        "B08CGT5G42",
+        "B079J7QS6K",
+        "B07Z8SHLGQ",
+        "B07WDM3RB1"
+      ],
+      "recall_at_5": 0.125,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.4388910007946906,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#10 cans applesauce",
+      "ranked_product_ids": [
+        "B00CF5AARQ",
+        "B07WDT3WM9",
+        "B07C3435PP",
+        "B079J7QS6K",
+        "B0829FTMMP",
+        "B07C2SVB83",
+        "B07C37KZQD",
+        "B07C2SY9G9",
+        "B095WNDJHZ",
+        "B08RDZWDK8"
+      ],
+      "recall_at_5": 0.125,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.424926013816671,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#10 envelopes self seal",
+      "ranked_product_ids": [
+        "B07R4TGNCF",
+        "B078HHGY2L",
+        "B078S5ZL5D",
+        "B06VVLD2GL",
+        "B01N175R8R",
+        "B06W5294BW",
+        "B082489J69",
+        "B08G14MTVW",
+        "B08ZNLGLPF",
+        "B08V3S1926"
+      ],
+      "recall_at_5": 0.1875,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.4225749983705864,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "#10 envelopes self seal",
+      "ranked_product_ids": [
+        "B07R4TGNCF",
+        "B078S5ZL5D",
+        "B078HHGY2L",
+        "B003BLQHYI",
+        "B07VBPZJV8",
+        "B07VH1MVRP",
+        "B07VH2VTNQ",
+        "B085457J94",
+        "B01N175R8R",
+        "B06VVLD2GL"
+      ],
+      "recall_at_5": 0.125,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.466277471763641,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#10 envelopes self seal",
+      "ranked_product_ids": [
+        "B078S5ZL5D",
+        "B08V3S1926",
+        "B08V3W382H",
+        "B07R4TGNCF",
+        "B016V06OYS",
+        "B074M9FN2P",
+        "B08V352RY5",
+        "B07935FRJ2",
+        "B01D0OANU4",
+        "B07G4KSW3L"
+      ],
+      "recall_at_5": 0.1875,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.37796681117387326,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#10 envelopes without security tint",
+      "ranked_product_ids": [
+        "B016V06OYS",
+        "B01D0OANU4",
+        "B085WJMWC9",
+        "B08Y8VX63W",
+        "B07CXXVXLC",
+        "B08NW4LRQC",
+        "B08P2FWYKG",
+        "B08Y8TWR38",
+        "B074M9XL6R",
+        "B07GJCSF8Z"
+      ],
+      "recall_at_5": 0.1,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.417731702037531,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "#10 envelopes without security tint",
+      "ranked_product_ids": [
+        "B07R4TGNCF",
+        "B078S5ZL5D",
+        "B07GJKFC5X",
+        "B07GJCSF8Z",
+        "B08G14MTVW",
+        "B075HBY7DY",
+        "B07RP3F2LW",
+        "B0032JZ3EY",
+        "B07K4SGXRP",
+        "B0797PN46S"
+      ],
+      "recall_at_5": 0.13333333333333333,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.310982987607801,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "#10 envelopes without security tint",
+      "ranked_product_ids": [
+        "B01D0OANU4",
+        "B016V06OYS",
+        "B08V3W382H",
+        "B078S5ZL5D",
+        "B07R4TGNCF",
+        "B071VC47NS",
+        "B085WJMWC9",
+        "B00YNZZ6GG",
+        "B01LZ4HHZE",
+        "B07R2FCTJG"
+      ],
+      "recall_at_5": 0.06666666666666667,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.2607140121787744,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "#10 standard no tint no window not self seal",
+      "ranked_product_ids": [
+        "B08CK95JS3"
+      ],
+      "recall_at_5": 0.06666666666666667,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.34296012590706443,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#10 standard no tint no window not self seal",
+      "ranked_product_ids": [
+        "B078HHGY2L",
+        "B07RP3F2LW",
+        "B008005REQ",
+        "B08ZNLGLPF",
+        "B07GJKFC5X",
+        "B08V344BCQ",
+        "B007YX2KB8",
+        "B01D0OANU4",
+        "B01MTPJH6L",
+        "B01MRMF71L"
+      ],
+      "recall_at_5": 0.06666666666666667,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.2827756246628019,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#10 standard no tint no window not self seal",
+      "ranked_product_ids": [
+        "B08Y97TG79",
+        "B08CK95JS3",
+        "B085VV4TV5",
+        "B06W5294BW",
+        "B071VC47NS",
+        "B079H6L3CK",
+        "B074CKXF95",
+        "B08Y8VX63W",
+        "B07PDNRRMC",
+        "B07Q8749T1"
+      ],
+      "recall_at_5": 0.06666666666666667,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.582537878157034,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "#10 window envelopes not self seal",
+      "ranked_product_ids": [
+        "B079H6L3CK",
+        "B07C28VWVN",
+        "B08CK95JS3",
+        "B06XDRJ316",
+        "B0797ZMZ9Q",
+        "B08CHKRPHD",
+        "B07Q8749T1",
+        "B0849M36K2",
+        "B08ZNLGLPF",
+        "B01MTPJH6L"
+      ],
+      "recall_at_5": 0.14285714285714285,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.07555718854432678,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#10 window envelopes not self seal",
+      "ranked_product_ids": [
+        "B07R4TGNCF",
+        "B078S5ZL5D",
+        "B078HHGY2L",
+        "B07R2FCTJG",
+        "B06W5294BW",
+        "B007YX2KB8",
+        "B07RP3F2LW",
+        "B07K4SGXRP",
+        "B08ZNLGLPF",
+        "B003BLQHYI"
+      ],
+      "recall_at_5": 0.03571428571428571,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.25206494032666715,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#10 window envelopes not self seal",
+      "ranked_product_ids": [
+        "B08V352RY5",
+        "B078S5ZL5D",
+        "B079H6L3CK",
+        "B0153SIHL2",
+        "B071VC47NS",
+        "B08CK95JS3",
+        "B07566JS34",
+        "B08Y8TWR38",
+        "B004FRZD4C",
+        "B01D0OANU4"
+      ],
+      "recall_at_5": 0.03571428571428571,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#10 window envelopes without plastic",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.28371255449703187,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#10 window envelopes without plastic",
+      "ranked_product_ids": [
+        "B07K4SGXRP",
+        "B078HHGY2L",
+        "B07RDNZ568",
+        "B081RD9MCZ",
+        "B086H5V1C2",
+        "B07R2FCTJG",
+        "B007YX2KB8",
+        "B07RP3F2LW",
+        "B0797ZMZ9Q",
+        "B01N31J4TF"
+      ],
+      "recall_at_5": 0.029411764705882353,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.6758704024811182,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "#10 window envelopes without plastic",
+      "ranked_product_ids": [
+        "B08V352RY5",
+        "B071VC47NS",
+        "B08Y8TWR38",
+        "B08CK95JS3",
+        "B01D0OANU4",
+        "B07566JS34",
+        "B017WK7Z3U",
+        "B08Y97TG79",
+        "B00WXT35Y4",
+        "B015773LQK"
+      ],
+      "recall_at_5": 0.11764705882352941,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.541942129480027,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "#11 mrs. kormel is not normal",
+      "ranked_product_ids": [
+        "0060822295"
+      ],
+      "recall_at_5": 0.3333333333333333,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.541942129480027,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#11 mrs. kormel is not normal",
+      "ranked_product_ids": [
+        "0060822295",
+        "B074GFPD96",
+        "1945446080",
+        "B00VWGB6S6",
+        "B071FRF9CJ",
+        "B09B35B2SR",
+        "B09B36MRGG",
+        "B09B36MRGH",
+        "B09B36MRGM",
+        "B09B36MRGZ"
+      ],
+      "recall_at_5": 0.3333333333333333,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.541942129480027,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#11 mrs. kormel is not normal",
+      "ranked_product_ids": [
+        "0060822295",
+        "B00VWGB6S6",
+        "B00XPANEWS",
+        "B01JUCQHNC",
+        "B074GFPD96",
+        "B071RFP5KC",
+        "B013S5QM4G",
+        "B074YLYR8B",
+        "B07F1PBQ9B",
+        "B078BMMX2K"
+      ],
+      "recall_at_5": 0.3333333333333333,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#12 black boys chain necklace without baseball stitches",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#12 black boys chain necklace without baseball stitches",
+      "ranked_product_ids": [
+        "B083SBJLZ7",
+        "B077V1W2XZ",
+        "B07VTC243X",
+        "B01BNR4TD2",
+        "B01BNR4TGO"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.3422816707727018,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#12 black boys chain necklace without baseball stitches",
+      "ranked_product_ids": [
+        "B087JB9P67",
+        "B08LMVKCJ6",
+        "B07XQ9FBJ2",
+        "B08ZSYMVCH",
+        "B07LH1FZ52",
+        "B07K7MM24F",
+        "B01CV192MW",
+        "B07C2NVGP2",
+        "B077V1W2XZ",
+        "B0823CZK46"
+      ],
+      "recall_at_5": 0.10714285714285714,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.45374257454118544,
+      "note": "",
+      "precision_at_5": 0.75,
+      "query": "#14 x 1-1/2 stainless self tapping",
+      "ranked_product_ids": [
+        "B07Y7XGLJL",
+        "B074ZXJK2P",
+        "B07X2H5Y2Y",
+        "B0128T2KX0"
+      ],
+      "recall_at_5": 0.1875,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.8389574121760601,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "#14 x 1-1/2 stainless self tapping",
+      "ranked_product_ids": [
+        "B07Y7XGLJL",
+        "B07R6Y2MMH",
+        "B076BTTB9M",
+        "B086HMB4X7",
+        "B074ZXJK2P",
+        "B07WJ3HD3W",
+        "B0128T2KX0",
+        "B076BYSDXT",
+        "B085RNSQY7",
+        "B014Q6YVJE"
+      ],
+      "recall_at_5": 0.25,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.8486026589039899,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "#14 x 1-1/2 stainless self tapping",
+      "ranked_product_ids": [
+        "B07R6Y2MMH",
+        "B0128T2KX0",
+        "B074ZXJK2P",
+        "B07Y7XGLJL",
+        "B086HMB4X7",
+        "B076BTTB9M",
+        "B01J3M1KX6",
+        "B07WJ3HD3W",
+        "B00EWDPNN0",
+        "B014Q6YVJE"
+      ],
+      "recall_at_5": 0.25,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.4194284288637603,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "#15 charm",
+      "ranked_product_ids": [
+        "B07485GXBF",
+        "B011JI397C",
+        "B07SKLQ1G1",
+        "B010W5KQHY",
+        "B07BRQ16MF",
+        "B07F7YXYK3",
+        "B079DZ8VV9",
+        "B07XPJLG3P",
+        "B082MQTZNV",
+        "B07KC629G7"
+      ],
+      "recall_at_5": 0.125,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.43723247439455626,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#15 charm",
+      "ranked_product_ids": [
+        "B07485GXBF",
+        "B011JI397C",
+        "B07SKLQ1G1",
+        "B009E8NATC",
+        "B07CMRP13Y",
+        "B010W5KQHY",
+        "B0138VDW6G",
+        "B07DFHQ6KY",
+        "B07BRQ16MF",
+        "B0138WCRVQ"
+      ],
+      "recall_at_5": 0.0625,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.12564338174637948,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#15 charm",
+      "ranked_product_ids": [
+        "B07DFHQ6KY",
+        "B07RFHF2FV",
+        "B01ELP31Q4",
+        "B081N46TXR",
+        "B019MCJI54",
+        "B08F7XHLD4",
+        "B01AO9X4J0",
+        "B01AOB3QDW",
+        "B07SR9CSRT",
+        "B08BY6MKJJ"
+      ],
+      "recall_at_5": 0.0625,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#2 dixon oriole pencils not sharpened",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.3022602039469766,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "#2 dixon oriole pencils not sharpened",
+      "ranked_product_ids": [
+        "B072DSDNH9",
+        "B00M3GFG76",
+        "B004X4KRDE",
+        "B011VB1OYC",
+        "B01FWSJQU4",
+        "B01FWSJQZO",
+        "B01FWSJSJ8",
+        "B00PGNSC92",
+        "B0194I0F5I",
+        "B00ZPW8Y9M"
+      ],
+      "recall_at_5": 0.1,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.1518475893451469,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "#2 dixon oriole pencils not sharpened",
+      "ranked_product_ids": [
+        "B07ZQF4SCY",
+        "B08DLXH86D",
+        "B00M3GFG76",
+        "B072DSDNH9",
+        "B08DTFXYF5",
+        "B004X4KRDE",
+        "B07QX47R3W",
+        "B07PBT2K43",
+        "B07PQ6DR13",
+        "B07V227TD7"
+      ],
+      "recall_at_5": 0.05,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.1111111111111111,
+      "ndcg_at_10": 0.12987501165334073,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#2 pencils",
+      "ranked_product_ids": [
+        "B07Q5LJWNZ",
+        "B07G4672FN",
+        "B07B42FRWR",
+        "B07LF4JYD4",
+        "B07GBBRMV1",
+        "B01DJHVYLY",
+        "B01LYGCFKV",
+        "B079STQWBM",
+        "B07ZGD1SL3",
+        "B07ZGDX5MT"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#2 pencils",
+      "ranked_product_ids": [
+        "B01FWSJQHC",
+        "B01FWSJRE4",
+        "B01FWSJQU4",
+        "B01FWSJS16",
+        "B088SZQY8R",
+        "B086T59DCV",
+        "B01FWSJQZO",
+        "B01FWSJSJ8",
+        "B0092OSO7Q",
+        "B075KKZSKC"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#2 pencils",
+      "ranked_product_ids": [
+        "B01FWSJQHC",
+        "B01FWSJQU4",
+        "B01FWSJRE4",
+        "B01FWSJS16",
+        "B01FWSJQZO",
+        "B01FWSJSJ8",
+        "B07XMPZM3R",
+        "B07BZMZC8Y",
+        "B089TYRM7Q",
+        "B00PGNSC92"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.448668937538067,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#2 pencils with erasers sharpened not soft",
+      "ranked_product_ids": [
+        "B087J9MBXJ",
+        "B0891SSBJT",
+        "B0891R2YFN",
+        "B07G2Q28PG",
+        "B07G2RYY6H",
+        "B07G7F6JZ6",
+        "B07JZJLHCF",
+        "B08ZCDH33N",
+        "B08ZCLWNM7",
+        "B08PV8HSB8"
+      ],
+      "recall_at_5": 0.07692307692307693,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.019837491981936364,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#2 pencils with erasers sharpened not soft",
+      "ranked_product_ids": [
+        "B075KKZSKC",
+        "B01FWSJQU4",
+        "B08R8LW1W2",
+        "B01FWSJQZO",
+        "B01FWSJSJ8",
+        "B001G9G6XY",
+        "B00PGNSC92",
+        "B085LCNJQ2",
+        "B072DSDNH9",
+        "B0194I0F5I"
+      ],
+      "recall_at_5": 0.02564102564102564,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.16666666666666666,
+      "ndcg_at_10": 0.07839826897867533,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#2 pencils with erasers sharpened not soft",
+      "ranked_product_ids": [
+        "B08158738F",
+        "B07RLBY1K2",
+        "B07ZQF4SCY",
+        "B07QPXWR15",
+        "B08ZCDH33N",
+        "B08ZCLWNM7",
+        "B07Q391X7B",
+        "B07PBT2K43",
+        "B000HTBBO8",
+        "B07P5R84YP"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.4180447925876675,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#2 pencils without erasers",
+      "ranked_product_ids": [
+        "B01GPJXPQ0",
+        "B00MI50TYM",
+        "B07R3F2MH4",
+        "B06XGPLVH7",
+        "B07RQVZHL6",
+        "B07R67RMC3",
+        "B07Q391X7B",
+        "B087J9MBXJ",
+        "B07G4DL3B5",
+        "B019FWWJCU"
+      ],
+      "recall_at_5": 0.08333333333333333,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.7819835854675756,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "#2 pencils without erasers",
+      "ranked_product_ids": [
+        "B01FWSJRE4",
+        "B01FWSJS16",
+        "B01FWSJQZO",
+        "B01FWSJSJ8",
+        "B01FWSJQHC",
+        "B08R8LW1W2",
+        "B01FWSJQU4",
+        "B07XMPZM3R",
+        "B075KKZSKC",
+        "B01GPJXPQ0"
+      ],
+      "recall_at_5": 0.1388888888888889,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.16666666666666666,
+      "ndcg_at_10": 0.2816372027313761,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#2 pencils without erasers",
+      "ranked_product_ids": [
+        "B07DPVVMWB",
+        "B082H9Y8GV",
+        "B081DN445R",
+        "B00PGNSC92",
+        "B082GZHGF5",
+        "B01FWSJRE4",
+        "B01FWSJS16",
+        "B07KRNM6K5",
+        "B01FWSJQZO",
+        "B01FWSJSJ8"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.146825361314138,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "#20 paper bags without handle",
+      "ranked_product_ids": [
+        "B095XWN82Z",
+        "B07S2LV1QC",
+        "B081YQ4XVQ",
+        "B07D6L24GF",
+        "B0876P47ZF",
+        "B086N1J2DL",
+        "B0857GC2N9",
+        "B099YTSP5Y"
+      ],
+      "recall_at_5": 0.07142857142857142,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.14507633292165267,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#20 paper bags without handle",
+      "ranked_product_ids": [
+        "B085ZL8ZCX",
+        "B09BBNC9RG",
+        "B083LKWCNR",
+        "B08L929P16",
+        "B07ZNF3XPB",
+        "B07PVYNTZR",
+        "B0942M9ZRP",
+        "B081YQ4XVQ",
+        "B08P6ZJRNY",
+        "B08P7198QF"
+      ],
+      "recall_at_5": 0.03571428571428571,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.27174455168022454,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#20 paper bags without handle",
+      "ranked_product_ids": [
+        "B07H3PSRVX",
+        "B07SZGQFZS",
+        "B095XWN82Z",
+        "B07V5LLCV4",
+        "B07XL96PF2",
+        "B07XR7JWXC",
+        "B084C55G5P",
+        "B08GCNH9WT",
+        "B08GG1P4Y3",
+        "B07XK36PWB"
+      ],
+      "recall_at_5": 0.10714285714285714,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#3 metal zipper slider not made in america",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.37601891595094755,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "#3 metal zipper slider not made in america",
+      "ranked_product_ids": [
+        "B01M4IFK18",
+        "B013XF8T2Y",
+        "B01MUVI9PV",
+        "B07QQXBPKQ",
+        "B07PM1XH37",
+        "B07BMZ52G8",
+        "B08YR3D98G",
+        "B08Y7R9TL5",
+        "B07QFN6B8F",
+        "B07Q1YHWL3"
+      ],
+      "recall_at_5": 0.06451612903225806,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.5673626622506588,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#3 metal zipper slider not made in america",
+      "ranked_product_ids": [
+        "B07THSNBBW",
+        "B07PM1XH37",
+        "B07QQXBPKQ",
+        "B005I5JA2G",
+        "B07BMZ52G8",
+        "B08Y7R9TL5",
+        "B08YD415KR",
+        "B08YR3D98G",
+        "B07QFN6B8F",
+        "B07Q1YHWL3"
+      ],
+      "recall_at_5": 0.0967741935483871,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.14285714285714285,
+      "ndcg_at_10": 0.1234571362934156,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#4 braiding hair not stretched",
+      "ranked_product_ids": [
+        "B087CG1CMT",
+        "B07D1292ZB",
+        "B07FFLQDTN",
+        "B0894JSC8T",
+        "B07K6MX269",
+        "B091C4H2SR",
+        "B08HTZM685",
+        "B07G5Z351K",
+        "B08R3T19MS",
+        "B093TZCYQF"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.14285714285714285,
+      "ndcg_at_10": 0.03144168089972574,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#4 braiding hair not stretched",
+      "ranked_product_ids": [
+        "B07ZGD7ZVS",
+        "B07W48T2F5",
+        "B07FXL6YH9",
+        "B07DG2RX7F",
+        "B087CG1CMT",
+        "B07G6WWPGJ",
+        "B089SV45K8",
+        "B00EDNMKS0",
+        "B085QK6XLW",
+        "B07WGV271P"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.16057926615356627,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#4 braiding hair not stretched",
+      "ranked_product_ids": [
+        "B07YXX1XGZ",
+        "B08J7L9SRF",
+        "B087CG1CMT",
+        "B07WGV271P",
+        "B0894JSC8T",
+        "B07K6MX269",
+        "B0895KNRY9",
+        "B0863KNK3V",
+        "B07J4PP6SD",
+        "B07DG2RX7F"
+      ],
+      "recall_at_5": 0.03225806451612903,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.5935446956631301,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "#4 pads without wings",
+      "ranked_product_ids": [
+        "B01IAI9WNO",
+        "B0029NYQME",
+        "B01IAIA95O",
+        "B001G7QUZU",
+        "B084H3MY2N",
+        "B07WMFB2XC",
+        "B00LKRAGEM",
+        "B01N7HMX75",
+        "B079RHWX3F",
+        "B079RJPH42"
+      ],
+      "recall_at_5": 0.12903225806451613,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.8553475075669356,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "#4 pads without wings",
+      "ranked_product_ids": [
+        "B0052RF17S",
+        "B01IAI9WNO",
+        "B007X4SZZI",
+        "B0029NYQME",
+        "B01IAIA95O",
+        "B001DWNTBG",
+        "B00IVNCCRM",
+        "B00N26564O",
+        "B000T9TI5A",
+        "B001E6KHAW"
+      ],
+      "recall_at_5": 0.16129032258064516,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.49463071081778187,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "#4 pads without wings",
+      "ranked_product_ids": [
+        "B01N7HMX75",
+        "B01IAI6SD6",
+        "B001E6KHAW",
+        "B01IULAV6I",
+        "B0029NYQME",
+        "B00LKRAGEM",
+        "B00JOLS9QI",
+        "B00KOC34T8",
+        "B01IAI9WNO",
+        "B0014H2ZKG"
+      ],
+      "recall_at_5": 0.12903225806451613,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.20194864076050967,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "#5 coil zipper without lock",
+      "ranked_product_ids": [
+        "B07QFN6B8F",
+        "B07Q1YHWL3",
+        "B0999PFCDV",
+        "B08G8W3SJ2"
+      ],
+      "recall_at_5": 0.125,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.5138173381538017,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#5 coil zipper without lock",
+      "ranked_product_ids": [
+        "B08NGL8268",
+        "B07CG4Z7Q8",
+        "B00506SQPA",
+        "B08Y7R9TL5",
+        "B08S3HH74K",
+        "B0999PFCDV",
+        "B082SQY8RQ",
+        "B07ZPFH3CT",
+        "B097NZ57N1",
+        "B08XB87J44"
+      ],
+      "recall_at_5": 0.09375,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.4797037535868031,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "#5 coil zipper without lock",
+      "ranked_product_ids": [
+        "B07QFN6B8F",
+        "B08PD7BTNT",
+        "B08HS2X9YM",
+        "B07DFZ12RK",
+        "B0999PFCDV",
+        "B00506SQPA",
+        "B082SQY8RQ",
+        "B07Q1YHWL3",
+        "B0933GPD7P",
+        "B089GKCKLR"
+      ],
+      "recall_at_5": 0.125,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#5 machine screws",
+      "ranked_product_ids": [
+        "B07XVN7RMB",
+        "B07FR24XNP",
+        "B0991YJJ9G",
+        "B07PD5L5XR",
+        "B01MR892S8",
+        "B01MYAGE6W",
+        "B01N6T5DCW",
+        "B01FWTBX4U",
+        "B07P8MJZDS",
+        "B07PBWBDWL"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#5 machine screws",
+      "ranked_product_ids": [
+        "B07HLJ97J6",
+        "B00004YOBF",
+        "B00JKDFYQ8",
+        "B01BXKETRA",
+        "B07HD1M85F",
+        "B07XLLTCFL",
+        "B07F3KBST3",
+        "B00757ADZ8",
+        "B07FNTY64J",
+        "B07XVN7RMB"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#5 machine screws",
+      "ranked_product_ids": [
+        "B00WEFVUNK",
+        "B07H3K5NQ2",
+        "B0795M5L6X",
+        "B00JKDFYQ8",
+        "B08BHXFBMP",
+        "B01FWTBX4U",
+        "B07XVN7RMB",
+        "B01MR892S8",
+        "B01N6T5DCW",
+        "B07PD5L5XR"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#5 orb to not fitting",
+      "ranked_product_ids": [
+        "B07B2YQLBL",
+        "B07CVW2HGH",
+        "B07CVW9MB8",
+        "B07WCHKKNT",
+        "B00PVE19SW"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.4682360114272641,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "#5 orb to not fitting",
+      "ranked_product_ids": [
+        "B08LPC9JTB",
+        "B089F8HBFQ",
+        "B07X9YCGPT",
+        "B07V27X9SB",
+        "B08BFMZC32",
+        "B078Z4CV2J",
+        "B07KJMG6ZZ",
+        "B079K89ZJS",
+        "B07D971VP2",
+        "B07GFN9WF5"
+      ],
+      "recall_at_5": 0.2222222222222222,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.5402244656939633,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#5 orb to not fitting",
+      "ranked_product_ids": [
+        "B07V27X9SB",
+        "B078Z4CV2J",
+        "B07NHX8R9M",
+        "B08LPC9JTB",
+        "B07DXSCVD4",
+        "B0050DHYEW",
+        "B07B4SC6PN",
+        "B082MSQ13D",
+        "B082XGWTBJ",
+        "B07B2YQLBL"
+      ],
+      "recall_at_5": 0.3333333333333333,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.2,
+      "ndcg_at_10": 0.10085794749673935,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#5 pull cord",
+      "ranked_product_ids": [
+        "B00JIBITGY",
+        "B07GXG2NDG",
+        "B07VN7VTGD",
+        "B004QGXND0",
+        "B07CF7D36C",
+        "B07S2K18G5",
+        "B07HCY3L99",
+        "B08QRTN9SD",
+        "B0823J4S98",
+        "B00M5T8EGG"
+      ],
+      "recall_at_5": 0.09090909090909091,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#5 pull cord",
+      "ranked_product_ids": [
+        "B07GXG2NDG",
+        "B00JIBITGY",
+        "B01FHGG7YO",
+        "B08V5PDWPM",
+        "B07VGV2RPP",
+        "B0153T1QZU",
+        "B077GFWGWY",
+        "B07NBWLJ2V",
+        "B0153T1J8Y",
+        "B0153T1KNS"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#5 pull cord",
+      "ranked_product_ids": [
+        "B07N4BY7TD",
+        "B07VGV2RPP",
+        "B01LYZIJAP",
+        "B00M5T8EGG",
+        "B000BVXVTA",
+        "B0891TSBXC",
+        "B0071BQRKS",
+        "B07J4VGQ44",
+        "B07CY1CYXK",
+        "B08V932KV9"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.3956419101509375,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#5 zipper tape without pulls",
+      "ranked_product_ids": [
+        "B08PD7BTNT",
+        "B07QFN6B8F",
+        "B07Q1YHWL3",
+        "B0895CW8P4",
+        "B0999PFCDV",
+        "B08F3KSHX4",
+        "B096NM8GVM",
+        "B07WWXRQGG",
+        "B0871ZDTKZ",
+        "B083DJ7YNL"
+      ],
+      "recall_at_5": 0.1,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.26925550060365017,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#5 zipper tape without pulls",
+      "ranked_product_ids": [
+        "B08PS3YWBS",
+        "B097NZ57N1",
+        "B08PD7BTNT",
+        "B08S3HH74K",
+        "B082SQY8RQ",
+        "B08ZCP5MLK",
+        "B07QV3DDYT",
+        "B08NGL8268",
+        "B07ZPFH3CT",
+        "B08Y7R9TL5"
+      ],
+      "recall_at_5": 0.1,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.37796703807188897,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "#5 zipper tape without pulls",
+      "ranked_product_ids": [
+        "B08PD7BTNT",
+        "B07QFN6B8F",
+        "B08Z8B1XVL",
+        "B07ZPFH3CT",
+        "B074CMMFXH",
+        "B07Q1YHWL3",
+        "B07PM1XH37",
+        "B07QQXBPKQ",
+        "B07YHBF4RK",
+        "B08VFYDY9S"
+      ],
+      "recall_at_5": 0.13333333333333333,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.3967288731930281,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#6 fishing hook without barb",
+      "ranked_product_ids": [
+        "B07T7PB8CN",
+        "B07GQY4ZBG",
+        "B0891X23M3",
+        "B081N13H7V",
+        "B07MFKM5VJ",
+        "B07ZQQKF7D"
+      ],
+      "recall_at_5": 0.0967741935483871,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.4409298583145004,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "#6 fishing hook without barb",
+      "ranked_product_ids": [
+        "B07N63KDNN",
+        "B07F1LDRQ3",
+        "B08QF4K6JN",
+        "B07T7PB8CN",
+        "B07R7QKM8M",
+        "B08ZKBWTD6",
+        "B08F752CTX",
+        "B08DDGSHP3",
+        "B08PNRWW11",
+        "B07D4B5PY3"
+      ],
+      "recall_at_5": 0.12903225806451613,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.09095415684553482,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#6 fishing hook without barb",
+      "ranked_product_ids": [
+        "B078SR9N3S",
+        "B07T7PB8CN",
+        "B01D60X92Q",
+        "B078SQ2FHS",
+        "B078SQ8FM6",
+        "B078SQMY6Y",
+        "B07N63KDNN",
+        "B01M32X90K",
+        "B01M3VNOI7",
+        "B01M7VD3IB"
+      ],
+      "recall_at_5": 0.03225806451612903,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#68 do not fuplicate key",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.44931995211004705,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#68 do not fuplicate key",
+      "ranked_product_ids": [
+        "B00HJAGSB4",
+        "B07QZLW8PF",
+        "B083LFTLLT",
+        "B0836Q88KT",
+        "B07CHNNC8Z",
+        "B085VQ2VDJ",
+        "B07PZ92H5S",
+        "B008IVNJK6",
+        "B07PNRF17V",
+        "B0769DQLYL"
+      ],
+      "recall_at_5": 0.14285714285714285,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.5570724781038321,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "#68 do not fuplicate key",
+      "ranked_product_ids": [
+        "B00HJAGSB4",
+        "B008IVNJK6",
+        "B07Z3F88WV",
+        "B00NLMWWN2",
+        "B07PNRF17V",
+        "B074DQSN83",
+        "B0769DQLYL",
+        "B085ZSMJDJ",
+        "B07826PLMB",
+        "B074XMVVC6"
+      ],
+      "recall_at_5": 0.2857142857142857,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#8 merchandising tags without string",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#8 merchandising tags without string",
+      "ranked_product_ids": [
+        "B0979Z13W9",
+        "B076BBJYRN",
+        "B091GJTZ8Y",
+        "B013ORWB7K",
+        "B013ORWBC0",
+        "B013ORWC9W",
+        "B013ORWKEO",
+        "B013ORWP62",
+        "B013ORXI4A",
+        "B013ORWKLW"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.13886244387355454,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#8 merchandising tags without string",
+      "ranked_product_ids": [
+        "B07541MJRV",
+        "B00I0EU22Y",
+        "B01JH4H9K8",
+        "B07HRYGN97",
+        "B07QNTWLQS",
+        "B00OLNG12I",
+        "B07DP8L8KX",
+        "B07QCXBQ5R",
+        "B076BBJYRN",
+        "B078T91YY7"
+      ],
+      "recall_at_5": 0.030303030303030304,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.5829393865084945,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "#8 phillips head wood screws",
+      "ranked_product_ids": [
+        "B07GDQ9LRN",
+        "B08545BSYB",
+        "B084Y8N6M8",
+        "B07L3ZY3Z9",
+        "B07L4BSVDV",
+        "B07PQS4G74",
+        "B08HXZG71X",
+        "B01M9E5WS8",
+        "B07PNHNL89",
+        "B075DJ2R9Z"
+      ],
+      "recall_at_5": 0.125,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.43708192473471086,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#8 phillips head wood screws",
+      "ranked_product_ids": [
+        "B08HXZG71X",
+        "B075DJ2R9Z",
+        "B07DDK12GD",
+        "B07D1KGR2P",
+        "B07D1KL6SR",
+        "B07D1L98GC",
+        "B0725GSH2S",
+        "B07GDQ9LRN",
+        "B08545BSYB",
+        "B076CPB2P5"
+      ],
+      "recall_at_5": 0.1875,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.1111111111111111,
+      "ndcg_at_10": 0.06625422345438903,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#8 phillips head wood screws",
+      "ranked_product_ids": [
+        "B08HXZG71X",
+        "B08LBB342P",
+        "B089KGSZTD",
+        "B07ZWPG2QL",
+        "B07ZWDBFF6",
+        "B07C8HH93H",
+        "B075DJ18QX",
+        "B07QYMQHZ6",
+        "B01M9E5WS8",
+        "B07ZWGDV6V"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.31030097886323393,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "#8 tags without string",
+      "ranked_product_ids": [
+        "B076BBJYRN",
+        "B00I0EU22Y",
+        "B00OLNG12I",
+        "B07FNCSY6B",
+        "B07541MJRV",
+        "B078T91YY7",
+        "B07YTM1SCB",
+        "B091GJTZ8Y",
+        "B01BI7GA7A",
+        "B019FYMOZA"
+      ],
+      "recall_at_5": 0.125,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.5508373986612617,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#8 tags without string",
+      "ranked_product_ids": [
+        "B0979Z13W9",
+        "B076BBJYRN",
+        "B091GJTZ8Y",
+        "B013ORWB7K",
+        "B013ORWBC0",
+        "B013ORWC9W",
+        "B013ORWKEO",
+        "B013ORWP62",
+        "B013ORXI4A",
+        "B013ORWKLW"
+      ],
+      "recall_at_5": 0.09375,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.299433632106331,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#8 tags without string",
+      "ranked_product_ids": [
+        "B07541MJRV",
+        "B00I0EU22Y",
+        "B07QNTWLQS",
+        "B00OLNG12I",
+        "B076BBJYRN",
+        "B078T91YY7",
+        "B0089P07G0",
+        "B07DLQ1HD9",
+        "B091GJTZ8Y",
+        "B07TYBKS54"
+      ],
+      "recall_at_5": 0.09375,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#82 jewelry box without cotton",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#82 jewelry box without cotton",
+      "ranked_product_ids": [
+        "B007PKHGSC",
+        "B07GZ22SBF",
+        "B07GZY3XK6",
+        "B073VCX525",
+        "B07GY3PGMP",
+        "B081GFM1MC",
+        "B08291S1ZW",
+        "B082929M11",
+        "B01MYLXE9P",
+        "B074DVBQ8F"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.13844055034377825,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#82 jewelry box without cotton",
+      "ranked_product_ids": [
+        "B07N8NS2BK",
+        "B01N6QTL9D",
+        "B084KWVQBL",
+        "B007PKHGSC",
+        "B07GY3PGMP",
+        "B07GZ22SBF",
+        "B07GZY3XK6",
+        "B081GFM1MC",
+        "B072DZF4SR",
+        "B07664H566"
+      ],
+      "recall_at_5": 0.038461538461538464,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#9x5\" wood screws",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#9x5\" wood screws",
+      "ranked_product_ids": [
+        "B01L9VCO9S",
+        "B07ZWGDV6V",
+        "B07N6LY3B4",
+        "B07ZWC5QR2",
+        "B07ZWDHH2G",
+        "B084G38NJB",
+        "B07ZWPG2QL",
+        "B07ZWJR4Q7",
+        "B089RRXZNM",
+        "B0816V9STS"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#9x5\" wood screws",
+      "ranked_product_ids": [
+        "B08HXZG71X",
+        "B07ZWDBFF6",
+        "B07ZWGDV6V",
+        "B07ZWDHH2G",
+        "B07ZWPG2QL",
+        "B07Z97R28G",
+        "B07ZWJR4Q7",
+        "B07ZWNWR2L",
+        "B07ZWG3DK9",
+        "B00WEFVUNK"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#do not disturb, jeidah bila",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#do not disturb, jeidah bila",
+      "ranked_product_ids": [
+        "B0935926GC",
+        "B0023LX6FK",
+        "B00DSZPCB6",
+        "B00EPKRHTI",
+        "B07K8XRWK2",
+        "B00O5IUQ7U",
+        "B07SW2TCTF",
+        "B084VP3SG9",
+        "B089ZQJNGT",
+        "B06WGRKM3L"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#do not disturb, jeidah bila",
+      "ranked_product_ids": [
+        "B01M64Y71U",
+        "B08VRWTQ97",
+        "B08HVFJVXT",
+        "B08HVN9DSV",
+        "B08TB4QVGN",
+        "B08B13XXCY",
+        "B08NG44GRM",
+        "B08NG6DXQK",
+        "B08NG7DGBP",
+        "B08NG7TXLG"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#followme ultra soft velour robe without hood for men",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.2421545336146298,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#followme ultra soft velour robe without hood for men",
+      "ranked_product_ids": [
+        "B07CS9N7YZ",
+        "B01N5PBXV2",
+        "B082PB4TCH",
+        "B082PBPTGS",
+        "B082PBJVT1",
+        "B06ZYWRNN5",
+        "B071R66NRP",
+        "B071Y5SFYP",
+        "B07PQ1TZNS",
+        "B06XP9LSD5"
+      ],
+      "recall_at_5": 0.027777777777777776,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.3279758509422825,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#followme ultra soft velour robe without hood for men",
+      "ranked_product_ids": [
+        "B07CS9N7YZ",
+        "B06ZYWRNN5",
+        "B071R66NRP",
+        "B071Y5SFYP",
+        "B082PBPTGS",
+        "B082PB4TCH",
+        "B06XP9LSD5",
+        "B06XPN8MVW",
+        "B082PBJVT1",
+        "B071D8GHC6"
+      ],
+      "recall_at_5": 0.08333333333333333,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#hydrate not dydrate",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.1111111111111111,
+      "ndcg_at_10": 0.07978111036754225,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#hydrate not dydrate",
+      "ranked_product_ids": [
+        "B088ZZYMK2",
+        "B076CSLPM1",
+        "B07S64FKYS",
+        "B07S6SPNKB",
+        "B07S6SQYRT",
+        "B07SB6DRRM",
+        "B08N488X3T",
+        "B08N4PDP6S",
+        "B08W9GF9HD",
+        "B07RGXWSQD"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.16721349044577458,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#hydrate not dydrate",
+      "ranked_product_ids": [
+        "B07176PR7D",
+        "B08W9GF9HD",
+        "B07T73LJFM",
+        "B09C6LPGGB",
+        "B07BVV4VJZ",
+        "B08N488X3T",
+        "B08N4PDP6S",
+        "B07S6SPNKB",
+        "B07S64FKYS",
+        "B07SB6DRRM"
+      ],
+      "recall_at_5": 0.125,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#i am not chinese",
+      "ranked_product_ids": [
+        "753548672X",
+        "B00Y1NQW2M",
+        "B08L6PDSR4",
+        "B07JHFQ5C2",
+        "B07SGB52DT",
+        "B07H36CZJ1",
+        "B07L59KWCK",
+        "B07M84TZ6Y",
+        "B07RXZS68R",
+        "B07V6L5NKB"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#i am not chinese",
+      "ranked_product_ids": [
+        "753548672X",
+        "B00Y1NQW2M",
+        "0998434981",
+        "1094000337",
+        "B0829G7B1V",
+        "0890871175",
+        "B019Z0ASKM",
+        "751155072X",
+        "0062360167",
+        "B000003JBI"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#i am not chinese",
+      "ranked_product_ids": [
+        "753548672X",
+        "B07JZNTTVR",
+        "B00Y1NQW2M",
+        "B08WDKBL6P",
+        "B08WLGDPHB",
+        "B08V4KGMPP",
+        "B07Y3CDWX6",
+        "B08WDK91LY",
+        "B081GQBK5V",
+        "B081GQMS4Z"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#i may not look like diesel decals",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#i may not look like diesel decals",
+      "ranked_product_ids": [
+        "B07VT2RH2K",
+        "B07T5LZ9NM",
+        "B07DH63QKF",
+        "B07P54QYXG",
+        "B07P5C72BQ",
+        "B07GGXQBX4",
+        "B07GGZ8CSR",
+        "B07GH3DT35",
+        "B07KK38QWJ",
+        "B07L477GL7"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#i may not look like diesel decals",
+      "ranked_product_ids": [
+        "B07VT2RH2K",
+        "B07GH3DT35",
+        "B07KK38QWJ",
+        "B07P54QYXG",
+        "B07T5LZ9NM",
+        "B07DH63QKF",
+        "B07RWF8KYQ",
+        "B009S9S074",
+        "B07GGZ8CSR",
+        "B017G788W6"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#metoo not you",
+      "ranked_product_ids": [
+        "B07GV9R83F",
+        "B07NPCRPX8",
+        "B011XNACNM",
+        "B08JQL87YF"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#metoo not you",
+      "ranked_product_ids": [
+        "0446555711",
+        "0446530778",
+        "0446615404",
+        "1609412540",
+        "B08KNMYS6W",
+        "0757305482",
+        "1416909532",
+        "B076M778Q1",
+        "B079KHNCBF",
+        "1477847723"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#metoo not you",
+      "ranked_product_ids": [
+        "B07MVMYJ3N",
+        "B07HJC95HC",
+        "B088T9WF5K",
+        "B07226BMJK",
+        "B07ZTKLHSQ",
+        "B0747776G1",
+        "B072TY6LZL",
+        "B018CD5IJO",
+        "B07V1MQ6DY",
+        "B01D4LT4I0"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#pinkandproud not sorry glitter lipstick",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.4143330522282448,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "#pinkandproud not sorry glitter lipstick",
+      "ranked_product_ids": [
+        "B07SM3G7KV",
+        "B07BFVLMVY",
+        "B07LD6YB1Q",
+        "B078BTB69Z",
+        "B09C59LKSV",
+        "B09C5BZ3KR",
+        "B08LYD6R9R",
+        "B08LYP272Y",
+        "B07L3DPG36",
+        "B09CMMKYHL"
+      ],
+      "recall_at_5": 0.10526315789473684,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.35211663137611204,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#pinkandproud not sorry glitter lipstick",
+      "ranked_product_ids": [
+        "B08GZ1FK71",
+        "B078BTB69Z",
+        "B08LYP272Y",
+        "B07R7V7XLN",
+        "B08LYD6R9R",
+        "B09C59LKSV",
+        "B09C5BZ3KR",
+        "B07L3DPG36",
+        "B09CMMKYHL",
+        "B07Y29SKKC"
+      ],
+      "recall_at_5": 0.07894736842105263,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "#stuccoville life without a net",
+      "ranked_product_ids": [
+        "194796643X"
+      ],
+      "recall_at_5": 1.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#stuccoville life without a net",
+      "ranked_product_ids": [
+        "194796643X",
+        "B094XDCPP2",
+        "1625915098",
+        "169516721X",
+        "B07N7G27WC",
+        "B085B7GHPY",
+        "B08F9XYGD1",
+        "1986655547",
+        "B07T4HMNWG",
+        "B08ZB91GQ4"
+      ],
+      "recall_at_5": 1.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "#stuccoville life without a net",
+      "ranked_product_ids": [
+        "194796643X",
+        "B094XDCPP2",
+        "1625915098",
+        "169516721X",
+        "B07N7G27WC",
+        "B085B7GHPY",
+        "B08F9XYGD1",
+        "1986655547",
+        "B07DCZRPYV",
+        "B07T4HMNWG"
+      ],
+      "recall_at_5": 1.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#this is not a truck decals",
+      "ranked_product_ids": [
+        "B07S2LR84F",
+        "B01M5K3KSA",
+        "B0838HCGSF",
+        "B00KVOGGEY",
+        "B097SQ67G9",
+        "B07HJ244DD",
+        "B07K7HB4SZ",
+        "B07NSSBKCD",
+        "B07NSSKV1F",
+        "B08X1GH9DS"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.2819869176090423,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#this is not a truck decals",
+      "ranked_product_ids": [
+        "B07TTTLXV2",
+        "B08N6JL9Q4",
+        "B018H3P6HI",
+        "B018H3TRIW",
+        "B07HNDPWZW",
+        "B06ZXY5P5H",
+        "B00COOKNNO",
+        "1454915749",
+        "1099141419",
+        "B001JT6EYC"
+      ],
+      "recall_at_5": 0.13043478260869565,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "#this is not a truck decals",
+      "ranked_product_ids": [
+        "B0838HCGSF",
+        "B07S2LR84F",
+        "B097SQ67G9",
+        "B083B74LYL",
+        "B07K3C7381",
+        "B08W586N2N",
+        "B0125VD2DI",
+        "B08XYKV1S6",
+        "B07B4LM2V7",
+        "B07NV4HJH1"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.4061167315212233,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "#try not to suck tshirt",
+      "ranked_product_ids": [
+        "B07PJZRNBJ",
+        "B07KVR6LVV",
+        "B07FQKM692"
+      ],
+      "recall_at_5": 0.1,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "#try not to suck tshirt",
+      "ranked_product_ids": [
+        "B07PJZRNBJ",
+        "B07N1QP7JH",
+        "B07L13CZNL",
+        "B07PLF6HB9",
+        "B07KDRHCZ8",
+        "B07P8GG6XP",
+        "B07P1FSJ3T",
+        "B07MQXHMBP",
+        "B07P3PC4P6",
+        "B07PCWR8GP"
+      ],
+      "recall_at_5": 0.16666666666666666,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.3916945263137128,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "#try not to suck tshirt",
+      "ranked_product_ids": [
+        "B07FQKM692",
+        "B07KVR6LVV",
+        "B08LT9V4JG",
+        "B08LTDNDLL",
+        "B07L13CZNL",
+        "B089R3H66H",
+        "B07PJZRNBJ",
+        "B098JK75MP",
+        "B07HFXP7XN",
+        "B0979FHBLS"
+      ],
+      "recall_at_5": 0.1,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$0.00 not kindleunlimited",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$0.00 not kindleunlimited",
+      "ranked_product_ids": [
+        "B06XHXJG31",
+        "B07XPD9L1C",
+        "B087M6PVKW",
+        "B07GBXPM3L",
+        "B072ZWC9FT",
+        "B003UBMC3O",
+        "B06XFYMCCG",
+        "B076JJL5V7",
+        "B083GK343P",
+        "B07TRPPGT7"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$0.00 not kindleunlimited",
+      "ranked_product_ids": [
+        "B06XHXJG31",
+        "B07XPD9L1C",
+        "B087M6PVKW",
+        "B07GBXPM3L",
+        "B07T8YFTM6",
+        "B08BKRTP5K",
+        "B07XFQJY7C",
+        "B06X6J8GPW",
+        "B07Z4NWL1D",
+        "B01HBFGS4I"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1",
+      "ranked_product_ids": [
+        "B08V1PTQMK",
+        "B000BO8EE4",
+        "B004VTG2W6",
+        "B0785PY1H2",
+        "B072LY5TYH",
+        "B09F9L8CW1",
+        "B004OZNUJU",
+        "B07F1XGJX7",
+        "B004XQYK76",
+        "B00DMEYTLW"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1",
+      "ranked_product_ids": [
+        "B08V1PTQMK",
+        "B000BO8EE4",
+        "B004VTG2W6",
+        "B0785PY1H2",
+        "B072LY5TYH",
+        "B09F9L8CW1",
+        "B004OZNUJU",
+        "B07F1XGJX7",
+        "B004XQYK76",
+        "B00DMEYTLW"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1",
+      "ranked_product_ids": [
+        "B08V1PTQMK",
+        "B000BO8EE4",
+        "B004VTG2W6",
+        "B0785PY1H2",
+        "B072LY5TYH",
+        "B09F9L8CW1",
+        "B004OZNUJU",
+        "B07F1XGJX7",
+        "B004XQYK76",
+        "B00DMEYTLW"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1 dollar toys not fidgets",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.2,
+      "ndcg_at_10": 0.09641971622967913,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$1 dollar toys not fidgets",
+      "ranked_product_ids": [
+        "B0932MBF2K",
+        "B091CC7JX4",
+        "B08S6T5NTH",
+        "B07PW98XXR",
+        "B08LNGFYGJ",
+        "B07Q9YQ8KJ",
+        "B0949GWZ8T",
+        "B07QCRKRTF",
+        "B07V7YGCYQ",
+        "B07H9J212M"
+      ],
+      "recall_at_5": 0.1111111111111111,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1 dollar toys not fidgets",
+      "ranked_product_ids": [
+        "B08MT7NRG2",
+        "B08NJ9C1J8",
+        "B097ZD2L2R",
+        "B091CHD1VV",
+        "B0936KJQYY",
+        "B08QD2N5KN",
+        "B0932MBF2K",
+        "B092Q928X4",
+        "B07Q8QDVL5",
+        "B07KCHDPPX"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1 first addition charizard not fake",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1 first addition charizard not fake",
+      "ranked_product_ids": [
+        "B07G7246X6",
+        "B07TX374HW",
+        "B076BCLWJB",
+        "B074PDN95B",
+        "B09HXW1VV3",
+        "B099Z9TXXQ",
+        "B074MGFBRW",
+        "B08971GZ78",
+        "B07XBCWCN3",
+        "B07V1KT247"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1 first addition charizard not fake",
+      "ranked_product_ids": [
+        "B07TX374HW",
+        "B076BCLWJB",
+        "B074PDN95B",
+        "B09HXW1VV3",
+        "B074MGFBRW",
+        "B099Z9TXXQ",
+        "B01N3U198K",
+        "9123933631",
+        "B08971GZ78",
+        "B07V1KT247"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1 items for men",
+      "ranked_product_ids": [
+        "B07BL5JXR1",
+        "B00LCXBDWS",
+        "B08B55ZF7Z",
+        "B088P94548",
+        "B083HVLSVX",
+        "B08438D6Q5",
+        "B07XXYYFXD",
+        "B07XM6X2LD",
+        "B07C3QVMVQ",
+        "B07MQHQ47K"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1 items for men",
+      "ranked_product_ids": [
+        "B01L9KUFJA",
+        "B07BL5JXR1",
+        "B07W21HN2G",
+        "B07RW58SFH",
+        "B07JZ715MF",
+        "B07V6PFQRZ",
+        "B01N02GI0M",
+        "B07L2W5L63",
+        "B07WCJ4JL1",
+        "B000NGQR4E"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1 items for men",
+      "ranked_product_ids": [
+        "B088P94548",
+        "B007WVIBQA",
+        "B07MGQF535",
+        "B08CZVRCJ2",
+        "B07XF54FNH",
+        "B07GS613WZ",
+        "B07GPFQQG8",
+        "B07C3QVMVQ",
+        "B07J67MNJZ",
+        "B000XE9EVO"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1 million that look real but that is not it",
+      "ranked_product_ids": [
+        "B0757K4F6K",
+        "B076SL392C",
+        "B07PM22PWZ",
+        "B019MMUA8S",
+        "B0822DSQ1P",
+        "B00C2WDD5I",
+        "B088T33ZL6",
+        "B07NVFNRFQ",
+        "B07NT559T4",
+        "B07Q7GMCR6"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.13955866652659585,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$1 million that look real but that is not it",
+      "ranked_product_ids": [
+        "B08L6LR8PR",
+        "B002HESJBY",
+        "B00FGXSE36",
+        "B07TZLH2SP",
+        "B07YY1764T",
+        "B07DCZW39L",
+        "B07N15G7X7",
+        "B082FXBFRR",
+        "B01BW29KNC",
+        "B00X3C6F6U"
+      ],
+      "recall_at_5": 0.125,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.2791173330531917,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$1 million that look real but that is not it",
+      "ranked_product_ids": [
+        "B00FGXSE36",
+        "B07YY1764T",
+        "B00EMX9QPQ",
+        "B07DCZW39L",
+        "B07TZLH2SP",
+        "B07N15G7X7",
+        "B00IWGQBX4",
+        "B0055UZO9M",
+        "B082FXBFRR",
+        "B00JVVQQ1G"
+      ],
+      "recall_at_5": 0.125,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1 stuffed toy",
+      "ranked_product_ids": [
+        "B01ASZ0146",
+        "B01LWQA4LE",
+        "B00362TPXC",
+        "B00286CY2G",
+        "B007B5GW18",
+        "B007B8MRDC",
+        "B07MJ5Q78C",
+        "B09C5S26BD",
+        "B07X6VB46H",
+        "B07ZXWXY6V"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1 stuffed toy",
+      "ranked_product_ids": [
+        "B07G2HYY4M",
+        "B014PJQNI4",
+        "B07P2H63Y4",
+        "B08JY8L1C5",
+        "B01NCWDO96",
+        "B01ASZ0146",
+        "B074GH8DYH",
+        "B01LWQA4LE",
+        "B00362TPXC",
+        "B07CP4ZJ5S"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$1 stuffed toy",
+      "ranked_product_ids": [
+        "B01COH2R98",
+        "B01CO8HI1O",
+        "B096P9DSPC",
+        "B07TKJ15RB",
+        "B07P2H63Y4",
+        "B00BF7G7D6",
+        "B07QSRBFY1",
+        "B07J9LLT84",
+        "B07PDJ511N",
+        "B0044D7ZJI"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 amazon prime not prime wardrobe sweatpaants",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 amazon prime not prime wardrobe sweatpaants",
+      "ranked_product_ids": [
+        "B0767ZC9P9",
+        "B07N5MGKTY",
+        "B00S1UGM0S",
+        "B00XZ8C60Q",
+        "B00S1UH0I6",
+        "B00XZ8FG26",
+        "B07665G9TB",
+        "B08865CXFK",
+        "B08CXQMLPR",
+        "B07GY4H2YD"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 amazon prime not prime wardrobe sweatpaants",
+      "ranked_product_ids": [
+        "B07N5MGKTY",
+        "B01IVOD3VY",
+        "B01N9KIKZA",
+        "B07SL294WH",
+        "B00S1UGM0S",
+        "B00XZ8C60Q",
+        "B071NY99MS",
+        "B0773NN69F",
+        "B00S1UH0I6",
+        "B00XZ8FG26"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.16666666666666666,
+      "ndcg_at_10": 0.14201905717762706,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 blanket",
+      "ranked_product_ids": [
+        "B087TRPMTD",
+        "B07YSZKMNK",
+        "B08432MRX6",
+        "B07D35VCMM",
+        "B07Y8WV83K",
+        "B08BJG8S76",
+        "B08FRT9M4B",
+        "B08WX5P955",
+        "B0847BQVGB",
+        "B07RGYMKSK"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.125,
+      "ndcg_at_10": 0.06943122193677727,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 blanket",
+      "ranked_product_ids": [
+        "B06XDJ2QVW",
+        "B087TRPMTD",
+        "B08VGJ6XW8",
+        "B07YSZKMNK",
+        "B08432MRX6",
+        "B07D35VCMM",
+        "B07Y8WV83K",
+        "B08BJG8S76",
+        "B08FRT9M4B",
+        "B07V9PT569"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.11004588314904008,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$10 blanket",
+      "ranked_product_ids": [
+        "B08KTH1JSC",
+        "B08432MRX6",
+        "B08BJG8S76",
+        "B08FRT9M4B",
+        "B07HCM6BVY",
+        "B08WX5P955",
+        "B00QCOBK20",
+        "B07WMX4CRJ",
+        "B07WMZBB5R",
+        "B08T5Y2LPK"
+      ],
+      "recall_at_5": 0.0625,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 candles",
+      "ranked_product_ids": [
+        "B07QHL8JLX",
+        "B07N99PTQ1",
+        "B01BNV7OZS",
+        "B07GBWFHF9",
+        "B0092RSKRW",
+        "B006VE59QO",
+        "B009143KK8",
+        "B07ZJVKX4V",
+        "B07PFHMMC7",
+        "B07DN84F36"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.1,
+      "ndcg_at_10": 0.07536325064909712,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 candles",
+      "ranked_product_ids": [
+        "B01D3IH562",
+        "B07XQNLSTX",
+        "B07N99PTQ1",
+        "B07YN82B6F",
+        "B0812BLK3W",
+        "B0812BCSQ6",
+        "B089N9F791",
+        "B07YN8LMJS",
+        "B08CN9BVDK",
+        "B07SW8FS9N"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 candles",
+      "ranked_product_ids": [
+        "B082T2FHSX",
+        "B077LJ5QLK",
+        "B00MKKKCN8",
+        "B008CU2WFG",
+        "B009AM64KY",
+        "B07WZHRVGP",
+        "B07X5G726C",
+        "B005ORWBMY",
+        "B08TC83QSR",
+        "B07YK9YBFZ"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 credit not given on purchase on prime day",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 credit not given on purchase on prime day",
+      "ranked_product_ids": [
+        "B07SM9XHJW",
+        "B00HSDG8OY",
+        "B07DG1ZZQF",
+        "B07CVWYTPQ",
+        "B00WSAOTZW",
+        "B01K6M3BS4",
+        "B06X9S931L",
+        "B06XX721LP",
+        "B07X13GR6Z",
+        "B07XBPSZRR"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 credit not given on purchase on prime day",
+      "ranked_product_ids": [
+        "B00HSDG8OY",
+        "B07SM9XHJW",
+        "B07X13GR6Z",
+        "B07XBPSZRR",
+        "B00WSAOTZW",
+        "B01K6M3BS4",
+        "B06X9S931L",
+        "B07CVWYTPQ",
+        "B06XX721LP",
+        "B07DG1ZZQF"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.5611967562179879,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "$10 gold eagle",
+      "ranked_product_ids": [
+        "B0000AUY86",
+        "B01DUSCZ42",
+        "B082DN3P3G",
+        "B07B2KQCPJ",
+        "B087BF4R46",
+        "B083QRZ326",
+        "B0849VH3B7",
+        "B089NL8GR3",
+        "B07SLCPTYD",
+        "B07Q4FJXC8"
+      ],
+      "recall_at_5": 0.13333333333333333,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.36154075010510783,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "$10 gold eagle",
+      "ranked_product_ids": [
+        "B0000AUY86",
+        "B01DUSCZ42",
+        "B082DN3P3G",
+        "B07B2KQCPJ",
+        "B087BF4R46",
+        "B00A6SD3SM",
+        "B0771RYYVH",
+        "B07C97F4QX",
+        "B083QRZ326",
+        "B0849VH3B7"
+      ],
+      "recall_at_5": 0.13333333333333333,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.5538865667632845,
+      "note": "",
+      "precision_at_5": 0.8,
+      "query": "$10 gold eagle",
+      "ranked_product_ids": [
+        "B07BLNLW2F",
+        "B07Q4FJXC8",
+        "B089NL8GR3",
+        "B07Q5HKNWB",
+        "B07L443MN7",
+        "B0849RT9NK",
+        "B08KJ2GJM9",
+        "B083QSMHWH",
+        "B0849VH3B7",
+        "B083QRG1V5"
+      ],
+      "recall_at_5": 0.26666666666666666,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 lol literally not gonna change baby pet lol",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 lol literally not gonna change baby pet lol",
+      "ranked_product_ids": [
+        "B091TCD7MQ",
+        "B08HM4TRTC",
+        "B08QZ4LSQ3",
+        "B08DLF165G",
+        "B08P41T13J",
+        "B0846Y9G1H",
+        "B000RKNI5W",
+        "B07WXP91M7",
+        "B07JG2NW3Z",
+        "B07JG2NLPC"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 lol literally not gonna change baby pet lol",
+      "ranked_product_ids": [
+        "B091TCD7MQ",
+        "B08HM4TRTC",
+        "B08QZ4LSQ3",
+        "B08P41T13J",
+        "B07JFRVFPG",
+        "B085RQ9921",
+        "B07JG2NW3Z",
+        "B07JG2NLPC",
+        "B000RKNI5W",
+        "B08X4HLFJV"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.35564192692084573,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "$10 magnetic eyelashes without eyeliner",
+      "ranked_product_ids": [
+        "B0972WCZP2",
+        "B092CSHCJ4",
+        "B099DY9D11",
+        "B083NSC7HD",
+        "B089G6V2B9",
+        "B099584WRR",
+        "B08FY2PKKZ",
+        "B0946YPPVX",
+        "B08NK1LCVC",
+        "B08FBX4XGZ"
+      ],
+      "recall_at_5": 0.06451612903225806,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 magnetic eyelashes without eyeliner",
+      "ranked_product_ids": [
+        "B07FNXBDY3",
+        "B07VDB82VD",
+        "B093PTN439",
+        "B09DXXP5GH",
+        "B094R9GJXC",
+        "B09F2RBMR8",
+        "B0971BRHL4",
+        "B098KLQNFG",
+        "B07XYQ44PZ",
+        "B096YPBGKD"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.2,
+      "ndcg_at_10": 0.17121353077196294,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$10 magnetic eyelashes without eyeliner",
+      "ranked_product_ids": [
+        "B092CSHCJ4",
+        "B083NSC7HD",
+        "B0897ZRZ7S",
+        "B08HT2L7L1",
+        "B094D5NQ35",
+        "B082FWPZ5Z",
+        "B08JHR155D",
+        "B09221BWXF",
+        "B07ZYJGLL9",
+        "B08ZKF1ZHF"
+      ],
+      "recall_at_5": 0.03225806451612903,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 stuff not books",
+      "ranked_product_ids": [
+        "B089VX5XF4",
+        "B07QFRS1PL",
+        "B078W2ZC7M",
+        "B01MZILMY4",
+        "B0765ND1VC",
+        "B08MW7P8C5",
+        "B072V7PJ6K",
+        "B01N6H12UR",
+        "B07M9Y1RJM",
+        "B07ZNZKD7X"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 stuff not books",
+      "ranked_product_ids": [
+        "B07M747YKM",
+        "0763644315",
+        "B07HHGTC7C",
+        "B06Y4SG383",
+        "B01DQX2RJY",
+        "B07K2KV446",
+        "B07G4HNBGH",
+        "1954392354",
+        "B00VPKYABO",
+        "B01MTN6XD8"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$10 stuff not books",
+      "ranked_product_ids": [
+        "B07CYLC2BF",
+        "B07K2JL69K",
+        "B07K2KJFTW",
+        "B07KCL992V",
+        "B06Y4SG383",
+        "B07L456ZZD",
+        "0960021930",
+        "B07KCKP63Z",
+        "B07K2KV446",
+        "B002CFI2I8"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$100 things that are not electronics",
+      "ranked_product_ids": [
+        "B07VF314GK",
+        "B00KTWY1DQ",
+        "B07JYJ5ZGL",
+        "B01GOXCIJM",
+        "B01LZYBPYV",
+        "B084ST8GWG",
+        "B07FS647D5",
+        "B07S4HV2JK",
+        "B01N41FD19",
+        "B07NLJ4BFL"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$100 things that are not electronics",
+      "ranked_product_ids": [
+        "1937578313",
+        "B078JNBVFY",
+        "B007PCNN78",
+        "B07JM18GL7",
+        "B01LZ8PDAG",
+        "B07V5G1X15",
+        "B07RJQHD3Q",
+        "B077YBRN6X",
+        "B075R1PQG9",
+        "B07FLJT72Q"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$100 things that are not electronics",
+      "ranked_product_ids": [
+        "B07V5G1X15",
+        "1937578313",
+        "B078JNBVFY",
+        "B07FLJT72Q",
+        "B07RJQHD3Q",
+        "B082TMFQ1V",
+        "B075R1PQG9",
+        "B07VF314GK",
+        "B07TZJ4Q7W",
+        "B076Y3SCXD"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$11 fidget please just please $11 not 25 not",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$11 fidget please just please $11 not 25 not",
+      "ranked_product_ids": [
+        "B017TCGID4",
+        "B017TCL4EM",
+        "B017TCMF22",
+        "B01LXZJY7S",
+        "B079391J47",
+        "B07938S5LV",
+        "B0814P9Y7R",
+        "B07V5DBCG7",
+        "B07K1RBSWP",
+        "B0999LLCK8"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$11 fidget please just please $11 not 25 not",
+      "ranked_product_ids": [
+        "B0963D4V99",
+        "B082MSQ13D",
+        "B081YPCHZR",
+        "B084MC5VKT",
+        "B08V6HT65K",
+        "B07YWKNFNG",
+        "B07D1LPLM1",
+        "B07Z3SN1RC",
+        "B084T56BF8",
+        "B07DBX2NN1"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$12 label maker that\u2019s not a cheap one",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.11004588314904008,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$12 label maker that\u2019s not a cheap one",
+      "ranked_product_ids": [
+        "B07H9CV5TJ",
+        "B078JVDTZP",
+        "B08D7J1S34",
+        "B08F21XH53",
+        "B08JBX5KMZ",
+        "B07TX9PX1K",
+        "B0751XHB44",
+        "B08G8NWHJH",
+        "B08G8PZN2T",
+        "B07TFBQ19Z"
+      ],
+      "recall_at_5": 0.06666666666666667,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.22009176629808017,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$12 label maker that\u2019s not a cheap one",
+      "ranked_product_ids": [
+        "B08ZCMYT82",
+        "B0757JG57P",
+        "B07585ZGQR",
+        "B07XXB2MXN",
+        "B07H9CV5TJ",
+        "B0018NFYLS",
+        "B009NVTE5E",
+        "B01J3WQ360",
+        "B07QX4Z22P",
+        "B08JBX5KMZ"
+      ],
+      "recall_at_5": 0.06666666666666667,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$13 bb guns without a yellow tube",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$13 bb guns without a yellow tube",
+      "ranked_product_ids": [
+        "B00K1NAA6U",
+        "B0179SSDMC",
+        "B06XPF9HSZ",
+        "B0179TIL3W",
+        "B00GLV3VBC",
+        "B00C88HUSM",
+        "B00C88JTYK",
+        "B07DP2C5RW",
+        "B00GLWD4YK",
+        "B06XVVKRLF"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.0819750639042519,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$13 bb guns without a yellow tube",
+      "ranked_product_ids": [
+        "B00K1NAA6U",
+        "B0179SSDMC",
+        "B008DQ9VV2",
+        "B07VYP35Y1",
+        "B06XPF9HSZ",
+        "B0179TIL3W",
+        "B00GLV3VBC",
+        "B08DXNXRLN",
+        "B00EWK00FY",
+        "B076QHPQQN"
+      ],
+      "recall_at_5": 0.029411764705882353,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$13 fidget toys without paying for delivery",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.1111111111111111,
+      "ndcg_at_10": 0.06625422345438903,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$13 fidget toys without paying for delivery",
+      "ranked_product_ids": [
+        "B094N3CPHH",
+        "B07Q8QDVL5",
+        "B092V8LC9Y",
+        "B0936KJQYY",
+        "B094H4BG4Z",
+        "B091FWHDBF",
+        "B08GG639D2",
+        "B08T19KP36",
+        "B08L3K3B41",
+        "B07L9941VP"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$13 fidget toys without paying for delivery",
+      "ranked_product_ids": [
+        "B094N3CPHH",
+        "B097ZD2L2R",
+        "B07Q8QDVL5",
+        "B08MT7NRG2",
+        "B08NJ9C1J8",
+        "B092V8LC9Y",
+        "B095M7M1NX",
+        "B0936KJQYY",
+        "B08FBWWJLQ",
+        "B06X6GXF45"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$139 one cup cousy not coffee maker",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$139 one cup cousy not coffee maker",
+      "ranked_product_ids": [
+        "B07MX87HH9",
+        "B07ZHNDYDY",
+        "B08RHMMP9T",
+        "B08RHVYR85",
+        "B088TH196W",
+        "B0746DV91S",
+        "B092VSBR18",
+        "B06WLJBVDV",
+        "B07RHL1FVY",
+        "B07RKSWCZZ"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$139 one cup cousy not coffee maker",
+      "ranked_product_ids": [
+        "B088TH196W",
+        "B0746DV91S",
+        "B092VSBR18",
+        "B07L96HRC8",
+        "B0899C1R7M",
+        "B088FX78HY",
+        "B06WLJBVDV",
+        "B01HTB4NQ4",
+        "B01E3X4OK6",
+        "B017DOT5EW"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$15 doller bb guns not spring powered",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.16666666666666666,
+      "ndcg_at_10": 0.033599258133718,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$15 doller bb guns not spring powered",
+      "ranked_product_ids": [
+        "B08X4F4FQH",
+        "B01GPJDVQE",
+        "B0199QUK3M",
+        "B07NVMRPCW",
+        "B004B1MTSK",
+        "B0793427F2",
+        "B00GJBFMGQ",
+        "B004W72XIO",
+        "B07FT2LLLK",
+        "B002H9RZM8"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$15 doller bb guns not spring powered",
+      "ranked_product_ids": [
+        "B07VYP35Y1",
+        "B00KBZTCOY",
+        "B01GPJDVQE",
+        "B008DQ9VV2",
+        "B0199QUK3M",
+        "B015OVSLQO",
+        "B001L21VCW",
+        "B07KKMQQZ1",
+        "B004B1MTSK",
+        "B08X4F4FQH"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$15 fidget pack without the pea poppet",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.23843350565230886,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "$15 fidget pack without the pea poppet",
+      "ranked_product_ids": [
+        "B08MT7NRG2",
+        "B08NJ9C1J8",
+        "B0936KJQYY",
+        "B093Q6QFM6",
+        "B091H2SHFC",
+        "B07Q8QDVL5",
+        "B094PV4G39",
+        "B0968HJBNQ",
+        "B08T19KP36",
+        "B0926RZG85"
+      ],
+      "recall_at_5": 0.09090909090909091,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.2266306816903868,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "$15 fidget pack without the pea poppet",
+      "ranked_product_ids": [
+        "B08MT7NRG2",
+        "B08NJ9C1J8",
+        "B093Q6QFM6",
+        "B091H2SHFC",
+        "B0936KJQYY",
+        "B08Y8W53XK",
+        "B07Q8QDVL5",
+        "B06X6GXF45",
+        "B092LKPTXG",
+        "B08T19KP36"
+      ],
+      "recall_at_5": 0.09090909090909091,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$150 laptop not previews",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$150 laptop not previews",
+      "ranked_product_ids": [
+        "B07Y53N349",
+        "B07BLNVZ7D",
+        "B015EJPK42",
+        "B07N4J6T3F",
+        "B083BVLM71",
+        "B07YG59PK9",
+        "B07ZMR6MPV",
+        "B07R3V7XGG",
+        "B07SLSWXGD",
+        "B07DNHH94H"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$150 laptop not previews",
+      "ranked_product_ids": [
+        "1643696386",
+        "1643696394",
+        "1643696343",
+        "B00505DU4I",
+        "B07T1PH25B",
+        "B07KW965JX",
+        "B07DZVQFQ5",
+        "B002KSY6QY",
+        "B083JKXTYG",
+        "B000EEPETE"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$175 gram led frisbee gram not dollar",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.25,
+      "ndcg_at_10": 0.1584091525685025,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$175 gram led frisbee gram not dollar",
+      "ranked_product_ids": [
+        "B06XG1HTYY",
+        "B06XG4KZ7W",
+        "B0135RWTDK",
+        "B08WRZQCWM",
+        "B01944SOKA",
+        "B00NGRU996",
+        "B017LUWCAW",
+        "B074W1XFRX",
+        "B072WFPSDK",
+        "B076PJ1KHS"
+      ],
+      "recall_at_5": 0.05,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.20437092584821728,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "$175 gram led frisbee gram not dollar",
+      "ranked_product_ids": [
+        "B004ZLB91O",
+        "B01LVZC319",
+        "B08WRZQCWM",
+        "B0135RWTDK",
+        "B00F2GZD68",
+        "B01LW9L9YR",
+        "B07B8KD632",
+        "B087Q5D97G",
+        "B08BP57885",
+        "B00N1XUFVW"
+      ],
+      "recall_at_5": 0.1,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$2 pop tube not a pack",
+      "ranked_product_ids": [
+        "B07HWVM3S1",
+        "B07JQC4L12",
+        "B07JQCT8ZX",
+        "B07JYG28TT",
+        "B0867CYY8J",
+        "B07HWTKLDT",
+        "B07SPX1N74",
+        "B0933112CP",
+        "B093311B5L",
+        "B08QHQXKDZ"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.04894178710471267,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$2 pop tube not a pack",
+      "ranked_product_ids": [
+        "B01NABA2ZA",
+        "B0963F1R3X",
+        "B097ZD2L2R",
+        "B07MW4T5DY",
+        "B0797N98B1",
+        "B08B9S3QH9",
+        "B07CJTK245",
+        "B00WFHTNS6",
+        "B08BYQTDS6",
+        "B00CCI8UC8"
+      ],
+      "recall_at_5": 0.047619047619047616,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.16666666666666666,
+      "ndcg_at_10": 0.25478815127402876,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$2 pop tube not a pack",
+      "ranked_product_ids": [
+        "B009CQTZMC",
+        "B01NABA2ZA",
+        "B0936KJQYY",
+        "B095NNWZ3M",
+        "B0095IGRIM",
+        "B08CB266JS",
+        "B095VLRLXR",
+        "B08N2Q8WR2",
+        "B07MBW6JNL",
+        "B0867CYY8J"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$20 not credible dog pool rectangular",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$20 not credible dog pool rectangular",
+      "ranked_product_ids": [
+        "B07Z31NQ1Q",
+        "B0983MX135",
+        "B07N52NLC3",
+        "B083FWYBW4",
+        "B089B7LMGF",
+        "B075XMN1GH",
+        "B07XKW55KJ",
+        "B07R6VVTCK",
+        "B0857B63P3",
+        "B08RJ63P1X"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$20 not credible dog pool rectangular",
+      "ranked_product_ids": [
+        "B0983MX135",
+        "B07N52NLC3",
+        "B083FWYBW4",
+        "B07XKW55KJ",
+        "B085VFBZRY",
+        "B089B7LMGF",
+        "B075XMN1GH",
+        "B0857B63P3",
+        "B0159NYEKE",
+        "B07R6VVTCK"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$20 off for amazon app not applied",
+      "ranked_product_ids": [
+        "B07TMKZ9QL",
+        "B07NXR75HQ"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$20 off for amazon app not applied",
+      "ranked_product_ids": [
+        "B079JKPLM5",
+        "B06XGRXB4Q",
+        "B07Y4ZNJTX",
+        "B07TMKZ9QL",
+        "B078GDFYTY",
+        "B08F2V9KVD",
+        "B07SL98Q6B",
+        "B08W9Q5GKX",
+        "B093THNY4C",
+        "B079DBRJ1Z"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$20 off for amazon app not applied",
+      "ranked_product_ids": [
+        "B079JKPLM5",
+        "B08F2V9KVD",
+        "B07Y4ZNJTX",
+        "B078GDFYTY",
+        "B07TMKZ9QL",
+        "B07H5JSVTD",
+        "B07RSRX1YR",
+        "B0814RVFJC",
+        "B07THD8VBN",
+        "B079DBRJ1Z"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$20 rectangular not inflatable pool 26 i",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$20 rectangular not inflatable pool 26 i",
+      "ranked_product_ids": [
+        "B08RYC8SNZ",
+        "B0897FLLKW",
+        "B0863PFPDV",
+        "B00W601ZJW",
+        "B089WH7BKD",
+        "B08WCQRKXP",
+        "B08BLRHH7J",
+        "B089M9TVSX",
+        "B01HBKW66M",
+        "B0983MX135"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$20 rectangular not inflatable pool 26 i",
+      "ranked_product_ids": [
+        "B08RYC8SNZ",
+        "B009HUAHAM",
+        "B089D17K9P",
+        "B089Y33V2L",
+        "B0887X1ZVX",
+        "B0897FLLKW",
+        "B0863PFPDV",
+        "B0983MX135",
+        "B088N6SP4H",
+        "B08RS7HM7X"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$20 vr headset without controller",
+      "ranked_product_ids": [
+        "B07ZVYC41L",
+        "B081S1TV5M",
+        "B077BBLFF2",
+        "B086M2X2QR"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.2288008972910269,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$20 vr headset without controller",
+      "ranked_product_ids": [
+        "B07VRN1681",
+        "B07HH1FHHX",
+        "B08P1V69PJ",
+        "B0939LQQ54",
+        "B07HMKC45Y",
+        "B095JF1C5S",
+        "B098TZMNXK",
+        "B08FMP67SW",
+        "B095K34SQ6",
+        "B0967599HP"
+      ],
+      "recall_at_5": 0.08333333333333333,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.1319426301569214,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "$20 vr headset without controller",
+      "ranked_product_ids": [
+        "B08RB2D8ST",
+        "B0863MT183",
+        "B07VDJDMLV",
+        "B08P1V69PJ",
+        "B07D8N1N2C",
+        "B08RN289D2",
+        "B07C69ZMY8",
+        "B07DKYHLZL",
+        "B07FRQT211",
+        "B08JM6XKTK"
+      ],
+      "recall_at_5": 0.16666666666666666,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$230 pool for outdoors not plastic",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$230 pool for outdoors not plastic",
+      "ranked_product_ids": [
+        "B08794Q43R",
+        "B093D6S49T",
+        "B073JF4TM3",
+        "B004M05IK6",
+        "B01HD7FPHK",
+        "B071W35QN1",
+        "B073F7J6B1",
+        "B01GHM6XEQ",
+        "B081RL1SHW",
+        "B081RM21KX"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$230 pool for outdoors not plastic",
+      "ranked_product_ids": [
+        "B0855XTLRP",
+        "B0855Y7DKF",
+        "B0888SG554",
+        "B085C8LYF1",
+        "B0855YL82Y",
+        "B0878VG414",
+        "B085FT848Y",
+        "B0872VVZ46",
+        "B0855YNGGM",
+        "B000XO2RV8"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.1644922274565801,
+      "note": "",
+      "precision_at_5": 0.5,
+      "query": "$25 apple gift card not email",
+      "ranked_product_ids": [
+        "B08F3BV69X",
+        "B08F3C99KN"
+      ],
+      "recall_at_5": 0.05555555555555555,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.1303570060893872,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$25 apple gift card not email",
+      "ranked_product_ids": [
+        "B08NTQWTWN",
+        "B08F3BV69X",
+        "B08F3C99KN",
+        "B01B25L15E",
+        "B083HT9RSG",
+        "B08J67Z9LJ",
+        "B07RR19RZP",
+        "B075Y8WBTS",
+        "B07Y453383",
+        "B07Y454LKQ"
+      ],
+      "recall_at_5": 0.05555555555555555,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.24297496541229568,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$25 apple gift card not email",
+      "ranked_product_ids": [
+        "B08F3BV69X",
+        "B08F3C99KN",
+        "B075Y8WBTS",
+        "B07Y453383",
+        "B07Y454LKQ",
+        "B07Y45BRSG",
+        "B00KV30IHG",
+        "B0721NSDNL",
+        "B08B3NYGBF",
+        "B08B3PL6B1"
+      ],
+      "recall_at_5": 0.05555555555555555,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.2,
+      "ndcg_at_10": 0.085143117641621,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$25 ceiling fan without lights",
+      "ranked_product_ids": [
+        "B08224PMYG",
+        "B08JCNBX6D",
+        "B07XP1XYHD",
+        "B081SVK95V",
+        "B08M189CNL",
+        "B095PCJ3Z2",
+        "B07WWXRQGG",
+        "B01IVHUFGW",
+        "B07PFRC2SY",
+        "B07PFRCK84"
+      ],
+      "recall_at_5": 0.03333333333333333,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.2,
+      "ndcg_at_10": 0.26123729097441106,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$25 ceiling fan without lights",
+      "ranked_product_ids": [
+        "B092TR6VS5",
+        "B09C1JPT3B",
+        "B0917GF8NH",
+        "B08JLRP5BH",
+        "B095HXZMQG",
+        "B08M189CNL",
+        "B08NCWJ1QQ",
+        "B07CQKJT8F",
+        "B094MQFLQL",
+        "B09DYBL7X5"
+      ],
+      "recall_at_5": 0.03333333333333333,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$25 ceiling fan without lights",
+      "ranked_product_ids": [
+        "B07VF3V52Y",
+        "B09H2YH2HT",
+        "B091YP6NCN",
+        "B095SHJWM8",
+        "B07KRTK7GQ",
+        "B0923XMR6L",
+        "B094CXYYM1",
+        "B098JPVGDR",
+        "B096BCNS2J",
+        "B07FZZNRWR"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$25 katana swords not real",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.25,
+      "ndcg_at_10": 0.09478836436955078,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$25 katana swords not real",
+      "ranked_product_ids": [
+        "B08P1BYRTF",
+        "B07219NS51",
+        "B07NCGHJ3F",
+        "B097PBHXTH",
+        "B0893TVBLY",
+        "B093D1X8Q9",
+        "B096YW82SP",
+        "B08ZYF37RM",
+        "B09FDFY2WL",
+        "B07XB8WJ8R"
+      ],
+      "recall_at_5": 0.02857142857142857,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.25,
+      "ndcg_at_10": 0.17318663334822612,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$25 katana swords not real",
+      "ranked_product_ids": [
+        "B07NCGHJ3F",
+        "B07TVCS3W8",
+        "B08P1BYRTF",
+        "B08CRYBFJ7",
+        "B07PPP7LX4",
+        "B08CCV9WXD",
+        "B09FDFY2WL",
+        "B07XB65FM3",
+        "B07219NS51",
+        "B096YW82SP"
+      ],
+      "recall_at_5": 0.02857142857142857,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$25 xbox gift card not digital",
+      "ranked_product_ids": [
+        "B01HT1BW0E"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.5197662431661817,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "$25 xbox gift card not digital",
+      "ranked_product_ids": [
+        "B00F4CF39C",
+        "B07C438TMN",
+        "B00F4CEHNK",
+        "B00F4CEOS8",
+        "B00F4CEWOY",
+        "B00F4CF4PU",
+        "B00F4CF7L6",
+        "B00F4CFAV8",
+        "B00F4CFBUS",
+        "B00F4CFCXO"
+      ],
+      "recall_at_5": 0.3333333333333333,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$25 xbox gift card not digital",
+      "ranked_product_ids": [
+        "B00F4CF39C",
+        "B07FMJVVKW",
+        "B0727VWRHF",
+        "B014S24B28",
+        "B081R3QMN2",
+        "B00YD74M4Q",
+        "B085TKB1LN",
+        "B01B25L15E",
+        "B07FXJ91VW",
+        "B074NGD55Y"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.3589542101716347,
+      "note": "",
+      "precision_at_5": 1.0,
+      "query": "$275 airsoft guns",
+      "ranked_product_ids": [
+        "B015OVSLQO",
+        "B009NNALEU"
+      ],
+      "recall_at_5": 0.2,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.22009176629808017,
+      "note": "",
+      "precision_at_5": 0.2,
+      "query": "$275 airsoft guns",
+      "ranked_product_ids": [
+        "B009NNALEU",
+        "B0725G71JQ",
+        "B00C185NRO",
+        "B00GMAAUVG",
+        "B0002J836C",
+        "B001ABJXLA",
+        "B000JIH7SQ",
+        "B00HSP1PWW",
+        "B004B1MTSK",
+        "B00GJBFMGQ"
+      ],
+      "recall_at_5": 0.1,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.3589542101716347,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "$275 airsoft guns",
+      "ranked_product_ids": [
+        "B015OVSLQO",
+        "B009NNALEU",
+        "B07ZPDDZN8",
+        "B07VPLWX6J",
+        "B07BHNGRKN",
+        "B07X3ZNNZC",
+        "B07C3GV8BV",
+        "B08N4569QG",
+        "B01GPJDVQE",
+        "B01MQS74AT"
+      ],
+      "recall_at_5": 0.2,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "baseline_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$3 nail tips without tax",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$3 nail tips without tax",
+      "ranked_product_ids": [
+        "B089Y2KLZ5",
+        "B085HKCVND",
+        "B07M8TZZJM",
+        "B00RGHKZUA",
+        "B0865W2MRK",
+        "B07CXG4ZP9",
+        "B07R7SSD1C",
+        "B082FVR7BZ",
+        "B01GM9I33S",
+        "B07ZVBBGYQ"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.1111111111111111,
+      "ndcg_at_10": 0.06625422345438903,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$3 nail tips without tax",
+      "ranked_product_ids": [
+        "B0925Q72ZL",
+        "B0836S1MXY",
+        "B088Q1B9R8",
+        "B07M8TZZJM",
+        "B085HKCVND",
+        "B08DFHRM7D",
+        "B07W6V8L18",
+        "B086WZW6DT",
+        "B086ZLWVK4",
+        "B082SQSLFH"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "enriched_profile"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$30 roblox gift card not digital",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$30 roblox gift card not digital",
+      "ranked_product_ids": [
+        "B00F4CF4PU",
+        "B084LNGNX8",
+        "B08QCLF97N",
+        "B07Y94W69D",
+        "B0919XFLGP",
+        "B0919XY85V",
+        "B08CNBCWCF",
+        "B08P2MPYWN",
+        "B06XX721LP",
+        "B07RNKX2L7"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$30 roblox gift card not digital",
+      "ranked_product_ids": [
+        "B08CNBCWCF",
+        "B09BKRJ5JJ",
+        "B08P2MPYWN",
+        "B07S294N8G",
+        "B087JLF2R6",
+        "B06XX721LP",
+        "B00XAP7C1C",
+        "B07RNKX2L7",
+        "B07W92LWWT",
+        "B0856W1D37"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$35 bay casting left handed pole that does not do backlash",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$35 bay casting left handed pole that does not do backlash",
+      "ranked_product_ids": [
+        "B07XNFCF6T",
+        "B071YL7DX9",
+        "B083XH17J9",
+        "B01MRQCENJ",
+        "B01N46UYTL",
+        "B084WT9S81",
+        "B07QZPZ412",
+        "B01N1L8SKX",
+        "B01N69RARX",
+        "B01CUDZDJC"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$35 bay casting left handed pole that does not do backlash",
+      "ranked_product_ids": [
+        "B07WRN3HZ6",
+        "B07ZCD5BRP",
+        "B07ZCCGB3V",
+        "B06XYHR4N7",
+        "B08WZ5FWJ4",
+        "B071YL7DX9",
+        "B01MRQCENJ",
+        "B01N1L8SKX",
+        "B01N46UYTL",
+        "B01N69RARX"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$3what can you buy without siri dollar toy",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$3what can you buy without siri dollar toy",
+      "ranked_product_ids": [
+        "B0797FZW44",
+        "B072PXP8CR",
+        "B07WNCP3HG",
+        "B07F34H6LM",
+        "B07V7ZZWCW",
+        "B009I1RR26",
+        "B009WADWRW",
+        "B00AKIWJ56",
+        "B00ILGGODW",
+        "B07CGP25W7"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$3what can you buy without siri dollar toy",
+      "ranked_product_ids": [
+        "B089M6N2ZM",
+        "B08QFLP8B8",
+        "B0797FZW44",
+        "B072PXP8CR",
+        "B07JCX7MB7",
+        "B07JD9BX5T",
+        "B07JDTK5VT",
+        "B07JDTK6RV",
+        "B07JDWJM4N",
+        "B07JF58215"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$4 worthy items not books",
+      "ranked_product_ids": [
+        "B01BJ484EO",
+        "B07MPVCCSN",
+        "B07MKKT12R",
+        "B08C5B4MSW"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$4 worthy items not books",
+      "ranked_product_ids": [
+        "B00GT0LZMM",
+        "B0000GHNUE",
+        "9123939559",
+        "B08RGJ9S65",
+        "1620105942",
+        "B000QCQ9Q6",
+        "B08B1J26X5",
+        "B07L487T4Q",
+        "9124135917",
+        "B099C8S8SF"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$4 worthy items not books",
+      "ranked_product_ids": [
+        "B07YZVLVH4",
+        "B07DFTMDJT",
+        "B07Z4KXLW3",
+        "B07D2N9K1S",
+        "B07R3HCL96",
+        "B088RD9XK6",
+        "B08GP38BFJ",
+        "B07MPVCCSN",
+        "B08DLMZCK5",
+        "B09878PMXQ"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.3333333333333333,
+      "ndcg_at_10": 0.20483424751859086,
+      "note": "",
+      "precision_at_5": 0.5,
+      "query": "$40 bean bag chair for adults with bean not included",
+      "ranked_product_ids": [
+        "B07D3NPM7T",
+        "B08ZXML5YZ",
+        "B08DP3RQ3T",
+        "B08T64J84T"
+      ],
+      "recall_at_5": 0.06060606060606061,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.46900009332067477,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "$40 bean bag chair for adults with bean not included",
+      "ranked_product_ids": [
+        "B07L6GL9Z2",
+        "B07B9DT6NK",
+        "B08T64J84T",
+        "B00P21XE7I",
+        "B00P21YGDE",
+        "B00P21YGDY",
+        "B019OGT97A",
+        "B019OGTLA0",
+        "B019OGTQOQ",
+        "B019OGTRI6"
+      ],
+      "recall_at_5": 0.09090909090909091,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.4530643748551538,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "$40 bean bag chair for adults with bean not included",
+      "ranked_product_ids": [
+        "B08T64J84T",
+        "B015QJJD34",
+        "B0821XTHP2",
+        "B0821WY8H9",
+        "B0821XN92W",
+        "B0821XWBWB",
+        "B0949KFCZH",
+        "B08DP3RQ3T",
+        "B00P21XE7I",
+        "B00P21YGDE"
+      ],
+      "recall_at_5": 0.06060606060606061,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$44red ' phone without having to pay production",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$44red ' phone without having to pay production",
+      "ranked_product_ids": [
+        "B07RZDZDFY",
+        "B07YC5XGZZ",
+        "B07YD5LLLZ",
+        "B0897HB4RX",
+        "B07PYZL3SC",
+        "B07T3BXB5Q",
+        "B08735SJS8",
+        "B07D7KRQVB",
+        "B07Y1V3MLM",
+        "B01M7X05SS"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$44red ' phone without having to pay production",
+      "ranked_product_ids": [
+        "B07RZDZDFY",
+        "B07D7KRQVB",
+        "B0897HB4RX",
+        "B07YC5XGZZ",
+        "B07PYZL3SC",
+        "B07YD5LLLZ",
+        "B08735SJS8",
+        "B07H81QP1C",
+        "B07T3BXB5Q",
+        "B07Y1V3MLM"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$5 items",
+      "ranked_product_ids": [
+        "B07YRW6Z1K",
+        "B009LMJH1G",
+        "B07RRYBTCL",
+        "B082CW9YT9",
+        "B0924TSLJ3",
+        "B075H66LW1",
+        "B08FT173B7",
+        "B0753F8DMP",
+        "B0852DMJ29",
+        "B017W5KAM8"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$5 items",
+      "ranked_product_ids": [
+        "B07YRW6Z1K",
+        "B009LMJH1G",
+        "B07RRYBTCL",
+        "B082CW9YT9",
+        "B0924TSLJ3",
+        "B075H66LW1",
+        "B08FT173B7",
+        "B0753F8DMP",
+        "B0852DMJ29",
+        "B017W5KAM8"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$5 items",
+      "ranked_product_ids": [
+        "B013IVNQ3A",
+        "B00YNZKA62",
+        "B0798KFQDX",
+        "B00DT42TRQ",
+        "B07R7VPJJJ",
+        "B07HQCRD59",
+        "B088P94548",
+        "B0841XZSTX",
+        "B0836C9F9K",
+        "B01GQRB5OK"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.46900009332067477,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "$50 gifts for men",
+      "ranked_product_ids": [
+        "B08R8SW1NM",
+        "B07Y1C853J",
+        "B09722KXS8",
+        "B07Y1FHHD5",
+        "1726244822",
+        "B07LF2W5M8",
+        "B07Y7R4KZV",
+        "B08RXSKXGZ",
+        "B08WX17HZD",
+        "B091TX7PFH"
+      ],
+      "recall_at_5": 0.0967741935483871,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 0.49367903606741653,
+      "note": "",
+      "precision_at_5": 0.6,
+      "query": "$50 gifts for men",
+      "ranked_product_ids": [
+        "B07Y1C853J",
+        "B098MGNSSS",
+        "B084SQ8P2P",
+        "B07XDGTSFM",
+        "B08R8SW1NM",
+        "B09722KXS8",
+        "B08RXSKXGZ",
+        "B07Y1FHHD5",
+        "B07T6ST5SY",
+        "B091TX7PFH"
+      ],
+      "recall_at_5": 0.0967741935483871,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.5,
+      "ndcg_at_10": 0.32730659600126993,
+      "note": "",
+      "precision_at_5": 0.4,
+      "query": "$50 gifts for men",
+      "ranked_product_ids": [
+        "B07Z9Q6FHH",
+        "B084SQ8P2P",
+        "B07ZL13WZP",
+        "B07NH2X2YW",
+        "B076LVSMM3",
+        "B08R8SW1NM",
+        "B0189G0LCS",
+        "B091TX7PFH",
+        "B01MTS5BFN",
+        "B01MXPT281"
+      ],
+      "recall_at_5": 0.06451612903225806,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": [
+        "boosted_bm25"
+      ]
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$50 not accepted",
+      "ranked_product_ids": [
+        "B07XWNMHWX",
+        "B07647ZVMN",
+        "B07R762555",
+        "B07R636W1D",
+        "B00JF3S29Y",
+        "B07DXGZHRK",
+        "B09521CWYT",
+        "B07G3HGC4C",
+        "B076C2CQ2R",
+        "B07DVPW1HG"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$50 not accepted",
+      "ranked_product_ids": [
+        "B07P98L6B7",
+        "B0897RX562",
+        "B0746TG79B",
+        "0967718929",
+        "0985206705",
+        "B009L9Z9GG",
+        "B07FP7V42X",
+        "B018FD2LBE",
+        "B079HQJ78M",
+        "B089XX86SQ"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$50 not accepted",
+      "ranked_product_ids": [
+        "B07RN957Q8",
+        "B08DJ4KKFF",
+        "B07LCX9RPZ",
+        "B00DCK5ZXM",
+        "B07R762555",
+        "B07R636W1D",
+        "B07632QPJP",
+        "B07632VSS4",
+        "B008X6JB12",
+        "B00UA4JY5S"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$50 skateboard without waxing music",
+      "ranked_product_ids": [],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "baseline_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$50 skateboard without waxing music",
+      "ranked_product_ids": [
+        "B07PWVJZ8H",
+        "1626252521",
+        "B018RSC3X8",
+        "B08884YXJQ",
+        "B087ZW8STC",
+        "B081T4FR6P",
+        "B07JJKFCQD",
+        "B07YTRY28T",
+        "B097TCWH8W",
+        "B07T5RJTT3"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "boosted_bm25",
+      "winners": []
+    },
+    {
+      "mrr_at_10": 0.0,
+      "ndcg_at_10": 0.0,
+      "note": "",
+      "precision_at_5": 0.0,
+      "query": "$50 skateboard without waxing music",
+      "ranked_product_ids": [
+        "B08884YXJQ",
+        "B07N39GCNB",
+        "B087ZW8STC",
+        "B07ZKDD1VZ",
+        "B07T5RJTT3",
+        "B097TCWH8W",
+        "B07X2J2LP7",
+        "B081T4FR6P",
+        "B07PWVJZ8H",
+        "B07RMHXLF6"
+      ],
+      "recall_at_5": 0.0,
+      "status": "ok",
+      "strategy": "enriched_profile",
+      "winners": []
+    }
+  ],
+  "query_count": 100,
+  "summary": [
+    {
+      "delta_mrr_at_10": 0.0,
+      "delta_ndcg_at_10": 0.0,
+      "delta_precision_at_5": 0.0,
+      "delta_recall_at_5": 0.0,
+      "evaluated_queries": 100,
+      "mrr_at_10": 0.2782063492063492,
+      "ndcg_at_10": 0.13795965953104053,
+      "pending_queries": 0,
+      "precision_at_5": 0.2155,
+      "recall_at_5": 0.04577197265377631,
+      "status": "ok",
+      "strategy": "baseline_bm25"
+    },
+    {
+      "delta_mrr_at_10": 0.09469444444444447,
+      "delta_ndcg_at_10": 0.06294238867017354,
+      "delta_precision_at_5": 0.012500000000000011,
+      "delta_recall_at_5": 0.020086393860492414,
+      "evaluated_queries": 100,
+      "mrr_at_10": 0.37290079365079365,
+      "ndcg_at_10": 0.20090204820121407,
+      "pending_queries": 0,
+      "precision_at_5": 0.228,
+      "recall_at_5": 0.06585836651426873,
+      "status": "ok",
+      "strategy": "boosted_bm25"
+    },
+    {
+      "delta_mrr_at_10": 0.10184920634920636,
+      "delta_ndcg_at_10": 0.043125070449439334,
+      "delta_precision_at_5": -0.007499999999999979,
+      "delta_recall_at_5": 0.016781880378823104,
+      "evaluated_queries": 100,
+      "mrr_at_10": 0.38005555555555554,
+      "ndcg_at_10": 0.18108472998047986,
+      "pending_queries": 0,
+      "precision_at_5": 0.20800000000000002,
+      "recall_at_5": 0.06255385303259942,
+      "status": "ok",
+      "strategy": "enriched_profile"
+    }
+  ]
+}

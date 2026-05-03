@@ -65,7 +65,7 @@ cd ..\..
 Run local latency benchmarking:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\benchmark_search.py
+npm run benchmark:search
 ```
 
 ## Example Evaluation Output
@@ -119,6 +119,9 @@ docker compose down
 .\.venv\Scripts\python.exe scripts\benchmark_search.py
 .\.venv\Scripts\python.exe scripts\evaluate_hybrid_search.py
 .\.venv\Scripts\python.exe scripts\evaluate_reranking.py
+npm run evaluate:relevance
+npm run benchmark:search
+npm run gate:search-quality
 
 # API
 cd apps/api
@@ -161,6 +164,63 @@ The command evaluates `baseline_bm25`, `boosted_bm25`, and `enriched_profile`, t
 - `reports/relevance-report.md`
 
 Metrics include Precision@5, Recall@5, MRR@10, nDCG@10, evaluated query count, metric deltas, and per-query winners.
+
+## Search Quality Gate
+
+The local quality gate combines relevance and latency so a search change has to be both useful and fast enough. Thresholds live in `config/relevance-gate.json` and currently check the `enriched_profile` strategy.
+
+This compact gate is designed for the checked-in sample catalog and `data/judgments/product_search_judgments.json`. When using the full ESCI import, generate matching ESCI relevance reports separately and adjust the gate config to that report/strategy.
+
+Setup:
+
+```powershell
+docker compose up -d
+.\.venv\Scripts\python.exe -m pip install -e .
+```
+
+Ingest:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\create_index.py --recreate
+.\.venv\Scripts\python.exe scripts\load_sample_data.py
+```
+
+Evaluate, benchmark, and gate:
+
+```powershell
+npm run evaluate:relevance
+npm run benchmark:search
+npm run gate:search-quality
+```
+
+The commands write:
+
+- `reports/relevance-report.json`
+- `reports/relevance-report.md`
+- `reports/latency-report.json`
+- `reports/latency-report.md`
+
+Sample gate inputs:
+
+| Signal | Threshold | Latest measured value |
+| --- | ---: | ---: |
+| Average Precision@5 | >= 0.600 | from `reports/relevance-report.json` |
+| Average MRR@10 | >= 0.750 | from `reports/relevance-report.json` |
+| p95 latency | <= 500 ms | from `reports/latency-report.json` |
+
+If a threshold fails, `npm run gate:search-quality` exits non-zero and prints the failing metric. CI runs unit tests by default; the full evaluation and latency gate are documented as local commands because they require a running Elasticsearch instance and indexed data.
+
+For the local full ESCI import, run the aligned ESCI subset reports against the same judgment queries:
+
+```powershell
+npm run evaluate:relevance:esci
+npm run benchmark:search:esci
+npm run gate:search-quality:esci
+```
+
+The ESCI commands read `data/generated/esci_full_judgments.jsonl`, cap the run to a deterministic 100-query subset by default, and write `reports/esci-relevance-report.*` plus `reports/esci-latency-report.*`.
+
+The ESCI gate uses `config/esci-relevance-gate.json` because public-dataset judgments are much harder than the small portfolio sample. Keeping separate thresholds makes the distinction explicit instead of quietly mixing sample and ESCI expectations.
 
 ## Optional Amazon ESCI Dataset
 

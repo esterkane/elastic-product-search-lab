@@ -1,6 +1,11 @@
 {
   "private": true,
   "scripts": {
-    "evaluate:relevance": ".\\.venv\\Scripts\\python.exe scripts/evaluate_relevance.py"
+    "benchmark:search": ".\\.venv\\Scripts\\python.exe scripts/benchmark_search.py",
+    "benchmark:search:esci": ".\\.venv\\Scripts\\python.exe scripts/benchmark_search.py --judgments data/generated/esci_full_judgments.jsonl --max-queries 100 --repeat 5 --output reports/esci-latency-report.json --markdown-output reports/esci-latency-report.md",
+    "evaluate:relevance": ".\\.venv\\Scripts\\python.exe scripts/evaluate_relevance.py",
+    "evaluate:relevance:esci": ".\\.venv\\Scripts\\python.exe scripts/evaluate_relevance.py --judgments data/generated/esci_full_judgments.jsonl --max-queries 100 --json-report reports/esci-relevance-report.json --markdown-report reports/esci-relevance-report.md",
+    "gate:search-quality": ".\\.venv\\Scripts\\python.exe scripts/gate_search_quality.py",
+    "gate:search-quality:esci": ".\\.venv\\Scripts\\python.exe scripts/gate_search_quality.py --config config/esci-relevance-gate.json --relevance-report reports/esci-relevance-report.json --latency-report reports/esci-latency-report.json"
   }
 }

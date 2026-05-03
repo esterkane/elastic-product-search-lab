@@ -95,6 +95,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--json-report", type=Path, default=DEFAULT_JSON_REPORT_PATH)
     parser.add_argument("--markdown-report", type=Path, default=DEFAULT_MD_REPORT_PATH)
     parser.add_argument("--size", type=int, default=10)
+    parser.add_argument("--max-queries", type=int, help="Evaluate only the first N deterministic judgment queries.")
     return parser.parse_args()
 
 
@@ -104,6 +105,8 @@ def main() -> int:
     try:
         ensure_reachable(client)
         judgments = load_product_search_judgments(args.judgments)
+        if args.max_queries is not None:
+            judgments = judgments[: args.max_queries]
         rows = []
         for query_judgment in judgments:
             for strategy in ("baseline_bm25", "boosted_bm25", "enriched_profile"):

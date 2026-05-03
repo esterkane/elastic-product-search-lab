@@ -49,3 +49,19 @@ def test_report_generation_from_fixture(tmp_path: Path):
     assert "Delta nDCG@10" in markdown
     assert "enriched_profile" in markdown
     assert "yes" in markdown
+
+
+def test_load_product_search_judgments_supports_esci_jsonl(tmp_path: Path):
+    fixture = tmp_path / "esci_judgments.jsonl"
+    fixture.write_text(
+        '{"query":"wireless mouse","product_id":"P1","grade":3}\n'
+        '{"query":"wireless mouse","product_id":"P2","grade":1}\n'
+        '{"query":"coffee maker","product_id":"P3","grade":2}\n',
+        encoding="utf-8",
+    )
+
+    judgments = load_product_search_judgments(fixture)
+
+    assert [row.query for row in judgments] == ["coffee maker", "wireless mouse"]
+    assert judgments[0].judgments == {"P3": 2}
+    assert judgments[1].judgments == {"P1": 3, "P2": 1}

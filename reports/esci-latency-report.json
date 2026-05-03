@@ -1,0 +1,53 @@
+{
+  "attempt_count": 1500,
+  "generated_at_unix": 1777811610.448734,
+  "query_count": 100,
+  "repeat": 5,
+  "summary": [
+    {
+      "avg": 9.29468619954423,
+      "count": 500,
+      "error_count": 0,
+      "error_rate": 0.0,
+      "max": 230.04379999474622,
+      "min": 3.8982999976724386,
+      "p50": 6.659899991063867,
+      "p95": 45.51951499015554,
+      "p99": 49.68645799468504,
+      "strategy": "baseline_bm25",
+      "success_count": 500,
+      "timeout_count": 0,
+      "timeout_rate": 0.0
+    },
+    {
+      "avg": 185.21325299981982,
+      "count": 500,
+      "error_count": 0,
+      "error_rate": 0.0,
+      "max": 394.5250000106171,
+      "min": 52.072600010433234,
+      "p50": 188.85130000126082,
+      "p95": 283.08495499513805,
+      "p99": 348.16222900524735,
+      "strategy": "boosted_bm25",
+      "success_count": 500,
+      "timeout_count": 0,
+      "timeout_rate": 0.0
+    },
+    {
+      "avg": 147.8778805998736,
+      "count": 500,
+      "error_count": 0,
+      "error_rate": 0.0,
+      "max": 377.2633000044152,
+      "min": 40.12410000723321,
+      "p50": 146.71219999581808,
+      "p95": 249.96176000568082,
+      "p99": 283.5198459925595,
+      "strategy": "enriched_profile",
+      "success_count": 500,
+      "timeout_count": 0,
+      "timeout_rate": 0.0
+    }
+  ]
+}

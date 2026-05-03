@@ -1,4 +1,4 @@
-"""Local search latency benchmark for product-search strategies."""
+"""Local latency benchmark for judgment-list product-search strategies."""
 
 from __future__ import annotations
 
@@ -16,27 +16,15 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from scripts.create_index import build_client, ensure_reachable  # noqa: E402
-from src.embeddings.embedder import get_embedder  # noqa: E402
-from src.search.hybrid_search import (  # noqa: E402
-    baseline_lexical_query,
-    boosted_lexical_query,
-    extract_ids,
-    hybrid_rrf_search,
-)
+from scripts.evaluate_relevance import boosted_bm25_evaluation_query, enriched_profile_query  # noqa: E402
+from src.evaluation.relevance_report import load_product_search_judgments  # noqa: E402
+from src.search.hybrid_search import baseline_lexical_query, extract_ids  # noqa: E402
 
 DEFAULT_INDEX = "products-v1"
-DEFAULT_QUERIES = [
-    "wireless mouse",
-    "noise cancelling headphones",
-    "usb c charger",
-    "running shoes waterproof",
-    "coffee maker",
-    "yoga mat",
-    "office chair",
-    "stainless steel bottle",
-]
-DEFAULT_OUTPUT_JSON = PROJECT_ROOT / "data" / "generated" / "performance_report.json"
-DEFAULT_OUTPUT_MD = PROJECT_ROOT / "examples" / "performance_report.md"
+DEFAULT_JUDGMENTS_PATH = PROJECT_ROOT / "data" / "judgments" / "product_search_judgments.json"
+DEFAULT_OUTPUT_JSON = PROJECT_ROOT / "reports" / "latency-report.json"
+DEFAULT_OUTPUT_MD = PROJECT_ROOT / "reports" / "latency-report.md"
+STRATEGIES = ("baseline_bm25", "boosted_bm25", "enriched_profile")
 
 
 @dataclass(frozen=True)
@@ -62,6 +50,7 @@ class BenchmarkSummary:
     p99: float
     min: float
     max: float
+    avg: float
     error_rate: float
     timeout_rate: float
 
@@ -102,6 +91,7 @@ def summarize_attempts(attempts: list[BenchmarkAttempt]) -> list[BenchmarkSummar
                 p99=percentile(successful_latencies, 99),
                 min=min(successful_latencies) if successful_latencies else 0.0,
                 max=max(successful_latencies) if successful_latencies else 0.0,
+                avg=sum(successful_latencies) / len(successful_latencies) if successful_latencies else 0.0,
                 error_rate=error_count / count if count else 0.0,
                 timeout_rate=timeout_count / count if count else 0.0,
             )
@@ -132,15 +122,20 @@ def run_timed_query(strategy: str, query: str, search_fn: Any) -> BenchmarkAttem
         )
 
 
-def direct_lexical_search(client: Any, index_name: str, query: str, size: int, boosted: bool, timeout_seconds: float) -> list[str]:
-    body = boosted_lexical_query(query, size) if boosted else baseline_lexical_query(query, size)
+def build_strategy_query(strategy: str, query: str, size: int) -> dict[str, Any]:
+    if strategy == "baseline_bm25":
+        return baseline_lexical_query(query, size)
+    if strategy == "boosted_bm25":
+        return boosted_bm25_evaluation_query(query, size)
+    if strategy == "enriched_profile":
+        return enriched_profile_query(query, size)
+    raise ValueError(f"Unsupported benchmark strategy: {strategy}")
+
+
+def direct_strategy_search(client: Any, index_name: str, query: str, strategy: str, size: int, timeout_seconds: float) -> list[str]:
+    body = build_strategy_query(strategy, query, size)
     response = client.options(request_timeout=timeout_seconds).search(index=index_name, **body)
     return extract_ids(response)
-
-
-def index_has_embeddings(client: Any, index_name: str) -> bool:
-    response = client.search(index=index_name, size=0, query={"exists": {"field": "embedding"}})
-    return int(response.get("hits", {}).get("total", {}).get("value", 0)) > 0
 
 
 def run_benchmark(
@@ -150,35 +145,24 @@ def run_benchmark(
     size: int,
     repeat: int,
     timeout_seconds: float,
-    include_hybrid: bool,
-    provider: str,
-    model: str,
 ) -> tuple[list[BenchmarkAttempt], list[BenchmarkSummary]]:
     attempts: list[BenchmarkAttempt] = []
-    embedder = get_embedder(provider, model) if include_hybrid else None
 
     for _ in range(repeat):
         for query in queries:
-            attempts.append(
-                run_timed_query(
-                    "baseline_lexical",
-                    query,
-                    lambda q=query: direct_lexical_search(client, index_name, q, size, boosted=False, timeout_seconds=timeout_seconds),
-                )
-            )
-            attempts.append(
-                run_timed_query(
-                    "boosted_lexical",
-                    query,
-                    lambda q=query: direct_lexical_search(client, index_name, q, size, boosted=True, timeout_seconds=timeout_seconds),
-                )
-            )
-            if embedder is not None:
+            for strategy in STRATEGIES:
                 attempts.append(
                     run_timed_query(
-                        "hybrid_rrf",
+                        strategy,
                         query,
-                        lambda q=query: hybrid_rrf_search(client, index_name, q, embedder, size),
+                        lambda q=query, s=strategy: direct_strategy_search(
+                            client,
+                            index_name,
+                            q,
+                            s,
+                            size,
+                            timeout_seconds=timeout_seconds,
+                        ),
                     )
                 )
 
@@ -191,8 +175,12 @@ def write_reports(attempts: list[BenchmarkAttempt], summaries: list[BenchmarkSum
 
     report = {
         "generated_at_unix": time.time(),
+        "query_count": len({attempt.query for attempt in attempts}),
+        "repeat": max((sum(1 for attempt in attempts if attempt.query == query and attempt.strategy == attempts[0].strategy) for query in {attempt.query for attempt in attempts}), default=0)
+        if attempts
+        else 0,
+        "attempt_count": len(attempts),
         "summary": [asdict(summary) for summary in summaries],
-        "attempts": [asdict(attempt) for attempt in attempts],
     }
     json_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
@@ -201,14 +189,14 @@ def write_reports(attempts: list[BenchmarkAttempt], summaries: list[BenchmarkSum
         "",
         "Local benchmark results for product-search strategies. Latency values are milliseconds.",
         "",
-        "| Strategy | Count | Success | Error Rate | Timeout Rate | p50 | p95 | p99 | Min | Max |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Strategy | Count | Success | Error Rate | Timeout Rate | p50 | p95 | p99 | Min | Max | Avg |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for summary in summaries:
         lines.append(
             f"| {summary.strategy} | {summary.count} | {summary.success_count} | "
             f"{summary.error_rate:.3f} | {summary.timeout_rate:.3f} | {summary.p50:.2f} | "
-            f"{summary.p95:.2f} | {summary.p99:.2f} | {summary.min:.2f} | {summary.max:.2f} |"
+            f"{summary.p95:.2f} | {summary.p99:.2f} | {summary.min:.2f} | {summary.max:.2f} | {summary.avg:.2f} |"
         )
     lines.extend(
         [
@@ -222,15 +210,14 @@ def write_reports(attempts: list[BenchmarkAttempt], summaries: list[BenchmarkSum
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Benchmark local product search latency.")
     parser.add_argument("--index", default=os.getenv("PRODUCT_INDEX", DEFAULT_INDEX))
-    parser.add_argument("--queries", nargs="*", default=DEFAULT_QUERIES)
+    parser.add_argument("--judgments", type=Path, default=DEFAULT_JUDGMENTS_PATH)
+    parser.add_argument("--queries", nargs="*")
+    parser.add_argument("--max-queries", type=int, help="Benchmark only the first N deterministic judgment queries.")
     parser.add_argument("--size", type=int, default=10)
-    parser.add_argument("--repeat", type=int, default=2)
+    parser.add_argument("--repeat", type=int, default=20)
     parser.add_argument("--timeout-seconds", type=float, default=2.0)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_JSON)
     parser.add_argument("--markdown-output", type=Path, default=DEFAULT_OUTPUT_MD)
-    parser.add_argument("--hybrid", choices=["auto", "always", "never"], default="auto")
-    parser.add_argument("--provider", choices=["auto", "sentence-transformers", "hash"], default="hash")
-    parser.add_argument("--model", default="sentence-transformers/all-MiniLM-L6-v2")
     return parser.parse_args()
 
 
@@ -239,27 +226,26 @@ def main() -> int:
     client = build_client()
     try:
         ensure_reachable(client)
-        has_embeddings = index_has_embeddings(client, args.index)
-        include_hybrid = args.hybrid == "always" or (args.hybrid == "auto" and has_embeddings)
+        queries = list(args.queries) if args.queries else [row.query for row in load_product_search_judgments(args.judgments)]
+        if args.max_queries is not None:
+            queries = queries[: args.max_queries]
         attempts, summaries = run_benchmark(
             client=client,
             index_name=args.index,
-            queries=list(args.queries),
+            queries=queries,
             size=args.size,
             repeat=args.repeat,
             timeout_seconds=args.timeout_seconds,
-            include_hybrid=include_hybrid,
-            provider=args.provider,
-            model=args.model,
         )
         write_reports(attempts, summaries, args.output, args.markdown_output)
         for summary in summaries:
             print(
                 f"{summary.strategy}: p50={summary.p50:.2f}ms p95={summary.p95:.2f}ms "
-                f"p99={summary.p99:.2f}ms error_rate={summary.error_rate:.3f} timeout_rate={summary.timeout_rate:.3f}"
+                f"p99={summary.p99:.2f}ms avg={summary.avg:.2f}ms "
+                f"error_rate={summary.error_rate:.3f} timeout_rate={summary.timeout_rate:.3f}"
             )
-        if args.hybrid == "auto" and not include_hybrid:
-            print("hybrid_rrf skipped because no embedding field exists in the index.")
+        print(f"Wrote {args.output}")
+        print(f"Wrote {args.markdown_output}")
     except Exception as exc:  # noqa: BLE001 - CLI should fail clearly.
         print(f"Search benchmark failed: {exc}", file=sys.stderr)
         return 1

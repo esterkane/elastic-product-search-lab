@@ -32,6 +32,20 @@ class StrategyEvaluationRow:
 
 
 def load_product_search_judgments(path: Path) -> list[QueryJudgment]:
+    if path.suffix.lower() == ".jsonl":
+        grouped: dict[str, dict[str, int]] = defaultdict(dict)
+        with path.open("r", encoding="utf-8-sig") as handle:
+            for line_number, line in enumerate(handle, start=1):
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                query = str(row.get("query", "")).strip()
+                product_id = str(row.get("product_id", "")).strip()
+                if not query or not product_id:
+                    raise ValueError(f"Judgment line {line_number} must include query and product_id")
+                grouped[query][product_id] = int(row.get("grade", row.get("relevance", 0)))
+        return [QueryJudgment(query=query, judgments=grouped[query]) for query in sorted(grouped)]
+
     rows = json.loads(path.read_text(encoding="utf-8"))
     judgments: list[QueryJudgment] = []
     for index, row in enumerate(rows, start=1):
