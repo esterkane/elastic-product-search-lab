@@ -32,6 +32,10 @@ jobs:
         working-directory: apps/api
         run: npm run build
 
+      - name: Lint API
+        working-directory: apps/api
+        run: npm run lint
+
   python:
     name: Python unit tests
     runs-on: ubuntu-latest

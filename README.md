@@ -23,17 +23,21 @@ Product search relevance is not guesswork. Search changes should be evaluated wi
 
 ```mermaid
 flowchart LR
-    A[Product snapshots and events] --> B[Source-owned product state]
+    A[Datasets and JSONL samples] --> B[Source-owned events]
     B --> C[Canonical product builder]
-    C --> D[Ingestion enrichment]
-    D --> E[(Elasticsearch products-v1)]
+    C --> D[Versioned products-v build index]
+    D --> E[products-read alias]
     E --> F[TypeScript Search API]
-    E --> G[Relevance evaluator]
-    E --> H[Latency benchmark]
-    G --> I[Reports]
-    H --> I
-    I --> J[Search quality gate]
+    G[products-live optional overlay] --> F
+    H[product-suggest] --> F
+    I[Policy JSON optional] --> F
+    E --> J[Relevance evaluator]
+    E --> K[Latency benchmark]
+    J --> L[Reports and quality gate]
+    K --> L
 ```
+
+For a fuller component and sequence view, start with `docs/architecture_overview.md`.
 
 The main product-search index is intended to receive complete product documents. Phase 1 adds a canonical builder layer in `src/ingestion/canonical_builder.py`, with source state in `src/ingestion/source_state.py` and ownership/types in `src/ingestion/canonical_types.py`. Existing JSONL sample loading still works, but complete sample rows now pass through the canonical builder before bulk indexing.
 
@@ -50,6 +54,15 @@ The API read path uses `products-read` for stable candidate retrieval, can optio
 Optional governance and personalization policies can be supplied as data with `SEARCH_POLICY_PATH`, including query-matched boosts, category constraints, exclusions, seasonal rewrites, and modest cohort boosts. See `docs/policy_index_design.md`.
 
 ## Run Locally
+
+Quick contributor paths:
+
+- JSONL/default mode: `docs/local_quickstarts.md`
+- Kafka/Redpanda mode: `docs/kafka_dev_flow.md`
+- Dataset preparation: `docs/dataset_integration.md`
+- Reindex and alias cutover: `docs/index_roles_and_aliasing.md`
+- Troubleshooting: `docs/troubleshooting.md`
+- Migration summary: `docs/migration_note.md`
 
 Start Elasticsearch and Kibana:
 
