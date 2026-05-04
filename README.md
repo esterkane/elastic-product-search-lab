@@ -41,6 +41,8 @@ The current `scripts/replay_product_events.py` direct partial-update path is pre
 
 Optional Kafka-compatible ingestion is available through Redpanda. It is off by default so the file-driven lab stays simple. See `docs/kafka_dev_flow.md` for topics, event schema, producer scripts, consumer interfaces, and DLQ behavior.
 
+Versioned product index rebuilds are available through staged concrete indices such as `products-v202605041245` and an atomic `products-read` alias switch. Product content indices are configured separately from event/audit data streams and ILM retention. See `docs/index_roles_and_aliasing.md` and `docs/event_retention_and_ilm.md`.
+
 ## Run Locally
 
 Start Elasticsearch and Kibana:
@@ -70,6 +72,14 @@ Create the index and load the sample catalog:
 .\.venv\Scripts\python.exe scripts\create_index.py --recreate
 .\.venv\Scripts\python.exe scripts\load_sample_data.py
 ```
+
+Optional staged rebuild with alias cutover:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\load_sample_data.py --switch-alias --install-resources
+```
+
+Search, benchmark, and evaluation workflows can use `products-read` by setting `PRODUCT_INDEX=products-read` or passing that alias wherever an index name is accepted.
 
 Start the API:
 
