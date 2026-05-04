@@ -15,6 +15,9 @@ export type ApiConfig = {
   elasticsearchUseAuth: boolean;
   elasticsearchRequestTimeoutMs: number;
   productIndex: string;
+  productLiveIndex?: string;
+  productLiveOverlayEnabled: boolean;
+  productSuggestIndex: string;
   port: number;
 };
 
@@ -25,7 +28,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     elasticsearchPassword: env.ELASTICSEARCH_PASSWORD,
     elasticsearchUseAuth: ["1", "true", "yes"].includes((env.ELASTICSEARCH_USE_AUTH ?? "false").toLowerCase()),
     elasticsearchRequestTimeoutMs: Number(env.ELASTICSEARCH_REQUEST_TIMEOUT_MS ?? 2000),
-    productIndex: env.PRODUCT_INDEX ?? "products-v1",
+    productIndex: env.PRODUCT_INDEX ?? "products-read",
+    productLiveIndex: env.PRODUCT_LIVE_INDEX,
+    productLiveOverlayEnabled: ["1", "true", "yes"].includes((env.PRODUCT_LIVE_OVERLAY_ENABLED ?? "false").toLowerCase()),
+    productSuggestIndex: env.PRODUCT_SUGGEST_INDEX ?? "product-suggest",
     port: Number(env.PORT ?? 3000),
   };
 }

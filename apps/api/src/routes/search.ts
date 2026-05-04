@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type { AppDependencies } from "../app.js";
-import { searchProducts } from "../search/searchClient.js";
-import type { SearchQueryParams } from "../search/types.js";
+import { searchProducts, suggestProducts } from "../search/searchClient.js";
+import type { SearchQueryParams, SuggestQueryParams } from "../search/types.js";
 
 const searchQuerySchema = {
   type: "object",
@@ -19,6 +19,17 @@ const searchQuerySchema = {
   },
 } as const;
 
+const suggestQuerySchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["q"],
+  properties: {
+    q: { type: "string", minLength: 1 },
+    size: { type: "integer", minimum: 1, maximum: 20, default: 5 },
+    debug: { type: "boolean", default: false },
+  },
+} as const;
+
 export function registerSearchRoute(app: FastifyInstance, dependencies: AppDependencies): void {
   app.get<{ Querystring: SearchQueryParams }>(
     "/search",
@@ -32,7 +43,23 @@ export function registerSearchRoute(app: FastifyInstance, dependencies: AppDepen
         });
       }
 
-      return searchProducts(dependencies.elasticsearch, dependencies.config.productIndex, params);
+      return searchProducts(dependencies.elasticsearch, dependencies.config.productIndex, params, {
+        enabled: dependencies.config.productLiveOverlayEnabled,
+        index: dependencies.config.productLiveIndex,
+      });
     }
+  );
+
+  app.get<{ Querystring: SuggestQueryParams & { debug?: boolean } }>(
+    "/suggest",
+    { schema: { querystring: suggestQuerySchema } },
+    async (request) => {
+      return suggestProducts(
+        dependencies.elasticsearch,
+        dependencies.config.productSuggestIndex,
+        { q: request.query.q, size: request.query.size },
+        request.query.debug ?? false,
+      );
+    },
   );
 }

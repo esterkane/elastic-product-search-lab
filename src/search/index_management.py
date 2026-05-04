@@ -18,6 +18,7 @@ DEFAULT_PRODUCT_TEMPLATE = "products-catalog-template"
 DEFAULT_EVENT_TEMPLATE = "product-events-template"
 DEFAULT_EVENT_ILM_POLICY = "product-events-retention"
 DEFAULT_EVENT_DATA_STREAM = "product-events"
+DEFAULT_SUGGEST_INDEX = "product-suggest"
 
 
 def utc_build_id(now: datetime | None = None) -> str:
@@ -154,6 +155,35 @@ def event_data_stream_template_body(
         "_meta": {
             "component": "event_audit_data_stream",
             "description": "Time-based event/audit storage kept separate from the product content index.",
+        },
+    }
+
+
+def product_suggest_index_body(*, shards: int = 1, replicas: int = 0) -> dict[str, Any]:
+    return {
+        "settings": {
+            "number_of_shards": str(shards),
+            "number_of_replicas": str(replicas),
+            "analysis": {
+                "normalizer": {
+                    "lowercase_normalizer": {
+                        "type": "custom",
+                        "filter": ["lowercase", "asciifolding"],
+                    }
+                }
+            },
+        },
+        "mappings": {
+            "dynamic": "strict",
+            "properties": {
+                "product_id": {"type": "keyword"},
+                "suggest_text": {"type": "search_as_you_type"},
+                "title": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 256}}},
+                "brand": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "category": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "popularity_score": {"type": "float"},
+                "updated_at": {"type": "date"},
+            },
         },
     }
 

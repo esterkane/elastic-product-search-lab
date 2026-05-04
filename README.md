@@ -45,6 +45,8 @@ Versioned product index rebuilds are available through staged concrete indices s
 
 Dataset adapters can prepare small deterministic Amazon ESCI, RetailRocket, and Olist samples for catalog ingestion, source events, review enrichment, analytics ranking signals, and offline evaluation. See `docs/dataset_integration.md`.
 
+The API read path uses `products-read` for stable candidate retrieval, can optionally merge volatile `products-live` fields at response time, and exposes a separate `product-suggest` autocomplete path. See `docs/read_path_strategy.md`.
+
 ## Run Locally
 
 Start Elasticsearch and Kibana:

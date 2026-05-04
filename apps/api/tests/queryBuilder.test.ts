@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildBaselineBm25Query, buildBoostedRelevanceQuery, buildSearchDsl } from "../src/search/queryBuilder.js";
+import {
+  buildBaselineBm25Query,
+  buildBoostedRelevanceQuery,
+  buildRankingExtensionFunctions,
+  buildSearchDsl,
+  buildSuggestDsl,
+} from "../src/search/queryBuilder.js";
 
 const baseParams = { size: 10, debug: false };
 
@@ -116,6 +122,28 @@ describe("product search query builder", () => {
         },
       },
       sort: ["_score"],
+    });
+  });
+
+  it("exposes empty ranking extension hooks for future policies", () => {
+    expect(buildRankingExtensionFunctions({
+      analyticsSignals: { margin: "medium" },
+      cohortTags: ["new_customer"],
+      merchandiserPolicies: ["pin-sponsored"],
+    })).toEqual([]);
+  });
+
+  it("builds a separate bool-prefix suggest query", () => {
+    expect(buildSuggestDsl({ q: "wire", size: 5 })).toEqual({
+      size: 5,
+      query: {
+        multi_match: {
+          query: "wire",
+          type: "bool_prefix",
+          fields: ["suggest_text", "suggest_text._2gram", "suggest_text._3gram", "title^2", "brand", "category"],
+        },
+      },
+      _source: ["product_id", "title", "brand", "category", "suggest_text"],
     });
   });
 });

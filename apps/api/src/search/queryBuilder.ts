@@ -1,8 +1,14 @@
-import type { SearchQueryParams } from "./types.js";
+import type { SearchQueryParams, SuggestQueryParams } from "./types.js";
 
 type QueryDsl = Record<string, unknown>;
 
 const BASELINE_FIELDS = ["title^4", "brand^2", "category^1.5", "description^0.8", "catalog_text^0.5"];
+
+export type RankingExtensionContext = {
+  analyticsSignals?: Record<string, unknown>;
+  cohortTags?: string[];
+  merchandiserPolicies?: string[];
+};
 
 function textQuery(queryText?: string): QueryDsl {
   const trimmed = queryText?.trim();
@@ -45,6 +51,7 @@ export function buildBaselineBm25Query(params: SearchQueryParams): QueryDsl {
 }
 
 export function buildBoostedRelevanceQuery(params: SearchQueryParams): QueryDsl {
+  const extensionFunctions = buildRankingExtensionFunctions({});
   return {
     function_score: {
       query: buildBaselineBm25Query(params),
@@ -70,9 +77,15 @@ export function buildBoostedRelevanceQuery(params: SearchQueryParams): QueryDsl 
           },
           weight: 0.2,
         },
+        ...extensionFunctions,
       ],
     },
   };
+}
+
+export function buildRankingExtensionFunctions(context: RankingExtensionContext): QueryDsl[] {
+  void context;
+  return [];
 }
 
 export function buildSearchDsl(params: SearchQueryParams): QueryDsl {
@@ -84,5 +97,20 @@ export function buildSearchDsl(params: SearchQueryParams): QueryDsl {
     query,
     sort: ["_score"],
     ...(params.debug ? { explain: true, profile: true } : {}),
+  };
+}
+
+export function buildSuggestDsl(params: SuggestQueryParams): QueryDsl {
+  const query = params.q.trim();
+  return {
+    size: params.size,
+    query: {
+      multi_match: {
+        query,
+        type: "bool_prefix",
+        fields: ["suggest_text", "suggest_text._2gram", "suggest_text._3gram", "title^2", "brand", "category"],
+      },
+    },
+    _source: ["product_id", "title", "brand", "category", "suggest_text"],
   };
 }

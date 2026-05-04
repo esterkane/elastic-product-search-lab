@@ -17,7 +17,7 @@ describe("GET /health", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
       status: "ok",
-      elasticsearch: { reachable: true, index: "products-v1" },
+      elasticsearch: { reachable: true, index: "products-read" },
     });
   });
 
@@ -29,7 +29,7 @@ describe("GET /health", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
       status: "degraded",
-      elasticsearch: { reachable: false, index: "products-v1" },
+      elasticsearch: { reachable: false, index: "products-read" },
     });
   });
 });

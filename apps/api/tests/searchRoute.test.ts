@@ -9,6 +9,21 @@ afterEach(async () => {
 });
 
 describe("GET /search", () => {
+  it("uses products-read as the stable retrieval alias by default", async () => {
+    let requestedIndex = "";
+    app = buildTestApp({
+      search: async (request) => {
+        requestedIndex = request.index;
+        return { took: 1, hits: { total: { value: 0 }, hits: [] } };
+      },
+    });
+
+    const response = await app.inject({ method: "GET", url: "/search?q=mouse" });
+
+    expect(response.statusCode).toBe(200);
+    expect(requestedIndex).toBe("products-read");
+  });
+
   it("rejects invalid size", async () => {
     app = buildTestApp();
 
@@ -64,6 +79,120 @@ describe("GET /search", () => {
       total: 1,
       products: [{ productId: "P100002", title: "Sony Headphones" }],
       debug: { query: { size: 10 } },
+    });
+  });
+
+  it("optionally merges volatile price and inventory overlays", async () => {
+    app = buildTestApp(
+      {
+        search: async () => ({
+          took: 3,
+          hits: {
+            total: { value: 1 },
+            hits: [
+              {
+                _id: "P100002",
+                _score: 4.2,
+                _source: {
+                  product_id: "P100002",
+                  title: "Sony Headphones",
+                  description: "Noise canceling headphones",
+                  brand: "Sony",
+                  category: "Electronics > Headphones",
+                  attributes: {},
+                  price: 149.99,
+                  currency: "USD",
+                  availability: "in_stock",
+                  popularity_score: 98.7,
+                  seller_id: "seller-audio-014",
+                  updated_at: "2026-04-18T08:00:00Z",
+                },
+              },
+            ],
+          },
+        }),
+        mget: async () => ({
+          docs: [
+            {
+              _id: "P100002",
+              found: true,
+              _source: { price: 139.99, currency: "USD", availability: "limited_stock" },
+            },
+          ],
+        }),
+      },
+      { productLiveOverlayEnabled: true, productLiveIndex: "products-live" },
+    );
+
+    const response = await app.inject({ method: "GET", url: "/search?q=headphones&debug=true" });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().products[0]).toMatchObject({
+      productId: "P100002",
+      price: 139.99,
+      availability: "limited_stock",
+      overlay: { source: "products-live", appliedFields: ["price", "currency", "availability"] },
+    });
+    expect(response.json().debug.overlay).toMatchObject({ enabled: true, index: "products-live", attempted: true, applied: 1 });
+  });
+
+  it("keeps search responses stable when overlay is disabled", async () => {
+    let mgetCalled = false;
+    app = buildTestApp({
+      search: async () => ({
+        took: 1,
+        hits: {
+          total: { value: 1 },
+          hits: [{ _id: "P1", _source: { product_id: "P1", title: "Mouse", price: 10, availability: "in_stock" } }],
+        },
+      }),
+      mget: async () => {
+        mgetCalled = true;
+        return { docs: [] };
+      },
+    });
+
+    const response = await app.inject({ method: "GET", url: "/search?q=mouse&debug=true" });
+
+    expect(response.statusCode).toBe(200);
+    expect(mgetCalled).toBe(false);
+    expect(response.json().products[0]).toMatchObject({ productId: "P1", price: 10, availability: "in_stock" });
+  });
+
+  it("returns suggestions from the separate suggest index", async () => {
+    let requestedIndex = "";
+    app = buildTestApp({
+      search: async (request) => {
+        requestedIndex = request.index;
+        return {
+          took: 2,
+          hits: {
+            total: { value: 1 },
+            hits: [
+              {
+                _id: "P1",
+                _score: 3,
+                _source: {
+                  product_id: "P1",
+                  suggest_text: "Wireless Mouse Contoso Accessories",
+                  title: "Wireless Mouse",
+                  brand: "Contoso",
+                  category: "Accessories",
+                },
+              },
+            ],
+          },
+        };
+      },
+    });
+
+    const response = await app.inject({ method: "GET", url: "/suggest?q=wir&size=5" });
+
+    expect(response.statusCode).toBe(200);
+    expect(requestedIndex).toBe("product-suggest");
+    expect(response.json()).toMatchObject({
+      took: 2,
+      suggestions: [{ productId: "P1", text: "Wireless Mouse Contoso Accessories", title: "Wireless Mouse" }],
     });
   });
 

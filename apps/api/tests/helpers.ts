@@ -5,7 +5,9 @@ export function testConfig(overrides: Partial<ApiConfig> = {}): ApiConfig {
   return {
     elasticsearchUrl: "http://localhost:9200",
     elasticsearchUseAuth: false,
-    productIndex: "products-v1",
+    productIndex: "products-read",
+    productLiveOverlayEnabled: false,
+    productSuggestIndex: "product-suggest",
     port: 0,
     ...overrides,
   };
@@ -16,10 +18,11 @@ export function createMockClient(overrides: Partial<ElasticsearchLikeClient> = {
     ping: async () => true,
     search: async () => ({ took: 1, hits: { total: { value: 0 }, hits: [] } }),
     get: async () => ({ _id: "P1", _source: {} }),
+    mget: async () => ({ docs: [] }),
     ...overrides,
   };
 }
 
-export function buildTestApp(overrides: Partial<ElasticsearchLikeClient> = {}) {
-  return buildApp({ config: testConfig(), elasticsearch: createMockClient(overrides) });
+export function buildTestApp(overrides: Partial<ElasticsearchLikeClient> = {}, configOverrides: Partial<ApiConfig> = {}) {
+  return buildApp({ config: testConfig(configOverrides), elasticsearch: createMockClient(overrides) });
 }

@@ -9,6 +9,7 @@ export type ElasticsearchLikeClient = {
   ping: (...args: any[]) => Promise<unknown>;
   search: (...args: any[]) => Promise<any>;
   get: (...args: any[]) => Promise<any>;
+  mget?: (...args: any[]) => Promise<any>;
 };
 
 export type AppDependencies = {
