@@ -49,7 +49,12 @@ def test_prepare_esci_sample_filters_english_and_transforms_records():
     assert len(transformed_products) == 1
     assert transformed_products[0]["product_id"] == "P1"
     assert transformed_products[0]["title"] == "Wireless Mouse"
-    assert transformed_products[0]["attributes"] == {"product_color": "Black", "product_locale": "us"}
+    assert transformed_products[0]["attributes"]["product_color"] == "Black"
+    assert transformed_products[0]["attributes"]["product_locale"] == "us"
+    assert transformed_products[0]["attributes"]["source_dataset"] == "amazon_esci"
+    assert transformed_products[0]["attributes"]["synthetic_price"] is True
+    assert transformed_products[0]["attributes"]["synthetic_inventory"] is True
+    assert transformed_products[0]["price"] > 0
     assert judgments == [{"query": "wireless mouse", "product_id": "P1", "label": "E", "grade": 3}]
 
 

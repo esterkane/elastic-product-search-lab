@@ -1,0 +1,2 @@
+{"correlation_id":"demo-DEMO-ESCI-001","event_time":"2026-01-01T00:00:00Z","event_type":"snapshot","payload":{"availability":"in_stock"},"product_id":"DEMO-ESCI-001","source":"inventory","source_version":"2026-01-01T00:00:00Z","trace_id":"demo-00001-inventory"}
+{"correlation_id":"demo-DEMO-OLIST-001","event_time":"2026-01-01T00:00:00Z","event_type":"snapshot","payload":{"availability":"limited_stock"},"product_id":"DEMO-OLIST-001","source":"inventory","source_version":"2026-01-01T00:00:00Z","trace_id":"demo-00002-inventory"}

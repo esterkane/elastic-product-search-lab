@@ -1,0 +1,2 @@
+{"correlation_id":"demo-DEMO-ESCI-001","event_time":"2026-01-01T00:00:00Z","event_type":"snapshot","payload":{"average_rating":4.24,"review_count":0},"product_id":"DEMO-ESCI-001","source":"reviews","source_version":"2026-01-01T00:00:00Z","trace_id":"demo-00001-reviews"}
+{"correlation_id":"demo-DEMO-OLIST-001","event_time":"2026-01-01T00:00:00Z","event_type":"snapshot","payload":{"average_rating":4.5,"review_count":12},"product_id":"DEMO-OLIST-001","source":"reviews","source_version":"2026-01-01T00:00:00Z","trace_id":"demo-00002-reviews"}

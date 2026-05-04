@@ -12,6 +12,11 @@ from pathlib import Path
 from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from scripts.dataset_etl import stable_availability, stable_price, write_standard_outputs  # noqa: E402
+
 DEFAULT_PRODUCTS_OUT = PROJECT_ROOT / "data" / "generated" / "esci_products.jsonl"
 DEFAULT_JUDGMENTS_OUT = PROJECT_ROOT / "data" / "generated" / "esci_judgments.jsonl"
 DEFAULT_FULL_PRODUCTS_OUT = PROJECT_ROOT / "data" / "generated" / "esci_full_products.jsonl"
@@ -70,7 +75,7 @@ def sample_queries(examples: list[dict[str, Any]], max_queries: int, seed: int) 
     return sorted(rng.sample(queries, max_queries))
 
 
-def transform_product(record: dict[str, Any]) -> dict[str, Any]:
+def transform_product(record: dict[str, Any], *, seed: int = 7) -> dict[str, Any]:
     title = str(record.get("product_title") or record.get("title") or "Untitled product")
     description_parts = [
         str(record.get("product_description") or record.get("description") or ""),
@@ -81,16 +86,23 @@ def transform_product(record: dict[str, Any]) -> dict[str, Any]:
     color = str(record.get("product_color") or "").strip()
     locale = str(record.get("product_locale") or "us")
 
+    product_id = str(record["product_id"])
     return {
-        "product_id": str(record["product_id"]),
+        "product_id": product_id,
         "title": title,
         "description": description,
         "brand": brand,
         "category": "ESCI Imported Products",
-        "attributes": {"product_color": color, "product_locale": locale},
-        "price": 0.0,
+        "attributes": {
+            "product_color": color,
+            "product_locale": locale,
+            "source_dataset": "amazon_esci",
+            "synthetic_price": True,
+            "synthetic_inventory": True,
+        },
+        "price": stable_price(product_id, seed=seed),
         "currency": "USD",
-        "availability": "in_stock",
+        "availability": stable_availability(product_id, seed=seed),
         "popularity_score": 0.0,
         "seller_id": "esci-dataset",
         "updated_at": "2026-01-01T00:00:00Z",
@@ -134,7 +146,7 @@ def prepare_esci_dataset(
     kept_product_ids = {str(row["product_id"]) for row in selected_products}
     selected_examples = [row for row in selected_examples if str(row.get("product_id")) in kept_product_ids]
 
-    return [transform_product(row) for row in selected_products], [transform_judgment(row) for row in selected_examples]
+    return [transform_product(row, seed=seed) for row in selected_products], [transform_judgment(row) for row in selected_examples]
 
 
 def prepare_esci_sample(
@@ -173,6 +185,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--products-out", type=Path)
     parser.add_argument("--judgments-out", type=Path)
+    parser.add_argument(
+        "--standard-output-dir",
+        type=Path,
+        default=None,
+        help="Also write shared product_snapshots/events/judgments JSONL files to this directory.",
+    )
     args = parser.parse_args()
     if args.products_out is None:
         args.products_out = DEFAULT_FULL_PRODUCTS_OUT if args.full else DEFAULT_PRODUCTS_OUT
@@ -197,6 +215,15 @@ def main() -> int:
         write_jsonl(args.judgments_out, judgments)
         print(f"Wrote {len(products)} products to {args.products_out}")
         print(f"Wrote {len(judgments)} judgments to {args.judgments_out}")
+        if args.standard_output_dir is not None:
+            outputs = write_standard_outputs(
+                output_dir=args.standard_output_dir,
+                products=products,
+                judgments=judgments,
+                dataset="esci",
+            )
+            for name, path in outputs.items():
+                print(f"Wrote {name} to {path}")
     except Exception as exc:  # noqa: BLE001 - CLI should print a clear local failure.
         print(f"ESCI sample preparation failed: {exc}", file=sys.stderr)
         return 1

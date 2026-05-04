@@ -43,6 +43,8 @@ Optional Kafka-compatible ingestion is available through Redpanda. It is off by 
 
 Versioned product index rebuilds are available through staged concrete indices such as `products-v202605041245` and an atomic `products-read` alias switch. Product content indices are configured separately from event/audit data streams and ILM retention. See `docs/index_roles_and_aliasing.md` and `docs/event_retention_and_ilm.md`.
 
+Dataset adapters can prepare small deterministic Amazon ESCI, RetailRocket, and Olist samples for catalog ingestion, source events, review enrichment, analytics ranking signals, and offline evaluation. See `docs/dataset_integration.md`.
+
 ## Run Locally
 
 Start Elasticsearch and Kibana:
@@ -80,6 +82,14 @@ Optional staged rebuild with alias cutover:
 ```
 
 Search, benchmark, and evaluation workflows can use `products-read` by setting `PRODUCT_INDEX=products-read` or passing that alias wherever an index name is accepted.
+
+Prepare dataset-backed samples:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\prepare_esci_sample.py --products data\raw\shopping_queries_dataset_products.parquet --examples data\raw\shopping_queries_dataset_examples.parquet --standard-output-dir data\generated\esci
+.\.venv\Scripts\python.exe scripts\prepare_retailrocket_sample.py --events data\raw\retailrocket\events.csv --item-properties data\raw\retailrocket\item_properties_part1.csv
+.\.venv\Scripts\python.exe scripts\prepare_olist_sample.py --products data\raw\olist\olist_products_dataset.csv --order-items data\raw\olist\olist_order_items_dataset.csv --reviews data\raw\olist\olist_order_reviews_dataset.csv
+```
 
 Start the API:
 
