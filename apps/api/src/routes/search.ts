@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import type { AppDependencies } from "../app.js";
+import { loadPoliciesFromFile } from "../search/policies.js";
 import { searchProducts, suggestProducts } from "../search/searchClient.js";
 import type { SearchQueryParams, SuggestQueryParams } from "../search/types.js";
 
@@ -16,6 +17,7 @@ const searchQuerySchema = {
     size: { type: "integer", minimum: 1, maximum: 50, default: 10 },
     debug: { type: "boolean", default: false },
     boost: { type: "boolean", default: true },
+    cohorts: { type: "string", minLength: 1 },
   },
 } as const;
 
@@ -46,7 +48,7 @@ export function registerSearchRoute(app: FastifyInstance, dependencies: AppDepen
       return searchProducts(dependencies.elasticsearch, dependencies.config.productIndex, params, {
         enabled: dependencies.config.productLiveOverlayEnabled,
         index: dependencies.config.productLiveIndex,
-      });
+      }, loadPoliciesFromFile(dependencies.config.searchPolicyPath));
     }
   );
 

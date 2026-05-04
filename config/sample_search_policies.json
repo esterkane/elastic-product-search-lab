@@ -1,0 +1,42 @@
+{
+  "policies": [
+    {
+      "id": "pin-black-friday-charger",
+      "enabled": true,
+      "type": "pin_boost",
+      "priority": 90,
+      "queryMatch": "charger",
+      "productIds": ["P100003"],
+      "boost": 4,
+      "reason": "Seasonal charger promotion"
+    },
+    {
+      "id": "route-holiday-gifts",
+      "enabled": true,
+      "type": "seasonal_rewrite",
+      "priority": 80,
+      "queryMatch": "holiday gifts",
+      "rewriteQuery": "holiday gifts popular giftable products",
+      "routingHint": "holiday-gift-guide",
+      "reason": "Use holiday gift merchandising copy"
+    },
+    {
+      "id": "constrain-laptop-bags",
+      "enabled": true,
+      "type": "category_constraint",
+      "priority": 70,
+      "queryMatch": "laptop bag",
+      "category": "Accessories > Bags",
+      "reason": "Keep laptop bag searches in the bag category"
+    },
+    {
+      "id": "exclude-discontinued-demo",
+      "enabled": false,
+      "type": "exclusion_filter",
+      "priority": 60,
+      "queryMatch": "headphones",
+      "excludeProductIds": ["P999999"],
+      "reason": "Disabled example policy"
+    }
+  ]
+}

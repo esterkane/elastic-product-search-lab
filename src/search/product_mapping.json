@@ -58,6 +58,10 @@
                                         "seller_id":  {
                                                           "type":  "keyword"
                                                       },
+                                        "cohort_tags":  {
+                                                            "type":  "keyword",
+                                                            "normalizer":  "lowercase_normalizer"
+                                                        },
                                         "source_versions":  {
                                                                 "type":  "flattened"
                                                             },

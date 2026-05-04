@@ -4,8 +4,10 @@ import {
   buildBoostedRelevanceQuery,
   buildRankingExtensionFunctions,
   buildSearchDsl,
+  buildSearchDslDebug,
   buildSuggestDsl,
 } from "../src/search/queryBuilder.js";
+import { evaluateSearchPolicies, type SearchPolicy } from "../src/search/policies.js";
 
 const baseParams = { size: 10, debug: false };
 
@@ -125,12 +127,17 @@ describe("product search query builder", () => {
     });
   });
 
-  it("exposes empty ranking extension hooks for future policies", () => {
+  it("adds modest cohort boosts through the ranking extension hook", () => {
     expect(buildRankingExtensionFunctions({
-      analyticsSignals: { margin: "medium" },
-      cohortTags: ["new_customer"],
+      cohortTags: ["new_customer", "student"],
       merchandiserPolicies: ["pin-sponsored"],
-    })).toEqual([]);
+    })).toEqual([
+      { filter: { term: { cohort_tags: "new_customer" } }, weight: 0.35 },
+      { filter: { term: { cohort_tags: "student" } }, weight: 0.35 },
+    ]);
+    expect(buildSearchDslDebug({ cohortTags: ["Student"] })).toEqual({
+      cohortBoosts: [{ tag: "student", weight: 0.35 }],
+    });
   });
 
   it("builds a separate bool-prefix suggest query", () => {
@@ -145,5 +152,80 @@ describe("product search query builder", () => {
       },
       _source: ["product_id", "title", "brand", "category", "suggest_text"],
     });
+  });
+});
+
+describe("search policy evaluation", () => {
+  const policies: SearchPolicy[] = [
+    {
+      id: "category-low",
+      enabled: true,
+      type: "category_constraint",
+      priority: 10,
+      queryMatch: "bag",
+      category: "Accessories > Travel",
+    },
+    {
+      id: "category-high",
+      enabled: true,
+      type: "category_constraint",
+      priority: 30,
+      queryMatch: "bag",
+      category: "Accessories > Laptop Bags",
+      reason: "Prefer laptop bag category",
+    },
+    {
+      id: "disabled-pin",
+      enabled: false,
+      type: "pin_boost",
+      priority: 100,
+      queryMatch: "bag",
+      productIds: ["P-disabled"],
+    },
+    {
+      id: "pin-active",
+      enabled: true,
+      type: "pin_boost",
+      priority: 20,
+      queryMatch: "bag",
+      productIds: ["P-active"],
+      boost: 3,
+    },
+    {
+      id: "exclude-active",
+      enabled: true,
+      type: "exclusion_filter",
+      priority: 15,
+      queryMatch: "bag",
+      excludeBrands: ["BlockedBrand"],
+    },
+  ];
+
+  it("orders policy conflicts by priority and ignores disabled policies", () => {
+    const evaluation = evaluateSearchPolicies(policies, "laptop bag");
+
+    expect(evaluation.filters).toEqual([{ term: { category: "accessories > laptop bags" } }]);
+    expect(evaluation.boostFunctions).toEqual([{ filter: { ids: { values: ["P-active"] } }, weight: 3 }]);
+    expect(evaluation.mustNot).toEqual([{ terms: { brand: ["blockedbrand"] } }]);
+    expect(evaluation.firedPolicies.map((policy) => policy.id)).toEqual(["category-high", "pin-active", "exclude-active"]);
+    expect(evaluation.firedPolicies).not.toContainEqual(expect.objectContaining({ id: "disabled-pin" }));
+  });
+
+  it("records seasonal rewrites and routing hints", () => {
+    const evaluation = evaluateSearchPolicies([
+      {
+        id: "holiday",
+        enabled: true,
+        type: "seasonal_rewrite",
+        priority: 50,
+        queryMatch: "holiday gifts",
+        rewriteQuery: "holiday gifts popular",
+        routingHint: "holiday-guide",
+      },
+    ], "holiday gifts");
+
+    expect(evaluation.queryText).toBe("holiday gifts popular");
+    expect(evaluation.routingHints).toEqual(["holiday-guide"]);
+    expect(evaluation.firedPolicies[0]).toMatchObject({ id: "holiday", actions: ["rewrite_query"] });
   });
 });

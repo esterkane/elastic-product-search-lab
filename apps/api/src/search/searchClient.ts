@@ -1,7 +1,8 @@
 import type { ElasticsearchLikeClient } from "../app.js";
 import { normalizeProductHit } from "./normalize.js";
 import { mergeVolatileOverlay, type OverlayOptions } from "./overlay.js";
-import { buildSearchDsl, buildSuggestDsl } from "./queryBuilder.js";
+import { evaluateSearchPolicies, type SearchPolicy } from "./policies.js";
+import { buildSearchDsl, buildSearchDslDebug, buildSuggestDsl, type RankingExtensionContext } from "./queryBuilder.js";
 import type { ProductSearchResponse, ProductSuggestOption, ProductSuggestResponse, SearchQueryParams, SuggestQueryParams } from "./types.js";
 
 function totalHitsValue(total: unknown): number {
@@ -17,8 +18,19 @@ export async function searchProducts(
   indexName: string,
   params: SearchQueryParams,
   overlayOptions: OverlayOptions = { enabled: false },
+  policies: SearchPolicy[] = [],
 ): Promise<ProductSearchResponse> {
-  const dsl = buildSearchDsl(params);
+  const cohorts = parseCohorts(params.cohorts);
+  const policyEvaluation = evaluateSearchPolicies(policies, params.q);
+  const effectiveParams = { ...params, q: policyEvaluation.queryText ?? params.q };
+  const rankingContext: RankingExtensionContext = {
+    cohortTags: cohorts,
+    policyFilters: policyEvaluation.filters,
+    policyMustNot: policyEvaluation.mustNot,
+    policyBoostFunctions: policyEvaluation.boostFunctions,
+    merchandiserPolicies: policyEvaluation.firedPolicies.map((policy) => policy.id),
+  };
+  const dsl = buildSearchDsl(effectiveParams, rankingContext);
   const response = await client.search({
     index: indexName,
     ...dsl,
@@ -31,8 +43,28 @@ export async function searchProducts(
     took: response.took ?? 0,
     total: totalHitsValue(response.hits?.total),
     products: overlay.products,
-    ...(params.debug ? { debug: { query: dsl, overlay: overlay.debug } } : {}),
+    ...(params.debug ? {
+      debug: {
+        query: dsl,
+        overlay: overlay.debug,
+        policies: {
+          fired: policyEvaluation.firedPolicies,
+          routingHints: policyEvaluation.routingHints,
+        },
+        cohorts: {
+          requested: cohorts,
+          boosts: buildSearchDslDebug(rankingContext).cohortBoosts,
+        },
+      },
+    } : {}),
   };
+}
+
+function parseCohorts(value?: string): string[] {
+  return [...new Set((value ?? "")
+    .split(",")
+    .map((tag) => tag.trim().toLowerCase())
+    .filter(Boolean))];
 }
 
 function normalizeSuggestHit(hit: { _id?: string; _score?: number; _source?: Record<string, unknown> }): ProductSuggestOption {

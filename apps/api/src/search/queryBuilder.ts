@@ -8,6 +8,13 @@ export type RankingExtensionContext = {
   analyticsSignals?: Record<string, unknown>;
   cohortTags?: string[];
   merchandiserPolicies?: string[];
+  policyFilters?: QueryDsl[];
+  policyMustNot?: QueryDsl[];
+  policyBoostFunctions?: QueryDsl[];
+};
+
+export type SearchDslDebug = {
+  cohortBoosts: { tag: string; weight: number }[];
 };
 
 function textQuery(queryText?: string): QueryDsl {
@@ -24,7 +31,7 @@ function textQuery(queryText?: string): QueryDsl {
   };
 }
 
-function buildFilters(params: SearchQueryParams): QueryDsl[] {
+function buildFilters(params: SearchQueryParams, context: RankingExtensionContext = {}): QueryDsl[] {
   const filter: QueryDsl[] = [];
 
   if (params.category) filter.push({ term: { category: params.category.toLowerCase() } });
@@ -38,23 +45,24 @@ function buildFilters(params: SearchQueryParams): QueryDsl[] {
     filter.push({ range: { price: priceRange } });
   }
 
-  return filter;
+  return [...filter, ...(context.policyFilters ?? [])];
 }
 
-export function buildBaselineBm25Query(params: SearchQueryParams): QueryDsl {
+export function buildBaselineBm25Query(params: SearchQueryParams, context: RankingExtensionContext = {}): QueryDsl {
   return {
     bool: {
       must: [textQuery(params.q)],
-      filter: buildFilters(params),
+      filter: buildFilters(params, context),
+      ...(context.policyMustNot?.length ? { must_not: context.policyMustNot } : {}),
     },
   };
 }
 
-export function buildBoostedRelevanceQuery(params: SearchQueryParams): QueryDsl {
-  const extensionFunctions = buildRankingExtensionFunctions({});
+export function buildBoostedRelevanceQuery(params: SearchQueryParams, context: RankingExtensionContext = {}): QueryDsl {
+  const extensionFunctions = buildRankingExtensionFunctions(context);
   return {
     function_score: {
-      query: buildBaselineBm25Query(params),
+      query: buildBaselineBm25Query(params, context),
       score_mode: "sum",
       boost_mode: "sum",
       functions: [
@@ -84,19 +92,32 @@ export function buildBoostedRelevanceQuery(params: SearchQueryParams): QueryDsl 
 }
 
 export function buildRankingExtensionFunctions(context: RankingExtensionContext): QueryDsl[] {
-  void context;
-  return [];
+  const functions: QueryDsl[] = [];
+  for (const tag of context.cohortTags ?? []) {
+    functions.push({
+      filter: { term: { cohort_tags: tag.toLowerCase() } },
+      weight: 0.35,
+    });
+  }
+  functions.push(...(context.policyBoostFunctions ?? []));
+  return functions;
 }
 
-export function buildSearchDsl(params: SearchQueryParams): QueryDsl {
+export function buildSearchDsl(params: SearchQueryParams, context: RankingExtensionContext = {}): QueryDsl {
   const useBoosts = params.boost ?? true;
-  const query = useBoosts ? buildBoostedRelevanceQuery(params) : buildBaselineBm25Query(params);
+  const query = useBoosts ? buildBoostedRelevanceQuery(params, context) : buildBaselineBm25Query(params, context);
 
   return {
     size: params.size,
     query,
     sort: ["_score"],
     ...(params.debug ? { explain: true, profile: true } : {}),
+  };
+}
+
+export function buildSearchDslDebug(context: RankingExtensionContext = {}): SearchDslDebug {
+  return {
+    cohortBoosts: (context.cohortTags ?? []).map((tag) => ({ tag: tag.toLowerCase(), weight: 0.35 })),
   };
 }
 

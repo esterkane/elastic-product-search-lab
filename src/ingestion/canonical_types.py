@@ -33,6 +33,7 @@ INDEXED_PRODUCT_FIELDS = frozenset(
         "availability",
         "popularity_score",
         "seller_id",
+        "cohort_tags",
         "updated_at",
         "catalog_text",
         "search_profile",
@@ -84,4 +85,3 @@ class CanonicalBuildResult(BaseModel):
     emitted: bool
     document: dict[str, Any] | None = None
     issues: list[CanonicalBuildIssue] = Field(default_factory=list)
-

@@ -47,6 +47,8 @@ Dataset adapters can prepare small deterministic Amazon ESCI, RetailRocket, and 
 
 The API read path uses `products-read` for stable candidate retrieval, can optionally merge volatile `products-live` fields at response time, and exposes a separate `product-suggest` autocomplete path. See `docs/read_path_strategy.md`.
 
+Optional governance and personalization policies can be supplied as data with `SEARCH_POLICY_PATH`, including query-matched boosts, category constraints, exclusions, seasonal rewrites, and modest cohort boosts. See `docs/policy_index_design.md`.
+
 ## Run Locally
 
 Start Elasticsearch and Kibana:

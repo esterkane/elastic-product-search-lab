@@ -8,6 +8,7 @@ export type SearchQueryParams = {
   size: number;
   debug: boolean;
   boost?: boolean;
+  cohorts?: string;
 };
 
 export type SuggestQueryParams = {
@@ -47,6 +48,20 @@ export type ProductSearchResponse = {
       attempted: boolean;
       applied: number;
       error?: string;
+    };
+    policies?: {
+      fired: Array<{
+        id: string;
+        type: string;
+        priority: number;
+        reason?: string;
+        actions: string[];
+      }>;
+      routingHints: string[];
+    };
+    cohorts?: {
+      requested: string[];
+      boosts: Array<{ tag: string; weight: number }>;
     };
   };
 };

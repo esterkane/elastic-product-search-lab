@@ -24,6 +24,7 @@ def test_required_fields_exist():
         "availability",
         "popularity_score",
         "seller_id",
+        "cohort_tags",
         "source_versions",
         "updated_at",
         "indexed_at",
@@ -68,6 +69,13 @@ def test_attributes_and_source_versions_are_flattened():
 
     assert properties["attributes"]["type"] == "flattened"
     assert properties["source_versions"]["type"] == "flattened"
+
+
+def test_cohort_tags_are_keyword_normalized():
+    cohort_tags = load_properties()["cohort_tags"]
+
+    assert cohort_tags["type"] == "keyword"
+    assert cohort_tags["normalizer"] == "lowercase_normalizer"
 
 
 def test_search_profile_is_text():

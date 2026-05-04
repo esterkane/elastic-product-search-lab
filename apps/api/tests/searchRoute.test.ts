@@ -1,4 +1,7 @@
-﻿import { afterEach, describe, expect, it } from "vitest";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
 import { buildTestApp } from "./helpers.js";
 
 let app: ReturnType<typeof buildTestApp> | undefined;
@@ -193,6 +196,58 @@ describe("GET /search", () => {
     expect(response.json()).toMatchObject({
       took: 2,
       suggestions: [{ productId: "P1", text: "Wireless Mouse Contoso Accessories", title: "Wireless Mouse" }],
+    });
+  });
+
+  it("shows fired policies and cohort boosts in debug output", async () => {
+    const policyDir = mkdtempSync(join(tmpdir(), "policy-test-"));
+    const policyPath = join(policyDir, "policies.json");
+    writeFileSync(policyPath, JSON.stringify({
+      policies: [
+        {
+          id: "pin-mouse",
+          enabled: true,
+          type: "pin_boost",
+          priority: 10,
+          queryMatch: "mouse",
+          productIds: ["P1"],
+          boost: 2,
+          reason: "Promote mouse fixture",
+        },
+      ],
+    }));
+    let capturedQuery: any;
+    app = buildTestApp(
+      {
+        search: async (request) => {
+          capturedQuery = request.query;
+          return {
+            took: 1,
+            hits: {
+              total: { value: 1 },
+              hits: [{ _id: "P1", _source: { product_id: "P1", title: "Mouse", price: 10, availability: "in_stock" } }],
+            },
+          };
+        },
+      },
+      { searchPolicyPath: policyPath },
+    );
+
+    const response = await app.inject({ method: "GET", url: "/search?q=mouse&cohorts=student&debug=true" });
+
+    expect(response.statusCode).toBe(200);
+    expect(capturedQuery.function_score.functions).toEqual(expect.arrayContaining([
+      { filter: { term: { cohort_tags: "student" } }, weight: 0.35 },
+      { filter: { ids: { values: ["P1"] } }, weight: 2 },
+    ]));
+    expect(response.json().debug).toMatchObject({
+      policies: {
+        fired: [{ id: "pin-mouse", type: "pin_boost", priority: 10, actions: ["boost_products"] }],
+      },
+      cohorts: {
+        requested: ["student"],
+        boosts: [{ tag: "student", weight: 0.35 }],
+      },
     });
   });
 

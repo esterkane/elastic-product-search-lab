@@ -19,6 +19,7 @@ DEFAULT_EVENT_TEMPLATE = "product-events-template"
 DEFAULT_EVENT_ILM_POLICY = "product-events-retention"
 DEFAULT_EVENT_DATA_STREAM = "product-events"
 DEFAULT_SUGGEST_INDEX = "product-suggest"
+DEFAULT_POLICY_INDEX = "search-policies"
 
 
 def utc_build_id(now: datetime | None = None) -> str:
@@ -183,6 +184,37 @@ def product_suggest_index_body(*, shards: int = 1, replicas: int = 0) -> dict[st
                 "category": {"type": "keyword", "normalizer": "lowercase_normalizer"},
                 "popularity_score": {"type": "float"},
                 "updated_at": {"type": "date"},
+            },
+        },
+    }
+
+
+def search_policy_index_body(*, shards: int = 1, replicas: int = 0) -> dict[str, Any]:
+    return {
+        "settings": {
+            "number_of_shards": str(shards),
+            "number_of_replicas": str(replicas),
+        },
+        "mappings": {
+            "dynamic": "strict",
+            "properties": {
+                "id": {"type": "keyword"},
+                "enabled": {"type": "boolean"},
+                "type": {"type": "keyword"},
+                "priority": {"type": "integer"},
+                "queryMatch": {"type": "keyword"},
+                "productIds": {"type": "keyword"},
+                "category": {"type": "keyword"},
+                "excludeProductIds": {"type": "keyword"},
+                "excludeBrands": {"type": "keyword"},
+                "boost": {"type": "float"},
+                "rewriteQuery": {"type": "text"},
+                "routingHint": {"type": "keyword"},
+                "reason": {"type": "text"},
+                "startsAt": {"type": "date"},
+                "endsAt": {"type": "date"},
+                "updatedBy": {"type": "keyword"},
+                "updatedAt": {"type": "date"},
             },
         },
     }

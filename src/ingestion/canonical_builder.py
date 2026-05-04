@@ -47,6 +47,9 @@ def build_canonical_product_document(
         "availability": str(fields["availability"]),
         "popularity_score": float(fields.get("popularity_score") or 0),
         "seller_id": str(fields["seller_id"]),
+        "cohort_tags": sorted(str(tag).lower() for tag in fields.get("attributes", {}).get("cohort_tags", []) if str(tag).strip())
+        if isinstance(fields.get("attributes"), dict)
+        else [],
         "source_versions": state.source_versions(),
         "updated_at": utc_iso(state.latest_updated_at() or datetime.now(timezone.utc)),
         "indexed_at": utc_iso(indexed_at or datetime.now(timezone.utc)),
@@ -152,4 +155,3 @@ def source_state_from_complete_product(
     if indexed_source_name:
         state.extra_source_versions[indexed_source_name] = source_version
     return state
-

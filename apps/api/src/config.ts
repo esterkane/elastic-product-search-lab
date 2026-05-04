@@ -18,6 +18,7 @@ export type ApiConfig = {
   productLiveIndex?: string;
   productLiveOverlayEnabled: boolean;
   productSuggestIndex: string;
+  searchPolicyPath?: string;
   port: number;
 };
 
@@ -32,6 +33,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     productLiveIndex: env.PRODUCT_LIVE_INDEX,
     productLiveOverlayEnabled: ["1", "true", "yes"].includes((env.PRODUCT_LIVE_OVERLAY_ENABLED ?? "false").toLowerCase()),
     productSuggestIndex: env.PRODUCT_SUGGEST_INDEX ?? "product-suggest",
+    searchPolicyPath: env.SEARCH_POLICY_PATH,
     port: Number(env.PORT ?? 3000),
   };
 }

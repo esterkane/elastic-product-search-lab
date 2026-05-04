@@ -13,6 +13,7 @@ from src.search.index_management import (
     product_index_template_body,
     product_ingest_pipeline_body,
     product_suggest_index_body,
+    search_policy_index_body,
     switch_read_alias,
     utc_build_id,
     versioned_product_index_name,
@@ -78,6 +79,16 @@ def test_product_suggest_index_body_is_separate_and_serializable():
     assert body["mappings"]["properties"]["suggest_text"]["type"] == "search_as_you_type"
     assert "price" not in body["mappings"]["properties"]
     assert body["settings"]["number_of_replicas"] == "0"
+    json.dumps(body)
+
+
+def test_search_policy_index_body_is_serializable():
+    body = search_policy_index_body(shards=1, replicas=0)
+
+    assert body["mappings"]["dynamic"] == "strict"
+    assert body["mappings"]["properties"]["type"]["type"] == "keyword"
+    assert body["mappings"]["properties"]["priority"]["type"] == "integer"
+    assert body["mappings"]["properties"]["productIds"]["type"] == "keyword"
     json.dumps(body)
 
 
