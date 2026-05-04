@@ -7,7 +7,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from src.ingestion.search_profile import build_search_profile
+from src.ingestion.canonical_builder import build_canonical_product_document, source_state_from_complete_product
 
 Availability = Literal["in_stock", "limited_stock", "backorder", "out_of_stock", "discontinued"]
 
@@ -43,22 +43,12 @@ class Product(BaseModel):
         return value.astimezone(timezone.utc)
 
     def to_index_document(self, indexed_at: datetime | None = None) -> dict[str, Any]:
-        indexed_timestamp = indexed_at or datetime.now(timezone.utc)
-        document = self.model_dump(mode="json")
-        document["catalog_text"] = " ".join(
-            part
-            for part in [
-                self.title,
-                self.description,
-                self.brand,
-                self.category,
-                " ".join(str(value) for value in self.attributes.values()),
-            ]
-            if part
+        source_version = self.updated_at.isoformat().replace("+00:00", "Z")
+        state = source_state_from_complete_product(
+            self.model_dump(mode="python"),
+            source_version=source_version,
         )
-        document["search_profile"] = build_search_profile(document)
-        document["source_versions"] = {
-            "sample_jsonl": self.updated_at.isoformat().replace("+00:00", "Z")
-        }
-        document["indexed_at"] = indexed_timestamp.isoformat().replace("+00:00", "Z")
-        return document
+        result = build_canonical_product_document(state, indexed_at=indexed_at)
+        if not result.emitted or result.document is None:
+            raise ValueError(f"Product {self.product_id} cannot produce an index document: {result.issues}")
+        return result.document

@@ -10,6 +10,8 @@ Product search relevance is not guesswork. Search changes should be evaluated wi
 
 - [x] Elasticsearch product mapping
 - [x] Deterministic ingestion with product IDs as document IDs
+- [x] Canonical product document assembly before indexing
+- [x] Explicit source ownership for catalog, price, inventory, reviews, and analytics
 - [x] `search_profile` enrichment from product fields
 - [x] BM25 and boosted search strategies
 - [x] Judgment-list relevance evaluation
@@ -21,15 +23,21 @@ Product search relevance is not guesswork. Search changes should be evaluated wi
 
 ```mermaid
 flowchart LR
-    A[Product data] --> B[Ingestion and enrichment]
-    B --> C[(Elasticsearch products-v1)]
-    C --> D[TypeScript Search API]
-    C --> E[Relevance evaluator]
-    C --> F[Latency benchmark]
-    E --> G[Reports]
-    F --> G
-    G --> H[Search quality gate]
+    A[Product snapshots and events] --> B[Source-owned product state]
+    B --> C[Canonical product builder]
+    C --> D[Ingestion enrichment]
+    D --> E[(Elasticsearch products-v1)]
+    E --> F[TypeScript Search API]
+    E --> G[Relevance evaluator]
+    E --> H[Latency benchmark]
+    G --> I[Reports]
+    H --> I
+    I --> J[Search quality gate]
 ```
+
+The main product-search index is intended to receive complete product documents. Phase 1 adds a canonical builder layer in `src/ingestion/canonical_builder.py`, with source state in `src/ingestion/source_state.py` and ownership/types in `src/ingestion/canonical_types.py`. Existing JSONL sample loading still works, but complete sample rows now pass through the canonical builder before bulk indexing.
+
+The current `scripts/replay_product_events.py` direct partial-update path is preserved for compatibility and demos. New batch or future Kafka consumers should update canonical source state first, then index the emitted complete product document. See `docs/canonical_builder_architecture.md`.
 
 ## Run Locally
 
@@ -40,6 +48,13 @@ docker compose up -d
 ```
 
 Local Elasticsearch security is enabled. Use the built-in `elastic` superuser for Elasticsearch and Kibana login; the password lives only in your ignored local `.env` file. Do not commit real passwords.
+
+Check local services:
+
+```powershell
+.\scripts\check-es.ps1
+.\scripts\check-kibana.ps1
+```
 
 Install Python dependencies:
 
@@ -137,7 +152,7 @@ Reports:
 
 ## Search Profile Enrichment
 
-`search_profile` is deterministic plain text built during ingestion from product title, brand, category, description, attributes, material/color, inferred use cases, and tags.
+`search_profile` is deterministic plain text built by the canonical product builder during ingestion from product title, brand, category, description, attributes, material/color, inferred use cases, and tags. `catalog_text` is derived at the same pre-indexing boundary so Elasticsearch receives a complete searchable document.
 
 Example shape:
 
@@ -149,7 +164,7 @@ This demonstrates that search quality can improve by improving indexed data qual
 
 ## Trade-Offs
 
-This is a compact lab, not a production marketplace system. It does not include a full Kafka deployment, gRPC service boundary, Kubernetes manifests, production observability dashboards, or A/B testing platform. No external LLMs or cloud services are required. Optional vector and reranking workflows exist in the repo, but the main measurable loop is lexical search plus deterministic enrichment, relevance metrics, latency benchmarks, and gates.
+This is a compact lab, not a production marketplace system. It does not include a full Kafka deployment, gRPC service boundary, Kubernetes manifests, production observability dashboards, or A/B testing platform. The canonical builder is intentionally Kafka-ready, but phase 1 does not add Kafka containers or client dependencies. No external LLMs or cloud services are required. Optional vector and reranking workflows exist in the repo, but the main measurable loop is lexical search plus deterministic enrichment, relevance metrics, latency benchmarks, and gates.
 
 ## Continuous Integration
 
@@ -168,7 +183,7 @@ npm run lint
 - Add click/conversion-derived judgments
 - Add hybrid/RRF strategy to the main quality gate
 - Add query rules/control plane
-- Add Kafka event ingestion
+- Add Kafka or Redpanda event ingestion that calls the canonical builder before indexing
 
 ## Tech Stack
 
