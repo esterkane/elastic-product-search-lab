@@ -39,6 +39,8 @@ The main product-search index is intended to receive complete product documents.
 
 The current `scripts/replay_product_events.py` direct partial-update path is preserved for compatibility and demos. New batch or future Kafka consumers should update canonical source state first, then index the emitted complete product document. See `docs/canonical_builder_architecture.md`.
 
+Optional Kafka-compatible ingestion is available through Redpanda. It is off by default so the file-driven lab stays simple. See `docs/kafka_dev_flow.md` for topics, event schema, producer scripts, consumer interfaces, and DLQ behavior.
+
 ## Run Locally
 
 Start Elasticsearch and Kibana:
@@ -111,6 +113,21 @@ npm run gate:search-quality:esci
 
 The full ESCI raw files and generated JSONL files stay local under ignored `data/raw/` and `data/generated/` paths.
 
+Optional Kafka/Redpanda workflow:
+
+```powershell
+docker compose -p elastic-product-search-lab `
+  -f docker-compose.yml `
+  -f docker-compose.kafka.yml `
+  up -d elasticsearch kibana redpanda redpanda-console
+
+docker exec elastic-product-search-lab-redpanda rpk topic create -p 3 -r 1 product.catalog product.price product.inventory product.reviews product.analytics product.dlq
+
+.\.venv\Scripts\python.exe -m pip install -e ".[kafka]"
+.\.venv\Scripts\python.exe scripts\generate_synthetic_events.py --limit 5
+.\.venv\Scripts\python.exe scripts\publish_events.py --input data\generated\synthetic_product_events.jsonl
+```
+
 ## Example Results
 
 The table below uses the local 100-query ESCI subset reports in `reports/esci-relevance-report.md` and `reports/esci-latency-report.md`.
@@ -164,7 +181,7 @@ This demonstrates that search quality can improve by improving indexed data qual
 
 ## Trade-Offs
 
-This is a compact lab, not a production marketplace system. It does not include a full Kafka deployment, gRPC service boundary, Kubernetes manifests, production observability dashboards, or A/B testing platform. The canonical builder is intentionally Kafka-ready, but phase 1 does not add Kafka containers or client dependencies. No external LLMs or cloud services are required. Optional vector and reranking workflows exist in the repo, but the main measurable loop is lexical search plus deterministic enrichment, relevance metrics, latency benchmarks, and gates.
+This is a compact lab, not a production marketplace system. It does not include a gRPC service boundary, Kubernetes manifests, production observability dashboards, or A/B testing platform. The optional Redpanda workflow is for local Kafka-compatible development only; the default lab remains file-driven. No external LLMs or cloud services are required. Optional vector and reranking workflows exist in the repo, but the main measurable loop is lexical search plus deterministic enrichment, relevance metrics, latency benchmarks, and gates.
 
 ## Continuous Integration
 

@@ -21,6 +21,9 @@ vector = [
   "scikit-learn",
   "rank-bm25"
 ]
+kafka = [
+  "confluent-kafka"
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/python"]

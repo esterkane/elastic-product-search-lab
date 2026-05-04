@@ -4,7 +4,7 @@
 
 This phase introduces a canonical product document layer before Elasticsearch indexing. The product-search index should receive complete, deterministic product documents assembled from source-owned state instead of becoming the place where many independent partial updaters merge business fields.
 
-The existing JSONL sample loader and product event replay remain available. The new canonical builder is a small Python interface that batch jobs, replay workers, or a later Kafka consumer can call before indexing.
+The existing JSONL sample loader and product event replay remain available. The new canonical builder is a small Python interface that batch jobs, replay workers, or the optional Kafka/Redpanda consumer can call before indexing.
 
 ## Current Components
 
@@ -17,6 +17,7 @@ The existing JSONL sample loader and product event replay remain available. The 
 | `src/ingestion/bulk_indexer.py` | Builds Elasticsearch bulk operations. | Continues indexing complete documents only. |
 | `data/sample/product_events.jsonl` | Deterministic event replay fixture. | Still used by the existing replay path. Future replay can update `ProductSourceState` first. |
 | `src/ingestion/product_event_consumer.py` | Applies direct partial updates into Elasticsearch. | Preserved for backward compatibility during phase 1; not expanded. |
+| `src/ingestion/kafka_consumer.py` | Optional Kafka-compatible consumer core. | Applies canonical events to source state, emits complete documents, and routes malformed events to DLQ. |
 | `src/search/product_mapping.json` | Strict mapping for `products-v1`. | Remains the target schema for emitted canonical documents. |
 | `apps/api/src/search/*` and `apps/api/src/routes/search.ts` | Search API over the product index. | No change; it reads the final searchable product index. |
 
@@ -79,3 +80,5 @@ if result.emitted:
 ```
 
 In a production worker, `ProductSourceState` would be stored in a durable state store keyed by `product_id`; Kafka partitions should preserve per-product ordering where possible. Non-retryable validation errors are rejected immediately by `SourceUpdate` or ownership checks. Retryable incomplete-product results should be retained until missing source data arrives.
+
+The lab's optional Redpanda workflow is documented in `docs/kafka_dev_flow.md`.

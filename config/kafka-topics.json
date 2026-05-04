@@ -1,0 +1,40 @@
+{
+  "topics": [
+    {
+      "name": "product.catalog",
+      "partitions": 3,
+      "replication_factor": 1,
+      "source": "catalog"
+    },
+    {
+      "name": "product.price",
+      "partitions": 3,
+      "replication_factor": 1,
+      "source": "price"
+    },
+    {
+      "name": "product.inventory",
+      "partitions": 3,
+      "replication_factor": 1,
+      "source": "inventory"
+    },
+    {
+      "name": "product.reviews",
+      "partitions": 3,
+      "replication_factor": 1,
+      "source": "reviews"
+    },
+    {
+      "name": "product.analytics",
+      "partitions": 3,
+      "replication_factor": 1,
+      "source": "analytics"
+    },
+    {
+      "name": "product.dlq",
+      "partitions": 3,
+      "replication_factor": 1,
+      "source": "dead_letter"
+    }
+  ]
+}
