@@ -1,0 +1,5 @@
+{"source":"price","product_id":"P100001","source_version":2,"updated_at":"2026-05-01T11:05:00Z","fields":{"price":7.49,"currency":"eur"}}
+{"source":"catalog","product_id":"P100001","source_version":1,"updated_at":"2026-05-01T10:00:00Z","fields":{"title":"Organic coffee beans","description":"Medium roast whole beans.","brand":"Kaufland Bio","category":"Grocery > Coffee","attributes":{"origin":"Colombia","roast":"medium","_debug":"drop-me"},"seller_id":"kaufland"}}
+{"source":"inventory","product_id":"P100001","source_version":1,"updated_at":"2026-05-01T12:00:00Z","fields":{"availability":"in_stock"}}
+{"source":"analytics","product_id":"P100001","source_version":1,"updated_at":"2026-05-01T13:00:00Z","fields":{"popularity_score":42.0}}
+{"source":"price","product_id":"P100001","source_version":1,"updated_at":"2026-05-01T11:00:00Z","fields":{"price":99.99,"currency":"usd"}}

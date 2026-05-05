@@ -1,10 +1,14 @@
+import json
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pytest
 
 from src.ingestion.canonical_builder import build_canonical_product_document, source_state_from_complete_product
 from src.ingestion.canonical_types import SourceUpdate
 from src.ingestion.source_state import ProductSourceState
+
+FIXTURE_DIR = Path(__file__).parent / "fixtures" / "canonical"
 
 
 def catalog_update(version: int = 1, **fields):
@@ -173,6 +177,9 @@ def test_canonical_builder_output_is_deterministic_for_same_input_state():
         "Organic coffee beans Medium roast whole beans. Kaufland Bio Grocery > Coffee Colombia medium"
     )
     assert first.document["search_profile"].startswith("Product: Organic coffee beans.")
+    assert first.document["schema_version"] == "catalog-v2"
+    assert first.document["source_attribution"]["title"] == "catalog@1"
+    assert first.document["source_attribution"]["price_info"] == "price@1"
 
 
 def test_existing_complete_sample_product_shape_builds_valid_index_document():
@@ -252,3 +259,74 @@ def test_canonical_document_merges_production_catalog_state():
     assert result.document["is_deleted"] is False
     assert result.document["cohort_tags"] == ["loyalty"]
     assert result.document["autosuggest"] == "Organic coffee beans Kaufland Bio Grocery > Coffee"
+
+
+def test_out_of_order_fixture_rebuild_is_idempotent_and_ignores_stale_versions():
+    events = [
+        SourceUpdate.model_validate_json(line)
+        for line in (FIXTURE_DIR / "out_of_order_events.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+    first_state = ProductSourceState(product_id="P100001")
+    second_state = ProductSourceState(product_id="P100001")
+    accepted = [first_state.apply(event) for event in events]
+    for event in events:
+        second_state.apply(event)
+
+    indexed_at = datetime(2026, 5, 2, tzinfo=timezone.utc)
+    first = build_canonical_product_document(first_state, indexed_at=indexed_at)
+    second = build_canonical_product_document(second_state, indexed_at=indexed_at)
+
+    assert accepted == [True, True, True, True, False]
+    assert first.document == second.document
+    assert first.document is not None
+    assert first.document["price"] == 7.49
+    assert first.document["currency"] == "EUR"
+    assert first.document["source_versions"]["price"] == "2"
+    assert "_debug" not in first.document["attributes"]
+
+
+def test_soft_delete_tombstone_emits_minimal_non_searchable_document():
+    state = ProductSourceState(product_id="P-deleted")
+    state.apply(
+        SourceUpdate(
+            source="lifecycle",
+            product_id="P-deleted",
+            source_version=5,
+            updated_at=datetime(2026, 5, 1, 16, tzinfo=timezone.utc),
+            fields={
+                "is_deleted": True,
+                "deleted_at": "2026-05-01T16:00:00Z",
+                "delete_reason": "source_tombstone",
+            },
+        )
+    )
+
+    result = build_canonical_product_document(state, indexed_at=datetime(2026, 5, 2, tzinfo=timezone.utc))
+
+    assert result.emitted is True
+    assert result.document is not None
+    assert result.document["product_id"] == "P-deleted"
+    assert result.document["is_deleted"] is True
+    assert result.document["lifecycle"]["delete_reason"] == "source_tombstone"
+    assert result.document["source_versions"] == {"lifecycle": "5"}
+    assert "title" not in result.document
+    assert result.issues == []
+
+
+def test_source_hygiene_removes_transient_source_fields_from_nested_source():
+    state = complete_state()
+    state.apply(
+        merchandising_update(
+            merchandising={"badges": ["bio"], "_tmp": {"unsafe": True}, "debug": "drop"},
+            badges=["bio"],
+        )
+    )
+
+    result = build_canonical_product_document(state, indexed_at=datetime(2026, 5, 2, tzinfo=timezone.utc))
+
+    assert result.emitted is True
+    serialized = json.dumps(result.document, sort_keys=True)
+    assert "_tmp" not in serialized
+    assert "raw_event" not in serialized

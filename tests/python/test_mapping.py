@@ -14,6 +14,7 @@ def test_required_fields_exist():
     properties = load_properties()
     required_fields = {
         "product_id",
+        "schema_version",
         "title",
         "description",
         "brand",
@@ -33,6 +34,7 @@ def test_required_fields_exist():
         "is_deleted",
         "cohort_tags",
         "source_versions",
+        "source_attribution",
         "updated_at",
         "indexed_at",
         "catalog_text",
@@ -84,6 +86,7 @@ def test_attributes_and_source_versions_are_flattened():
 
     assert properties["attributes"]["type"] == "flattened"
     assert properties["source_versions"]["type"] == "flattened"
+    assert properties["source_attribution"]["type"] == "flattened"
 
 
 def test_offers_are_nested_and_attribute_bags_stay_flattened():

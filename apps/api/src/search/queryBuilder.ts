@@ -32,7 +32,7 @@ function textQuery(queryText?: string): QueryDsl {
 }
 
 function buildFilters(params: SearchQueryParams, context: RankingExtensionContext = {}): QueryDsl[] {
-  const filter: QueryDsl[] = [];
+  const filter: QueryDsl[] = [{ term: { is_deleted: false } }];
 
   if (params.category) filter.push({ term: { category: params.category.toLowerCase() } });
   if (params.brand) filter.push({ term: { brand: params.brand.toLowerCase() } });

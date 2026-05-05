@@ -29,6 +29,9 @@
       "product_id": {
         "type": "keyword"
       },
+      "schema_version": {
+        "type": "keyword"
+      },
       "title": {
         "type": "text",
         "fields": {
@@ -205,6 +208,9 @@
         "normalizer": "lowercase_normalizer"
       },
       "source_versions": {
+        "type": "flattened"
+      },
+      "source_attribution": {
         "type": "flattened"
       },
       "updated_at": {

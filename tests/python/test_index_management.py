@@ -1,5 +1,6 @@
 import json
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pytest
 
@@ -18,6 +19,8 @@ from src.search.index_management import (
     utc_build_id,
     versioned_product_index_name,
 )
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_versioned_index_name_is_deterministic():
@@ -52,11 +55,25 @@ def test_product_ingest_pipeline_is_minimal_and_metadata_only():
 
     processors = pipeline["processors"]
     assert processors[0]["uppercase"]["field"] == "currency"
-    assert processors[1]["lowercase"]["field"] == "availability"
-    assert processors[2]["set"]["field"] == "indexed_at"
-    assert processors[2]["set"]["if"] == "ctx.indexed_at == null"
-    assert len(processors) == 3
+    assert processors[1]["uppercase"]["field"] == "price_info.currency"
+    assert processors[2]["foreach"]["field"] == "offers"
+    assert processors[3]["lowercase"]["field"] == "availability"
+    assert processors[4]["lowercase"]["field"] == "stock.availability"
+    assert processors[5]["set"]["field"] == "indexed_at"
+    assert processors[5]["set"]["if"] == "ctx.indexed_at == null"
+    assert processors[6]["set"]["field"] == "schema_version"
+    assert processors[7]["remove"]["field"] == ["raw_event", "debug", "_debug", "_tmp"]
+    assert len(processors) == 8
     json.dumps(pipeline)
+
+
+def test_checked_in_product_pipeline_json_matches_generated_body():
+    pipeline_path = PROJECT_ROOT / "config" / "products-minimal-normalization.pipeline.json"
+
+    with pipeline_path.open(encoding="utf-8") as pipeline_file:
+        checked_in_pipeline = json.load(pipeline_file)
+
+    assert checked_in_pipeline == product_ingest_pipeline_body()
 
 
 def test_event_ilm_and_data_stream_template_are_serializable():

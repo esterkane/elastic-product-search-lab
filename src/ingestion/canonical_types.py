@@ -27,6 +27,7 @@ SOURCE_OWNED_FIELDS: dict[SourceName, frozenset[str]] = {
 INDEXED_PRODUCT_FIELDS = frozenset(
     {
         "product_id",
+        "schema_version",
         "title",
         "description",
         "brand",
@@ -50,6 +51,7 @@ INDEXED_PRODUCT_FIELDS = frozenset(
         "catalog_text",
         "search_profile",
         "source_versions",
+        "source_attribution",
         "indexed_at",
     }
 )

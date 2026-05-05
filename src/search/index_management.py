@@ -60,12 +60,34 @@ def product_ingest_pipeline_body() -> dict[str, Any]:
         "description": "Minimal last-mile product document normalization. Business merging happens before indexing.",
         "processors": [
             {"uppercase": {"field": "currency", "ignore_missing": True}},
+            {"uppercase": {"field": "price_info.currency", "ignore_missing": True}},
+            {
+                "foreach": {
+                    "field": "offers",
+                    "ignore_missing": True,
+                    "processor": {"uppercase": {"field": "_ingest._value.currency", "ignore_missing": True}},
+                }
+            },
             {"lowercase": {"field": "availability", "ignore_missing": True}},
+            {"lowercase": {"field": "stock.availability", "ignore_missing": True}},
             {
                 "set": {
                     "field": "indexed_at",
                     "value": "{{_ingest.timestamp}}",
                     "if": "ctx.indexed_at == null",
+                }
+            },
+            {
+                "set": {
+                    "field": "schema_version",
+                    "value": "catalog-v2",
+                    "if": "ctx.schema_version == null",
+                }
+            },
+            {
+                "remove": {
+                    "field": ["raw_event", "debug", "_debug", "_tmp"],
+                    "ignore_missing": True,
                 }
             },
         ],

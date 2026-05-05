@@ -40,6 +40,7 @@ Create and cut over:
 | `seller`, `stock`, `price_info`, `merchandising`, `lifecycle` | structured objects | Explainable source-domain sections |
 | `embedding`, `semantic_embedding` | `dense_vector` | Configurable semantic retrieval experiments |
 | `is_deleted`, `deleted_at` | boolean/date | Soft-delete state kept in the canonical document |
+| `schema_version`, `source_versions`, `source_attribution` | keyword/flattened | Reviewable schema and provenance metadata |
 
 The mapping remains `dynamic: strict` so accidental fields fail loudly.
 
@@ -57,6 +58,7 @@ Production-shaped sections are emitted alongside them:
 
 ```json
 {
+  "schema_version": "catalog-v2",
   "product_id": "P100001",
   "title": "Organic coffee beans",
   "seller": {
@@ -94,6 +96,16 @@ Production-shaped sections are emitted alongside them:
     "is_deleted": false,
     "deleted_at": null,
     "delete_reason": ""
+  },
+  "source_versions": {
+    "catalog": "1",
+    "price": "2",
+    "stock": "1"
+  },
+  "source_attribution": {
+    "title": "catalog@1",
+    "price": "price@2",
+    "stock": "stock@1"
   }
 }
 ```

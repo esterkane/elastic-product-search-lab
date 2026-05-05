@@ -36,6 +36,7 @@ describe("product search query builder", () => {
           },
         ],
         filter: [
+          { term: { is_deleted: false } },
           { term: { category: "electronics > headphones" } },
           { term: { brand: "sony" } },
           { term: { availability: "in_stock" } },
@@ -94,6 +95,7 @@ describe("product search query builder", () => {
     expect(query).toMatchObject({
       bool: {
         must: [{ match_all: {} }],
+        filter: [{ term: { is_deleted: false } }],
       },
     });
   });

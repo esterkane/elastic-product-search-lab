@@ -28,10 +28,14 @@ The canonical layer models ownership explicitly:
 | Source | Owned fields |
 | --- | --- |
 | `catalog` | `title`, `description`, `brand`, `category`, `attributes`, `seller_id` |
+| `seller` | `seller`, `seller_id`, `seller_name`, `seller_rating`, `is_marketplace` |
 | `price` | `price`, `currency` |
 | `inventory` | `availability` |
+| `stock` | `stock`, `availability`, `stock_quantity`, `warehouse_id` |
 | `reviews` | `average_rating`, `review_count` |
 | `analytics` | `popularity_score` |
+| `merchandising` | `merchandising`, `badges`, `boost_tags`, `campaign_ids`, `cohort_tags` |
+| `lifecycle` | `lifecycle`, `is_deleted`, `deleted_at`, `delete_reason` |
 
 Each `SourceUpdate` carries `product_id`, `source`, `source_version`, optional `updated_at`, and source-owned `fields`. `ProductSourceState.apply()` rejects updates that try to write fields outside the source ownership table. That keeps unrelated fields from being overwritten by the wrong producer.
 
@@ -60,13 +64,15 @@ The builder emits only when minimum searchable fields exist:
 
 If any required field is missing, the builder returns a structured `CanonicalBuildResult` with `emitted=false` and a `canonical_product_incomplete` issue marked `retryable=true`. A future Kafka consumer can keep or retry that product state until the missing source arrives.
 
+Lifecycle tombstones are the exception: a delete event can emit a minimal `is_deleted=true` document keyed by `product_id` even if the searchable catalog fields have not arrived. That gives rebuilds a deterministic soft-delete record without making the product searchable.
+
 ## Source Clocks
 
-`source_versions` stores the latest accepted version per source. Numeric clocks compare numerically; non-numeric clocks compare as strings. The sample JSONL path also preserves the historical `sample_jsonl` version key for compatibility while adding canonical source clocks for `catalog`, `price`, `inventory`, and `analytics`.
+`source_versions` stores the latest accepted version per source. `source_attribution` records field-level provenance, for example `title: catalog@1` and `price: price@2`. Numeric clocks compare numerically; non-numeric clocks compare as strings. The sample JSONL path also preserves the historical `sample_jsonl` version key for compatibility while adding canonical source clocks for `catalog`, `price`, `inventory`, and `analytics`.
 
 ## Elasticsearch Boundary
 
-Canonical assembly stays in application code. Elasticsearch ingest pipelines should remain minimal and last-mile only, for example for operational metadata that does not require cross-source product semantics. The `products-v1` mapping remains strict, so phase 1 does not emit review fields into Elasticsearch until the mapping and search API intentionally add them.
+Canonical assembly stays in application code. Elasticsearch ingest pipelines should remain minimal and last-mile only, for example for operational metadata that does not require cross-source product semantics. The `products-minimal-normalization` pipeline normalizes currency and availability, sets missing indexing metadata, and removes known transient fields; it does not merge source-owned business state. The versioned product mapping remains strict.
 
 ## Kafka-Ready Interface
 

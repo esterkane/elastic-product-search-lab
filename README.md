@@ -41,7 +41,7 @@ For a fuller component and sequence view, start with `docs/architecture_overview
 
 The main product-search index is intended to receive complete product documents. Phase 1 adds a canonical builder layer in `src/ingestion/canonical_builder.py`, with source state in `src/ingestion/source_state.py` and ownership/types in `src/ingestion/canonical_types.py`. Existing JSONL sample loading still works, but complete sample rows now pass through the canonical builder before bulk indexing.
 
-The current `scripts/replay_product_events.py` direct partial-update path is preserved for compatibility and demos. New batch or future Kafka consumers should update canonical source state first, then index the emitted complete product document. See `docs/canonical_builder_architecture.md`.
+The current `scripts/replay_product_events.py` direct partial-update path is preserved for compatibility and demos. New batch or future Kafka consumers should update canonical source state first, then index the emitted complete product document. See `docs/canonical_builder_architecture.md` and `docs/ingestion.md` for precedence, tombstones, source attribution, and ingest-pipeline rules.
 
 Optional Kafka-compatible ingestion is available through Redpanda. It is off by default so the file-driven lab stays simple. See `docs/kafka_dev_flow.md` for topics, event schema, producer scripts, consumer interfaces, and DLQ behavior.
 

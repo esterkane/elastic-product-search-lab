@@ -8,6 +8,18 @@ from typing import Any
 
 from src.ingestion.canonical_types import SOURCE_OWNED_FIELDS, SourceClock, SourceName, SourceUpdate
 
+SOURCE_PRECEDENCE: tuple[SourceName, ...] = (
+    "catalog",
+    "seller",
+    "price",
+    "inventory",
+    "stock",
+    "analytics",
+    "reviews",
+    "merchandising",
+    "lifecycle",
+)
+
 
 @dataclass(frozen=True)
 class SourceRecord:
@@ -57,14 +69,27 @@ class ProductSourceState:
         return dict(sorted(versions.items()))
 
     def merged_fields(self) -> dict[str, Any]:
-        """Merge source-owned fields without cross-source overwrites."""
+        """Merge source-owned fields with explicit domain precedence."""
 
         merged: dict[str, Any] = {"product_id": self.product_id}
-        for source in ("catalog", "seller", "price", "inventory", "stock", "analytics", "reviews", "merchandising", "lifecycle"):
+        for source in SOURCE_PRECEDENCE:
             record = self.records.get(source)
             if record:
                 merged.update(record.fields)
         return merged
+
+    def source_attribution(self) -> dict[str, str]:
+        """Return field-to-source metadata for reviewable canonical output."""
+
+        attribution: dict[str, str] = {"product_id": "canonical"}
+        for source in SOURCE_PRECEDENCE:
+            record = self.records.get(source)
+            if not record:
+                continue
+            source_clock = f"{source}@{clock_to_string(record.version)}"
+            for field_name in sorted(record.fields):
+                attribution[field_name] = source_clock
+        return dict(sorted(attribution.items()))
 
     def latest_updated_at(self) -> datetime | None:
         timestamps = [record.updated_at for record in self.records.values() if record.updated_at]

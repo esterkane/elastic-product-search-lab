@@ -11,6 +11,8 @@ from src.ingestion.search_profile import build_search_profile
 from src.ingestion.source_state import ProductSourceState, utc_iso
 
 MINIMUM_SEARCHABLE_FIELDS = frozenset({"product_id", "title", "brand", "category", "price", "currency", "availability", "seller_id"})
+CANONICAL_SCHEMA_VERSION = "catalog-v2"
+TRANSIENT_SOURCE_KEYS = frozenset({"_debug", "_tmp", "debug", "raw_event", "trace"})
 
 
 def build_canonical_product_document(
@@ -20,8 +22,11 @@ def build_canonical_product_document(
     """Emit a complete indexable product document when minimum source state exists."""
 
     fields = state.merged_fields()
+    lifecycle = dict(fields.get("lifecycle") or {})
+    is_deleted = bool(lifecycle.get("is_deleted", fields.get("is_deleted", False)))
+    deleted_at = lifecycle.get("deleted_at", fields.get("deleted_at"))
     missing = sorted(field for field in MINIMUM_SEARCHABLE_FIELDS if fields.get(field) in (None, ""))
-    if missing:
+    if missing and not is_deleted:
         return CanonicalBuildResult(
             product_id=state.product_id,
             emitted=False,
@@ -34,8 +39,34 @@ def build_canonical_product_document(
                 )
             ],
         )
+    if missing and is_deleted:
+        field_attribution = state.source_attribution()
+        return CanonicalBuildResult(
+            product_id=state.product_id,
+            emitted=True,
+            document=deterministic_document(
+                {
+                    "schema_version": CANONICAL_SCHEMA_VERSION,
+                    "product_id": state.product_id,
+                    "lifecycle": {
+                        "is_deleted": True,
+                        "deleted_at": deleted_at,
+                        "delete_reason": str(lifecycle.get("delete_reason") or fields.get("delete_reason") or "tombstone"),
+                    },
+                    "is_deleted": True,
+                    "deleted_at": deleted_at,
+                    "source_versions": state.source_versions(),
+                    "source_attribution": attribution_for_document(
+                        state,
+                        {"lifecycle": field_attribution.get("lifecycle", field_attribution.get("is_deleted", "lifecycle"))},
+                    ),
+                    "updated_at": utc_iso(state.latest_updated_at() or datetime.now(timezone.utc)),
+                    "indexed_at": utc_iso(indexed_at or datetime.now(timezone.utc)),
+                }
+            ),
+        )
 
-    attributes = dict(fields.get("attributes") or {})
+    attributes = clean_attribute_bag(fields.get("attributes") or {})
     seller_id = str(fields["seller_id"])
     seller_fields = dict(fields.get("seller") or {})
     seller = {
@@ -69,10 +100,9 @@ def build_canonical_product_document(
             if str(tag).strip()
         }
     )
-    lifecycle = dict(fields.get("lifecycle") or {})
-    is_deleted = bool(lifecycle.get("is_deleted", fields.get("is_deleted", False)))
-    deleted_at = lifecycle.get("deleted_at", fields.get("deleted_at"))
+    field_attribution = state.source_attribution()
     document: dict[str, Any] = {
+        "schema_version": CANONICAL_SCHEMA_VERSION,
         "product_id": state.product_id,
         "title": str(fields["title"]),
         "description": str(fields.get("description") or ""),
@@ -112,6 +142,19 @@ def build_canonical_product_document(
         "deleted_at": deleted_at,
         "cohort_tags": cohort_tags,
         "source_versions": state.source_versions(),
+        "source_attribution": attribution_for_document(
+            state,
+            {
+                "autosuggest": "builder:derived",
+                "catalog_text": "builder:derived",
+                "offers": "builder:canonical",
+                "price_info": field_attribution.get("price", "builder:canonical"),
+                "search_profile": "builder:derived",
+                "schema_version": "builder:canonical",
+                "seller": field_attribution.get("seller", field_attribution.get("seller_id", "builder:canonical")),
+                "stock": field_attribution.get("stock", field_attribution.get("availability", "builder:canonical")),
+            },
+        ),
         "updated_at": utc_iso(state.latest_updated_at() or datetime.now(timezone.utc)),
         "indexed_at": utc_iso(indexed_at or datetime.now(timezone.utc)),
     }
@@ -150,14 +193,49 @@ def build_autosuggest_text(document: Mapping[str, Any]) -> str:
 
 
 def deterministic_document(document: Mapping[str, Any]) -> dict[str, Any]:
-    normalized = dict(document)
+    normalized = clean_source_value(dict(document))
     if isinstance(normalized.get("attributes"), Mapping):
         normalized["attributes"] = dict(sorted(normalized["attributes"].items()))
     if isinstance(normalized.get("source_versions"), Mapping):
         normalized["source_versions"] = dict(sorted(normalized["source_versions"].items()))
+    if isinstance(normalized.get("source_attribution"), Mapping):
+        normalized["source_attribution"] = dict(sorted(normalized["source_attribution"].items()))
+    if isinstance(normalized.get("merchandising"), Mapping):
+        normalized["merchandising"] = {
+            key: sorted(value) if isinstance(value, list) else value
+            for key, value in sorted(normalized["merchandising"].items())
+        }
+    if isinstance(normalized.get("cohort_tags"), list):
+        normalized["cohort_tags"] = sorted(normalized["cohort_tags"])
     if normalized.get("deleted_at") is None:
         normalized["deleted_at"] = None
     return normalized
+
+
+def attribution_for_document(state: ProductSourceState, derived_fields: Mapping[str, str] | None = None) -> dict[str, str]:
+    attribution = state.source_attribution()
+    attribution.update(dict(derived_fields or {}))
+    return dict(sorted(attribution.items()))
+
+
+def clean_attribute_bag(attributes: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        str(key): clean_source_value(value)
+        for key, value in sorted(attributes.items())
+        if key not in TRANSIENT_SOURCE_KEYS and not str(key).startswith("_") and value is not None
+    }
+
+
+def clean_source_value(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {
+            str(key): clean_source_value(child)
+            for key, child in sorted(value.items())
+            if key not in TRANSIENT_SOURCE_KEYS and not str(key).startswith("_")
+        }
+    if isinstance(value, list):
+        return [clean_source_value(child) for child in value if child is not None]
+    return value
 
 
 def apply_source_update(state: ProductSourceState, update: SourceUpdate) -> CanonicalBuildResult:
