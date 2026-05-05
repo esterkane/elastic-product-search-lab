@@ -35,25 +35,87 @@ def build_canonical_product_document(
             ],
         )
 
+    attributes = dict(fields.get("attributes") or {})
+    seller_id = str(fields["seller_id"])
+    seller_fields = dict(fields.get("seller") or {})
+    seller = {
+        "seller_id": str(seller_fields.get("seller_id") or fields.get("seller_id") or seller_id),
+        "seller_name": str(seller_fields.get("seller_name") or fields.get("seller_name") or seller_id),
+        "seller_rating": float(seller_fields.get("seller_rating") or fields.get("seller_rating") or 0),
+        "is_marketplace": bool(seller_fields.get("is_marketplace", fields.get("is_marketplace", seller_id != "kaufland"))),
+    }
+    stock_fields = dict(fields.get("stock") or {})
+    stock = {
+        "availability": str(stock_fields.get("availability") or fields["availability"]),
+        "stock_quantity": int(stock_fields.get("stock_quantity") or fields.get("stock_quantity") or 0),
+        "warehouse_id": str(stock_fields.get("warehouse_id") or fields.get("warehouse_id") or "default"),
+    }
+    price_info = {
+        "amount": float(fields["price"]),
+        "currency": str(fields["currency"]).upper(),
+    }
+    merchandising = dict(fields.get("merchandising") or {})
+    badges = fields.get("badges", merchandising.get("badges", []))
+    boost_tags = fields.get("boost_tags", merchandising.get("boost_tags", []))
+    campaign_ids = fields.get("campaign_ids", merchandising.get("campaign_ids", []))
+    cohort_tags = sorted(
+        {
+            str(tag).lower()
+            for tag in [
+                *(attributes.get("cohort_tags", []) if isinstance(attributes.get("cohort_tags"), list) else []),
+                *(fields.get("cohort_tags", []) if isinstance(fields.get("cohort_tags"), list) else []),
+                *(merchandising.get("cohort_tags", []) if isinstance(merchandising.get("cohort_tags"), list) else []),
+            ]
+            if str(tag).strip()
+        }
+    )
+    lifecycle = dict(fields.get("lifecycle") or {})
+    is_deleted = bool(lifecycle.get("is_deleted", fields.get("is_deleted", False)))
+    deleted_at = lifecycle.get("deleted_at", fields.get("deleted_at"))
     document: dict[str, Any] = {
         "product_id": state.product_id,
         "title": str(fields["title"]),
         "description": str(fields.get("description") or ""),
         "brand": str(fields["brand"]),
         "category": str(fields["category"]),
-        "attributes": dict(fields.get("attributes") or {}),
+        "attributes": attributes,
         "price": float(fields["price"]),
         "currency": str(fields["currency"]).upper(),
         "availability": str(fields["availability"]),
         "popularity_score": float(fields.get("popularity_score") or 0),
-        "seller_id": str(fields["seller_id"]),
-        "cohort_tags": sorted(str(tag).lower() for tag in fields.get("attributes", {}).get("cohort_tags", []) if str(tag).strip())
-        if isinstance(fields.get("attributes"), dict)
-        else [],
+        "seller_id": seller_id,
+        "seller": seller,
+        "stock": stock,
+        "price_info": price_info,
+        "offers": [
+            {
+                "offer_id": f"{state.product_id}:{seller['seller_id']}",
+                "seller_id": seller["seller_id"],
+                "price": price_info["amount"],
+                "currency": price_info["currency"],
+                "availability": stock["availability"],
+                "stock_quantity": stock["stock_quantity"],
+                "is_buy_box": True,
+            }
+        ],
+        "merchandising": {
+            "badges": sorted(str(value) for value in badges if str(value).strip()) if isinstance(badges, list) else [],
+            "boost_tags": sorted(str(value) for value in boost_tags if str(value).strip()) if isinstance(boost_tags, list) else [],
+            "campaign_ids": sorted(str(value) for value in campaign_ids if str(value).strip()) if isinstance(campaign_ids, list) else [],
+        },
+        "lifecycle": {
+            "is_deleted": is_deleted,
+            "deleted_at": deleted_at,
+            "delete_reason": str(lifecycle.get("delete_reason") or fields.get("delete_reason") or ""),
+        },
+        "is_deleted": is_deleted,
+        "deleted_at": deleted_at,
+        "cohort_tags": cohort_tags,
         "source_versions": state.source_versions(),
         "updated_at": utc_iso(state.latest_updated_at() or datetime.now(timezone.utc)),
         "indexed_at": utc_iso(indexed_at or datetime.now(timezone.utc)),
     }
+    document["autosuggest"] = build_autosuggest_text(document)
     document["catalog_text"] = build_catalog_text(document)
     document["search_profile"] = build_search_profile(document)
 
@@ -75,12 +137,26 @@ def build_catalog_text(document: Mapping[str, Any]) -> str:
     )
 
 
+def build_autosuggest_text(document: Mapping[str, Any]) -> str:
+    return " ".join(
+        part
+        for part in [
+            str(document.get("title") or ""),
+            str(document.get("brand") or ""),
+            str(document.get("category") or ""),
+        ]
+        if part
+    )
+
+
 def deterministic_document(document: Mapping[str, Any]) -> dict[str, Any]:
     normalized = dict(document)
     if isinstance(normalized.get("attributes"), Mapping):
         normalized["attributes"] = dict(sorted(normalized["attributes"].items()))
     if isinstance(normalized.get("source_versions"), Mapping):
         normalized["source_versions"] = dict(sorted(normalized["source_versions"].items()))
+    if normalized.get("deleted_at") is None:
+        normalized["deleted_at"] = None
     return normalized
 
 

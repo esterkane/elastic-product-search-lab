@@ -8,16 +8,20 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-SourceName = Literal["catalog", "price", "inventory", "reviews", "analytics"]
+SourceName = Literal["catalog", "seller", "price", "stock", "inventory", "reviews", "analytics", "merchandising", "lifecycle"]
 SourceClock = int | str
 Availability = Literal["in_stock", "limited_stock", "backorder", "out_of_stock", "discontinued"]
 
 SOURCE_OWNED_FIELDS: dict[SourceName, frozenset[str]] = {
     "catalog": frozenset({"title", "description", "brand", "category", "attributes", "seller_id"}),
+    "seller": frozenset({"seller", "seller_id", "seller_name", "seller_rating", "is_marketplace"}),
     "price": frozenset({"price", "currency"}),
+    "stock": frozenset({"stock", "availability", "stock_quantity", "warehouse_id"}),
     "inventory": frozenset({"availability"}),
     "reviews": frozenset({"average_rating", "review_count"}),
     "analytics": frozenset({"popularity_score"}),
+    "merchandising": frozenset({"merchandising", "badges", "boost_tags", "campaign_ids", "cohort_tags"}),
+    "lifecycle": frozenset({"lifecycle", "is_deleted", "deleted_at", "delete_reason"}),
 }
 
 INDEXED_PRODUCT_FIELDS = frozenset(
@@ -33,6 +37,14 @@ INDEXED_PRODUCT_FIELDS = frozenset(
         "availability",
         "popularity_score",
         "seller_id",
+        "seller",
+        "stock",
+        "price_info",
+        "offers",
+        "merchandising",
+        "lifecycle",
+        "is_deleted",
+        "deleted_at",
         "cohort_tags",
         "updated_at",
         "catalog_text",

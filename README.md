@@ -53,6 +53,8 @@ The API read path uses `products-read` for stable candidate retrieval, can optio
 
 Optional governance and personalization policies can be supplied as data with `SEARCH_POLICY_PATH`, including query-matched boosts, category constraints, exclusions, seasonal rewrites, and modest cohort boosts. See `docs/policy_index_design.md`.
 
+The canonical product schema now includes production-shaped seller, stock, price, nested offers, merchandising, soft-delete lifecycle, semantic vector, and autosuggest fields. See `docs/canonical_product_schema.md`.
+
 ## Run Locally
 
 Quick contributor paths:

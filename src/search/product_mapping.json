@@ -1,88 +1,243 @@
 {
-    "settings":  {
-                     "analysis":  {
-                                      "normalizer":  {
-                                                         "lowercase_normalizer":  {
-                                                                                      "type":  "custom",
-                                                                                      "filter":  [
-                                                                                                     "lowercase",
-                                                                                                     "asciifolding"
-                                                                                                 ]
-                                                                                  }
-                                                     }
-                                  }
-                 },
-    "mappings":  {
-                     "dynamic":  "strict",
-                     "properties":  {
-                                        "product_id":  {
-                                                           "type":  "keyword"
-                                                       },
-                                        "title":  {
-                                                      "type":  "text",
-                                                      "fields":  {
-                                                                     "keyword":  {
-                                                                                     "type":  "keyword",
-                                                                                     "ignore_above":  256,
-                                                                                     "normalizer":  "lowercase_normalizer"
-                                                                                 }
-                                                                 }
-                                                  },
-                                        "description":  {
-                                                            "type":  "text"
-                                                        },
-                                        "brand":  {
-                                                      "type":  "keyword",
-                                                      "normalizer":  "lowercase_normalizer"
-                                                  },
-                                        "category":  {
-                                                         "type":  "keyword",
-                                                         "normalizer":  "lowercase_normalizer"
-                                                     },
-                                        "attributes":  {
-                                                           "type":  "flattened"
-                                                       },
-                                        "price":  {
-                                                      "type":  "scaled_float",
-                                                      "scaling_factor":  100
-                                                  },
-                                        "currency":  {
-                                                         "type":  "keyword"
-                                                     },
-                                        "availability":  {
-                                                             "type":  "keyword"
-                                                         },
-                                        "popularity_score":  {
-                                                                 "type":  "float"
-                                                             },
-                                        "seller_id":  {
-                                                          "type":  "keyword"
-                                                      },
-                                        "cohort_tags":  {
-                                                            "type":  "keyword",
-                                                            "normalizer":  "lowercase_normalizer"
-                                                        },
-                                        "source_versions":  {
-                                                                "type":  "flattened"
-                                                            },
-                                        "updated_at":  {
-                                                           "type":  "date"
-                                                       },
-                                        "indexed_at":  {
-                                                           "type":  "date"
-                                                       },
-                                        "catalog_text":  {
-                                                             "type":  "text"
-                                                         },
-                                        "embedding":  {
-                                                          "type":  "dense_vector",
-                                                          "dims":  384,
-                                                          "index":  true,
-                                                          "similarity":  "cosine"
-                                                      },
-                                        "search_profile":  {
-                                                               "type":  "text"
-                                                           }
-                                    }
-                 }
+  "settings": {
+    "index": {
+      "mapping": {
+        "total_fields": {
+          "limit": 2000
+        }
+      }
+    },
+    "analysis": {
+      "normalizer": {
+        "lowercase_normalizer": {
+          "type": "custom",
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "_meta": {
+      "semantic_mode": "dense_vector",
+      "semantic_dims": 384
+    },
+    "properties": {
+      "product_id": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256,
+            "normalizer": "lowercase_normalizer"
+          },
+          "shingles": {
+            "type": "search_as_you_type"
+          }
+        }
+      },
+      "autosuggest": {
+        "type": "search_as_you_type"
+      },
+      "description": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 512,
+            "normalizer": "lowercase_normalizer"
+          }
+        }
+      },
+      "brand": {
+        "type": "keyword",
+        "normalizer": "lowercase_normalizer",
+        "fields": {
+          "text": {
+            "type": "text"
+          }
+        }
+      },
+      "category": {
+        "type": "keyword",
+        "normalizer": "lowercase_normalizer",
+        "fields": {
+          "text": {
+            "type": "text"
+          }
+        }
+      },
+      "attributes": {
+        "type": "flattened"
+      },
+      "price": {
+        "type": "scaled_float",
+        "scaling_factor": 100
+      },
+      "currency": {
+        "type": "keyword"
+      },
+      "availability": {
+        "type": "keyword"
+      },
+      "popularity_score": {
+        "type": "float"
+      },
+      "seller_id": {
+        "type": "keyword"
+      },
+      "seller": {
+        "properties": {
+          "seller_id": {
+            "type": "keyword"
+          },
+          "seller_name": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256,
+                "normalizer": "lowercase_normalizer"
+              }
+            }
+          },
+          "seller_rating": {
+            "type": "float"
+          },
+          "is_marketplace": {
+            "type": "boolean"
+          }
+        }
+      },
+      "stock": {
+        "properties": {
+          "availability": {
+            "type": "keyword"
+          },
+          "stock_quantity": {
+            "type": "integer"
+          },
+          "warehouse_id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "price_info": {
+        "properties": {
+          "amount": {
+            "type": "scaled_float",
+            "scaling_factor": 100
+          },
+          "currency": {
+            "type": "keyword"
+          }
+        }
+      },
+      "offers": {
+        "type": "nested",
+        "properties": {
+          "offer_id": {
+            "type": "keyword"
+          },
+          "seller_id": {
+            "type": "keyword"
+          },
+          "price": {
+            "type": "scaled_float",
+            "scaling_factor": 100
+          },
+          "currency": {
+            "type": "keyword"
+          },
+          "availability": {
+            "type": "keyword"
+          },
+          "stock_quantity": {
+            "type": "integer"
+          },
+          "is_buy_box": {
+            "type": "boolean"
+          }
+        }
+      },
+      "merchandising": {
+        "properties": {
+          "badges": {
+            "type": "keyword",
+            "normalizer": "lowercase_normalizer"
+          },
+          "boost_tags": {
+            "type": "keyword",
+            "normalizer": "lowercase_normalizer"
+          },
+          "campaign_ids": {
+            "type": "keyword"
+          }
+        }
+      },
+      "lifecycle": {
+        "properties": {
+          "is_deleted": {
+            "type": "boolean"
+          },
+          "deleted_at": {
+            "type": "date"
+          },
+          "delete_reason": {
+            "type": "keyword"
+          }
+        }
+      },
+      "is_deleted": {
+        "type": "boolean"
+      },
+      "deleted_at": {
+        "type": "date"
+      },
+      "cohort_tags": {
+        "type": "keyword",
+        "normalizer": "lowercase_normalizer"
+      },
+      "source_versions": {
+        "type": "flattened"
+      },
+      "updated_at": {
+        "type": "date"
+      },
+      "indexed_at": {
+        "type": "date"
+      },
+      "catalog_text": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 1024,
+            "normalizer": "lowercase_normalizer"
+          }
+        }
+      },
+      "embedding": {
+        "type": "dense_vector",
+        "dims": 384,
+        "index": true,
+        "similarity": "cosine"
+      },
+      "semantic_embedding": {
+        "type": "dense_vector",
+        "dims": 384,
+        "index": true,
+        "similarity": "cosine"
+      },
+      "search_profile": {
+        "type": "text"
+      }
+    }
+  }
 }

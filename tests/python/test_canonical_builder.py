@@ -62,6 +62,54 @@ def analytics_update(version: int = 1, **fields):
     )
 
 
+def seller_update(version: int = 1, **fields):
+    payload = {"seller_name": "Kaufland", "seller_rating": 4.8, "is_marketplace": False}
+    payload.update(fields)
+    return SourceUpdate(
+        source="seller",
+        product_id="P100001",
+        source_version=version,
+        updated_at=datetime(2026, 5, 1, 9, tzinfo=timezone.utc),
+        fields=payload,
+    )
+
+
+def stock_update(version: int = 1, **fields):
+    payload = {"availability": "limited_stock", "stock_quantity": 7, "warehouse_id": "berlin-1"}
+    payload.update(fields)
+    return SourceUpdate(
+        source="stock",
+        product_id="P100001",
+        source_version=version,
+        updated_at=datetime(2026, 5, 1, 12, tzinfo=timezone.utc),
+        fields=payload,
+    )
+
+
+def merchandising_update(version: int = 1, **fields):
+    payload = {"badges": ["bio"], "boost_tags": ["coffee-week"], "campaign_ids": ["spring"], "cohort_tags": ["loyalty"]}
+    payload.update(fields)
+    return SourceUpdate(
+        source="merchandising",
+        product_id="P100001",
+        source_version=version,
+        updated_at=datetime(2026, 5, 1, 14, tzinfo=timezone.utc),
+        fields=payload,
+    )
+
+
+def lifecycle_update(version: int = 1, **fields):
+    payload = {"is_deleted": False}
+    payload.update(fields)
+    return SourceUpdate(
+        source="lifecycle",
+        product_id="P100001",
+        source_version=version,
+        updated_at=datetime(2026, 5, 1, 15, tzinfo=timezone.utc),
+        fields=payload,
+    )
+
+
 def complete_state() -> ProductSourceState:
     state = ProductSourceState(product_id="P100001")
     for update in [catalog_update(), price_update(), inventory_update(), analytics_update()]:
@@ -160,3 +208,47 @@ def test_existing_complete_sample_product_shape_builds_valid_index_document():
         "sample_jsonl": "2026-05-01T10:00:00Z",
     }
 
+
+def test_canonical_document_merges_production_catalog_state():
+    state = complete_state()
+    state.apply(seller_update())
+    state.apply(stock_update())
+    state.apply(merchandising_update())
+    state.apply(lifecycle_update())
+
+    result = build_canonical_product_document(state, indexed_at=datetime(2026, 5, 2, tzinfo=timezone.utc))
+
+    assert result.emitted is True
+    assert result.document is not None
+    assert result.document["seller"] == {
+        "seller_id": "kaufland",
+        "seller_name": "Kaufland",
+        "seller_rating": 4.8,
+        "is_marketplace": False,
+    }
+    assert result.document["stock"] == {
+        "availability": "limited_stock",
+        "stock_quantity": 7,
+        "warehouse_id": "berlin-1",
+    }
+    assert result.document["price_info"] == {"amount": 8.99, "currency": "EUR"}
+    assert result.document["offers"] == [
+        {
+            "offer_id": "P100001:kaufland",
+            "seller_id": "kaufland",
+            "price": 8.99,
+            "currency": "EUR",
+            "availability": "limited_stock",
+            "stock_quantity": 7,
+            "is_buy_box": True,
+        }
+    ]
+    assert result.document["merchandising"] == {
+        "badges": ["bio"],
+        "boost_tags": ["coffee-week"],
+        "campaign_ids": ["spring"],
+    }
+    assert result.document["lifecycle"]["is_deleted"] is False
+    assert result.document["is_deleted"] is False
+    assert result.document["cohort_tags"] == ["loyalty"]
+    assert result.document["autosuggest"] == "Organic coffee beans Kaufland Bio Grocery > Coffee"

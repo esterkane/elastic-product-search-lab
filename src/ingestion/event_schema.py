@@ -15,13 +15,17 @@ KafkaEventType = Literal["snapshot", "upsert", "delete", "unavailable"]
 
 SOURCE_TOPICS: dict[SourceName, str] = {
     "catalog": "product.catalog",
+    "seller": "product.seller",
     "price": "product.price",
+    "stock": "product.inventory",
     "inventory": "product.inventory",
     "reviews": "product.reviews",
     "analytics": "product.analytics",
+    "merchandising": "product.analytics",
+    "lifecycle": "product.catalog",
 }
 DLQ_TOPIC = "product.dlq"
-ALL_PRODUCT_TOPICS: tuple[str, ...] = tuple(SOURCE_TOPICS.values())
+ALL_PRODUCT_TOPICS: tuple[str, ...] = tuple(dict.fromkeys(SOURCE_TOPICS.values()))
 
 
 class ProductSourceEvent(BaseModel):
@@ -93,4 +97,3 @@ def load_product_source_events(path: Path) -> list[ProductSourceEvent]:
             except Exception as exc:  # noqa: BLE001 - include fixture line context.
                 raise ValueError(f"Invalid canonical product event on line {line_number}: {exc}") from exc
     return events
-

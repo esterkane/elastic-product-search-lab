@@ -60,7 +60,7 @@ class ProductSourceState:
         """Merge source-owned fields without cross-source overwrites."""
 
         merged: dict[str, Any] = {"product_id": self.product_id}
-        for source in ("catalog", "price", "inventory", "analytics", "reviews"):
+        for source in ("catalog", "seller", "price", "inventory", "stock", "analytics", "reviews", "merchandising", "lifecycle"):
             record = self.records.get(source)
             if record:
                 merged.update(record.fields)
@@ -92,4 +92,3 @@ def parse_int_clock(value: SourceClock) -> int | None:
 
 def utc_iso(value: datetime) -> str:
     return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
-
