@@ -12,13 +12,13 @@ The search API supports explicit retrieval strategies through `/search?strategy=
 | `hybrid_rrf` | Elasticsearch RRF retriever combining enriched lexical and kNN vector retrieval. |
 | `reranked` | First-stage hybrid when `queryVector` exists, otherwise enriched lexical, then local deterministic rerank. |
 
-Hybrid retrieval requires a query vector:
+Hybrid retrieval accepts an explicit query vector:
 
 ```bash
 curl "http://localhost:3000/search?q=quiet%20travel%20headphones&strategy=hybrid_rrf&queryVector=0.01,0.02,0.03&debug=true"
 ```
 
-If no vector is supplied, `hybrid_rrf` falls back to `enriched_lexical` and the debug payload reports `executed: hybrid_fallback`.
+If no vector is supplied, the API generates a deterministic local hash vector with `vectorDims=384` by default, matching the checked-in dense-vector mapping. This keeps the lab runnable without an embedding service. It is a fallback for development and tests, not a semantic model.
 
 ## Exact-Match Precision
 
@@ -35,7 +35,7 @@ These clauses protect SKU-like, brand, and exact product-name queries from being
 
 The catalog mapping includes `embedding` and `semantic_embedding` dense vector fields. The API defaults to `semantic_embedding`, and callers can pass `vectorField=embedding` for experiments.
 
-The vector-producing service is intentionally not embedded inside the API yet. This keeps the API deterministic for tests and lets local scripts use either sentence-transformers or hash embeddings.
+The API can use caller-supplied vectors from an external embedding service, or its deterministic hash-vector fallback. Local evaluation scripts can still use either sentence-transformers or hash embeddings.
 
 ## Debug And Profile
 
@@ -45,7 +45,7 @@ The vector-producing service is intentionally not embedded inside the API yet. T
 - Elasticsearch `_profile`
 - returned query DSL or retriever request
 - requested/executed strategy
-- vector availability
+- vector availability, whether the vector was generated, and vector dimensions
 - rerank status
 - observed API-side latency
 - policy/cohort debug information

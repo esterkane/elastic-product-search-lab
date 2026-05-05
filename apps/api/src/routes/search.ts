@@ -21,6 +21,7 @@ const searchQuerySchema = {
     strategy: { type: "string", enum: ["baseline_bm25", "boosted_bm25", "enriched_lexical", "hybrid_rrf", "reranked"] },
     queryVector: { type: "string", minLength: 1 },
     vectorField: { type: "string", minLength: 1, default: "semantic_embedding" },
+    vectorDims: { type: "integer", minimum: 1, maximum: 4096, default: 384 },
     rerank: { type: "boolean", default: false },
   },
 } as const;

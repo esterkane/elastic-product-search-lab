@@ -246,10 +246,34 @@ describe("GET /search", () => {
       requested: "hybrid_rrf",
       executed: "hybrid_rrf",
       vectorProvided: true,
+      vectorGenerated: false,
+      vectorDims: 3,
       reranked: false,
     });
     expect(response.json().debug.profile).toEqual({ shards: [{ id: "0", searches: [] }] });
     expect(response.json().debug.explanations).toEqual([{ value: 3, description: "rrf score" }]);
+  });
+
+  it("generates a query vector for hybrid search when the caller omits one", async () => {
+    let capturedRequest: any;
+    app = buildTestApp({
+      search: async (request) => {
+        capturedRequest = request;
+        return { took: 2, hits: { total: { value: 0 }, hits: [] } };
+      },
+    });
+
+    const response = await app.inject({ method: "GET", url: "/search?q=quiet%20headphones&strategy=hybrid_rrf&vectorDims=4&debug=true" });
+
+    expect(response.statusCode).toBe(200);
+    expect(capturedRequest.retriever.rrf.retrievers[1].knn.query_vector).toHaveLength(4);
+    expect(response.json().debug.strategy).toMatchObject({
+      requested: "hybrid_rrf",
+      executed: "hybrid_rrf",
+      vectorProvided: false,
+      vectorGenerated: true,
+      vectorDims: 4,
+    });
   });
 
   it("can rerank first-stage candidates deterministically", async () => {

@@ -62,6 +62,8 @@ export async function searchProducts(
           requested: plan.requestedStrategy,
           executed: plan.executedStrategy,
           vectorProvided: plan.vectorProvided,
+          vectorGenerated: plan.vectorGenerated,
+          vectorDims: plan.vectorDims,
           reranked: Boolean(params.rerank || params.strategy === "reranked"),
           latencyMs,
         },

@@ -5,6 +5,7 @@ type QueryDsl = Record<string, unknown>;
 const BASELINE_FIELDS = ["title^4", "brand^2", "category^1.5", "description^0.8", "catalog_text^0.5"];
 const ENRICHED_FIELDS = ["search_profile^3", "title^2", "category^1.5", "brand", "description^0.5", "catalog_text", "attributes"];
 const DEFAULT_VECTOR_FIELD = "semantic_embedding";
+export const DEFAULT_QUERY_VECTOR_DIMS = 384;
 
 export type RankingExtensionContext = {
   analyticsSignals?: Record<string, unknown>;
@@ -22,8 +23,10 @@ export type SearchDslDebug = {
 export type SearchDslBuildResult = {
   dsl: QueryDsl;
   requestedStrategy: SearchStrategy;
-  executedStrategy: SearchStrategy | "hybrid_fallback";
+  executedStrategy: SearchStrategy;
   vectorProvided: boolean;
+  vectorGenerated: boolean;
+  vectorDims: number;
 };
 
 function textQuery(queryText?: string): QueryDsl {
@@ -154,14 +157,18 @@ export function buildSearchDsl(params: SearchQueryParams, context: RankingExtens
 
 export function buildSearchDslPlan(params: SearchQueryParams, context: RankingExtensionContext = {}): SearchDslBuildResult {
   const requestedStrategy = params.strategy ?? ((params.boost ?? true) ? "boosted_bm25" : "baseline_bm25");
-  const vector = parseQueryVector(params.queryVector);
-  const vectorProvided = vector.length > 0;
+  const explicitVector = parseQueryVector(params.queryVector);
+  const needsVector = requestedStrategy === "hybrid_rrf" || requestedStrategy === "reranked";
+  const vector = explicitVector.length > 0 ? explicitVector : (needsVector ? deterministicQueryVector(params.q ?? "", params.vectorDims) : []);
+  const vectorProvided = explicitVector.length > 0;
   const dsl = buildStrategyDsl(params, context, requestedStrategy, vector);
   return {
     dsl,
     requestedStrategy,
-    executedStrategy: requestedStrategy === "hybrid_rrf" && !vectorProvided ? "hybrid_fallback" : requestedStrategy,
+    executedStrategy: requestedStrategy,
     vectorProvided,
+    vectorGenerated: !vectorProvided && vector.length > 0,
+    vectorDims: vector.length,
   };
 }
 
@@ -177,16 +184,13 @@ function buildStrategyDsl(
   if (requestedStrategy === "boosted_bm25") {
     return withDebug({ size: params.size, query: buildBoostedRelevanceQuery(params, context), sort: ["_score"] }, params);
   }
-  if (requestedStrategy === "hybrid_rrf" && queryVector.length > 0) {
+  if (requestedStrategy === "hybrid_rrf") {
     return withDebug(buildHybridRrfDsl(params, context, queryVector), params);
   }
-  if (requestedStrategy === "reranked" && queryVector.length > 0) {
+  if (requestedStrategy === "reranked") {
     return withDebug(buildHybridRrfDsl({ ...params, size: Math.max(params.size, 20) }, context, queryVector), params);
   }
-  if (requestedStrategy === "reranked") {
-    return withDebug({ size: Math.max(params.size, 20), query: buildEnrichedLexicalQuery(params, context), sort: ["_score"] }, params);
-  }
-  if (requestedStrategy === "enriched_lexical" || requestedStrategy === "hybrid_rrf") {
+  if (requestedStrategy === "enriched_lexical") {
     return withDebug({ size: params.size, query: buildEnrichedLexicalQuery(params, context), sort: ["_score"] }, params);
   }
 
@@ -235,6 +239,30 @@ export function parseQueryVector(raw?: string): number[] {
   if (!raw) return [];
   const vector = raw.split(",").map((value) => Number(value.trim()));
   return vector.every((value) => Number.isFinite(value)) ? vector : [];
+}
+
+export function deterministicQueryVector(query: string, dimensions = DEFAULT_QUERY_VECTOR_DIMS): number[] {
+  const dims = Number.isFinite(dimensions) && dimensions > 0 ? Math.floor(dimensions) : DEFAULT_QUERY_VECTOR_DIMS;
+  const vector = Array.from({ length: dims }, () => 0);
+  const tokens = query.toLowerCase().normalize("NFKD").split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  const values = tokens.length ? tokens : [query || "empty-query"];
+  for (const token of values) {
+    const hash = fnv1a(token);
+    const index = hash % dims;
+    const sign = hash & 1 ? 1 : -1;
+    vector[index] += sign;
+  }
+  const norm = Math.sqrt(vector.reduce((sum, value) => sum + value * value, 0)) || 1;
+  return vector.map((value) => Number((value / norm).toFixed(6)));
+}
+
+function fnv1a(value: string): number {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return hash >>> 0;
 }
 
 export function buildSearchDslDebug(context: RankingExtensionContext = {}): SearchDslDebug {

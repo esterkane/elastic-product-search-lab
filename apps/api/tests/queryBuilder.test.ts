@@ -8,6 +8,7 @@ import {
   buildSearchDslPlan,
   buildSearchDslDebug,
   buildSuggestDsl,
+  deterministicQueryVector,
   parseQueryVector,
 } from "../src/search/queryBuilder.js";
 import { evaluateSearchPolicies, type SearchPolicy } from "../src/search/policies.js";
@@ -202,12 +203,14 @@ describe("product search query builder", () => {
     });
   });
 
-  it("falls back to enriched lexical when hybrid lacks a vector", () => {
-    const plan = buildSearchDslPlan({ ...baseParams, q: "quiet headphones", strategy: "hybrid_rrf" });
+  it("generates a correctly sized vector when hybrid lacks an explicit vector", () => {
+    const plan = buildSearchDslPlan({ ...baseParams, q: "quiet headphones", strategy: "hybrid_rrf", vectorDims: 6 });
 
-    expect(plan.executedStrategy).toBe("hybrid_fallback");
-    expect(plan.dsl).toHaveProperty("query");
-    expect(plan.dsl).not.toHaveProperty("retriever");
+    expect(plan.executedStrategy).toBe("hybrid_rrf");
+    expect(plan.vectorProvided).toBe(false);
+    expect(plan.vectorGenerated).toBe(true);
+    expect(plan.vectorDims).toBe(6);
+    expect((plan.dsl as any).retriever.rrf.retrievers[1].knn.query_vector).toHaveLength(6);
   });
 
   it("keeps multilingual and attribute-heavy queries in explainable lexical fields", () => {
@@ -221,6 +224,15 @@ describe("product search query builder", () => {
   it("parses comma-separated query vectors for API calls", () => {
     expect(parseQueryVector("0.1, 0.2, -0.3")).toEqual([0.1, 0.2, -0.3]);
     expect(parseQueryVector("0.1,nope")).toEqual([]);
+  });
+
+  it("builds deterministic normalized hash vectors for local hybrid fallback", () => {
+    const first = deterministicQueryVector("quiet travel headphones", 8);
+    const second = deterministicQueryVector("quiet travel headphones", 8);
+
+    expect(first).toEqual(second);
+    expect(first).toHaveLength(8);
+    expect(Math.sqrt(first.reduce((sum, value) => sum + value * value, 0))).toBeCloseTo(1, 5);
   });
 });
 

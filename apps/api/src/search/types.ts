@@ -15,6 +15,7 @@ export type SearchQueryParams = {
   queryVector?: string;
   vectorField?: string;
   rerank?: boolean;
+  vectorDims?: number;
 };
 
 export type SuggestQueryParams = {
@@ -71,8 +72,10 @@ export type ProductSearchResponse = {
     };
     strategy?: {
       requested: SearchStrategy;
-      executed: SearchStrategy | "hybrid_fallback";
+      executed: SearchStrategy;
       vectorProvided: boolean;
+      vectorGenerated: boolean;
+      vectorDims: number;
       reranked: boolean;
       latencyMs: number;
     };
