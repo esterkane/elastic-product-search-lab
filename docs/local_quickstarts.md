@@ -25,8 +25,7 @@ curl "http://localhost:3000/search?q=wireless%20mouse&debug=true"
 Kafka mode uses Redpanda and remains optional.
 
 ```powershell
-docker compose -p elastic-product-search-lab `
-  -f docker-compose.yml `
+docker compose -f docker-compose.yml `
   -f docker-compose.kafka.yml `
   up -d elasticsearch kibana redpanda redpanda-console
 

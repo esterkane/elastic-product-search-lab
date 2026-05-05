@@ -74,6 +74,8 @@ Start Elasticsearch and Kibana:
 docker compose up -d
 ```
 
+The Compose project name is fixed to `elastic-product-search-lab`, so plain `docker compose ...` and Kafka overlay commands inspect the same local containers.
+
 Local Elasticsearch security is enabled. Use the built-in `elastic` superuser for Elasticsearch and Kibana login; the password lives only in your ignored local `.env` file. Do not commit real passwords.
 
 Check local services:
@@ -163,8 +165,7 @@ The full ESCI raw files and generated JSONL files stay local under ignored `data
 Optional Kafka/Redpanda workflow:
 
 ```powershell
-docker compose -p elastic-product-search-lab `
-  -f docker-compose.yml `
+docker compose -f docker-compose.yml `
   -f docker-compose.kafka.yml `
   up -d elasticsearch kibana redpanda redpanda-console redpanda-topic-init
 

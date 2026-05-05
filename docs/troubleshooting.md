@@ -31,7 +31,7 @@ Kafka support is optional. Install the extra and start Redpanda:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -e ".[kafka]"
-docker compose -p elastic-product-search-lab -f docker-compose.yml -f docker-compose.kafka.yml up -d redpanda redpanda-console
+docker compose -f docker-compose.yml -f docker-compose.kafka.yml up -d redpanda redpanda-console
 ```
 
 Malformed events should go to DLQ through the consumer path. Producer delivery failures are retryable broker errors.

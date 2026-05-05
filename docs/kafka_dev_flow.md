@@ -11,8 +11,7 @@ Use the Kafka path when you want to test production-shaped event flow: per-sourc
 Start Elasticsearch, Kibana, Redpanda, and Redpanda Console:
 
 ```powershell
-docker compose -p elastic-product-search-lab `
-  -f docker-compose.yml `
+docker compose -f docker-compose.yml `
   -f docker-compose.kafka.yml `
   up -d elasticsearch kibana redpanda redpanda-console
 ```

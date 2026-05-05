@@ -1,3 +1,5 @@
+name: elastic-product-search-lab
+
 services:
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:${REDPANDA_VERSION:-v24.3.6}

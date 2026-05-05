@@ -9,8 +9,7 @@ Runtime choice: the indexer is Python because the canonical builder, source-stat
 ## Local Startup
 
 ```powershell
-docker compose -p elastic-product-search-lab `
-  -f docker-compose.yml `
+docker compose -f docker-compose.yml `
   -f docker-compose.kafka.yml `
   up -d elasticsearch kibana redpanda redpanda-console redpanda-topic-init
 ```
