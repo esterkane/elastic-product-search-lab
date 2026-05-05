@@ -7,14 +7,17 @@ import pytest
 from src.search.index_management import (
     DEFAULT_EVENT_ILM_POLICY,
     DEFAULT_PRODUCT_PIPELINE,
+    DEFAULT_WRITE_ALIAS,
     event_data_stream_template_body,
     event_ilm_policy_body,
     install_product_index_resources,
+    next_numeric_product_index_name,
     product_index_body,
     product_index_template_body,
     product_ingest_pipeline_body,
     product_suggest_index_body,
     search_policy_index_body,
+    switch_product_aliases,
     switch_read_alias,
     utc_build_id,
     versioned_product_index_name,
@@ -28,6 +31,14 @@ def test_versioned_index_name_is_deterministic():
 
     assert utc_build_id(now) == "202605041245"
     assert versioned_product_index_name("202605041245") == "products-v202605041245"
+
+
+def test_next_numeric_index_name_ignores_timestamp_and_nonmatching_names():
+    assert next_numeric_product_index_name({"products-v1", "products-v7", "products-v202605041245", "orders-v9"}) == (
+        "products-v8"
+    )
+    assert next_numeric_product_index_name({"products-v001", "products-v002"}, prefix="products") == "products-v3"
+    assert next_numeric_product_index_name({"products-blue"}) == "products-v1"
 
 
 def test_product_index_body_sets_lab_shards_replicas_and_pipeline():
@@ -81,6 +92,8 @@ def test_event_ilm_and_data_stream_template_are_serializable():
     template = event_data_stream_template_body(shards=1, replicas=0)
 
     assert policy["policy"]["phases"]["delete"]["min_age"] == "30d"
+    assert policy["policy"]["phases"]["warm"]["min_age"] == "7d"
+    assert policy["policy"]["phases"]["hot"]["actions"]["set_priority"]["priority"] == 100
     assert template["data_stream"] == {}
     assert template["template"]["settings"]["index.lifecycle.name"] == DEFAULT_EVENT_ILM_POLICY
     assert template["template"]["mappings"]["properties"]["payload"]["type"] == "flattened"
@@ -113,11 +126,17 @@ def test_event_ilm_retention_must_be_positive():
     with pytest.raises(ValueError, match="retention_days"):
         event_ilm_policy_body(retention_days=0)
 
+    with pytest.raises(ValueError, match="warm_after_days"):
+        event_ilm_policy_body(retention_days=7, warm_after_days=7)
+
 
 class FakeIndices:
     def __init__(self):
         self.existing = {"products-v-old", "products-v-new"}
-        self.aliases = {"products-v-old": {"aliases": {"products-read": {}}}}
+        self.aliases = {
+            "products-read": {"products-v-old": {"aliases": {"products-read": {}}}},
+            DEFAULT_WRITE_ALIAS: {"products-v-old": {"aliases": {DEFAULT_WRITE_ALIAS: {}}}},
+        }
         self.alias_updates = []
         self.templates = []
 
@@ -125,9 +144,9 @@ class FakeIndices:
         return index in self.existing
 
     def get_alias(self, name):
-        if name != "products-read":
+        if name not in self.aliases:
             raise KeyError(name)
-        return self.aliases
+        return self.aliases[name]
 
     def update_aliases(self, body):
         self.alias_updates.append(body)
@@ -174,6 +193,37 @@ def test_switch_read_alias_removes_existing_indices_and_adds_target_atomically()
             "actions": [
                 {"remove": {"index": "products-v-old", "alias": "products-read"}},
                 {"add": {"index": "products-v-new", "alias": "products-read"}},
+            ]
+        }
+    ]
+
+
+def test_switch_product_aliases_moves_read_and_write_aliases_atomically():
+    client = FakeClient()
+
+    result = switch_product_aliases(
+        client,
+        read_alias="products-read",
+        write_alias=DEFAULT_WRITE_ALIAS,
+        target_index="products-v-new",
+    )
+
+    assert result == {
+        "read_alias": "products-read",
+        "write_alias": DEFAULT_WRITE_ALIAS,
+        "target_index": "products-v-new",
+        "previous_indices": {
+            "products-read": ["products-v-old"],
+            DEFAULT_WRITE_ALIAS: ["products-v-old"],
+        },
+    }
+    assert client.indices.alias_updates == [
+        {
+            "actions": [
+                {"remove": {"index": "products-v-old", "alias": "products-read"}},
+                {"add": {"index": "products-v-new", "alias": "products-read"}},
+                {"remove": {"index": "products-v-old", "alias": DEFAULT_WRITE_ALIAS}},
+                {"add": {"index": "products-v-new", "alias": DEFAULT_WRITE_ALIAS}},
             ]
         }
     ]

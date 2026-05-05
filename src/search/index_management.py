@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -12,6 +13,7 @@ PRODUCT_MAPPING_PATH = PROJECT_ROOT / "src" / "search" / "product_mapping.json"
 
 DEFAULT_PRODUCT_INDEX_PREFIX = "products"
 DEFAULT_READ_ALIAS = "products-read"
+DEFAULT_WRITE_ALIAS = "products-write"
 DEFAULT_BUILD_ALIAS = "products-build"
 DEFAULT_PRODUCT_PIPELINE = "products-minimal-normalization"
 DEFAULT_PRODUCT_TEMPLATE = "products-catalog-template"
@@ -32,6 +34,20 @@ def versioned_product_index_name(build_id: str, prefix: str = DEFAULT_PRODUCT_IN
     if not normalized:
         raise ValueError("build_id must not be empty")
     return f"{prefix}-v{normalized}"
+
+
+def next_numeric_product_index_name(
+    existing_indices: list[str] | set[str] | tuple[str, ...],
+    *,
+    prefix: str = DEFAULT_PRODUCT_INDEX_PREFIX,
+) -> str:
+    pattern = re.compile(rf"^{re.escape(prefix)}-v(\d+)$")
+    versions = [
+        int(match.group(1))
+        for name in existing_indices
+        if (match := pattern.match(name)) and len(match.group(1)) <= 6
+    ]
+    return versioned_product_index_name(str(max(versions, default=0) + 1), prefix=prefix)
 
 
 def load_product_mapping(path: Path = PRODUCT_MAPPING_PATH) -> dict[str, Any]:
@@ -116,19 +132,30 @@ def product_index_template_body(
     }
 
 
-def event_ilm_policy_body(*, retention_days: int = 14) -> dict[str, Any]:
+def event_ilm_policy_body(*, retention_days: int = 14, warm_after_days: int = 7) -> dict[str, Any]:
     if retention_days < 1:
         raise ValueError("retention_days must be at least 1")
+    if warm_after_days < 1:
+        raise ValueError("warm_after_days must be at least 1")
+    if warm_after_days >= retention_days:
+        raise ValueError("warm_after_days must be less than retention_days")
     return {
         "policy": {
             "phases": {
                 "hot": {
                     "actions": {
+                        "set_priority": {"priority": 100},
                         "rollover": {
                             "max_age": "1d",
                             "max_primary_shard_size": "10gb",
                         }
                     }
+                },
+                "warm": {
+                    "min_age": f"{warm_after_days}d",
+                    "actions": {
+                        "set_priority": {"priority": 50},
+                    },
                 },
                 "delete": {
                     "min_age": f"{retention_days}d",
@@ -313,3 +340,33 @@ def switch_read_alias(client: Any, *, read_alias: str, target_index: str) -> dic
     actions.append({"add": {"index": target_index, "alias": read_alias}})
     client.indices.update_aliases(body={"actions": actions})
     return {"alias": read_alias, "target_index": target_index, "previous_indices": sorted(existing)}
+
+
+def switch_product_aliases(
+    client: Any,
+    *,
+    read_alias: str = DEFAULT_READ_ALIAS,
+    write_alias: str = DEFAULT_WRITE_ALIAS,
+    target_index: str,
+) -> dict[str, Any]:
+    if not client.indices.exists(index=target_index):
+        raise ValueError(f"Target index '{target_index}' does not exist")
+
+    previous: dict[str, list[str]] = {read_alias: [], write_alias: []}
+    actions: list[dict[str, Any]] = []
+    for alias in (read_alias, write_alias):
+        try:
+            existing = client.indices.get_alias(name=alias)
+        except Exception:  # noqa: BLE001 - Elasticsearch raises when the alias does not exist.
+            existing = {}
+        previous[alias] = sorted(existing)
+        actions.extend({"remove": {"index": index_name, "alias": alias}} for index_name in sorted(existing))
+        actions.append({"add": {"index": target_index, "alias": alias}})
+
+    client.indices.update_aliases(body={"actions": actions})
+    return {
+        "read_alias": read_alias,
+        "write_alias": write_alias,
+        "target_index": target_index,
+        "previous_indices": previous,
+    }

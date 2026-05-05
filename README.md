@@ -45,7 +45,7 @@ The current `scripts/replay_product_events.py` direct partial-update path is pre
 
 Optional Kafka-compatible ingestion and indexing are available through Redpanda. It is off by default so the file-driven lab stays simple. See `docs/kafka_dev_flow.md` for local producer/consumer setup and `docs/kafka_indexing.md` for indexer replay, idempotency, backoff, DLQ, lag, and rollback behavior.
 
-Versioned product index rebuilds are available through staged concrete indices such as `products-v202605041245` and an atomic `products-read` alias switch. Product content indices are configured separately from event/audit data streams and ILM retention. See `docs/index_roles_and_aliasing.md` and `docs/event_retention_and_ilm.md`.
+Versioned product index rebuilds are available through staged concrete indices such as `products-v1`, `products-v2`, or timestamped builds, with an atomic `products-read` / `products-write` alias switch. Product content indices are configured separately from event/audit data streams and ILM retention. See `docs/deployment.md`, `docs/index_roles_and_aliasing.md`, and `docs/event_retention_and_ilm.md`.
 
 Dataset adapters can prepare small deterministic Amazon ESCI, RetailRocket, and Olist samples for catalog ingestion, source events, review enrichment, analytics ranking signals, and offline evaluation. See `docs/dataset_integration.md`.
 
@@ -64,7 +64,7 @@ Quick contributor paths:
 - JSONL/default mode: `docs/local_quickstarts.md`
 - Kafka/Redpanda mode: `docs/kafka_dev_flow.md`
 - Dataset preparation: `docs/dataset_integration.md`
-- Reindex and alias cutover: `docs/index_roles_and_aliasing.md`
+- Reindex and alias cutover: `docs/deployment.md`
 - Troubleshooting: `docs/troubleshooting.md`
 - Migration summary: `docs/migration_note.md`
 
@@ -100,6 +100,12 @@ Optional staged rebuild with alias cutover:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\load_sample_data.py --switch-alias --install-resources
+```
+
+Deployment-safe blue-green rebuild with read/write alias cutover:
+
+```powershell
+.\scripts\reindex_and_switch.ps1 --target-version 2 --input data\sample\products.jsonl --install-resources --min-docs 1
 ```
 
 Search, benchmark, and evaluation workflows can use `products-read` by setting `PRODUCT_INDEX=products-read` or passing that alias wherever an index name is accepted.
