@@ -16,7 +16,13 @@ if str(PROJECT_ROOT) not in sys.path:
 from scripts.create_index import build_client, create_index, ensure_reachable  # noqa: E402
 from src.ingestion.events import load_events  # noqa: E402
 from src.ingestion.event_schema import load_product_source_events  # noqa: E402
-from src.ingestion.kafka_consumer import ElasticsearchIndexSink, InMemoryStateStore, ListDlqSink, process_event  # noqa: E402
+from src.ingestion.kafka_consumer import (  # noqa: E402
+    BulkElasticsearchIndexSink,
+    InMemoryStateStore,
+    IndexerCounters,
+    ListDlqSink,
+    ProductEventIndexer,
+)
 from src.ingestion.product_event_consumer import apply_events, configure_logging  # noqa: E402
 
 DEFAULT_INDEX = "products-v1"
@@ -30,6 +36,9 @@ class CanonicalReplaySummary:
     skipped_stale: int
     failed: int
     elapsed_seconds: float
+    duplicates: int = 0
+    retries: int = 0
+    dlq: int = 0
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,23 +67,24 @@ def main() -> int:
             events = load_product_source_events(args.canonical_events)
             state_store = InMemoryStateStore()
             dlq_sink = ListDlqSink()
-            index_sink = ElasticsearchIndexSink(client, args.index)
-            updated = 0
-            skipped_stale = 0
-            failed = 0
+            counters = IndexerCounters()
+            index_sink = BulkElasticsearchIndexSink(client, args.index, counters=counters)
+            indexer = ProductEventIndexer(
+                state_store=state_store,
+                index_sink=index_sink,
+                dlq_sink=dlq_sink,
+                counters=counters,
+            )
             for event in events:
-                result = process_event(event, state_store=state_store, index_sink=index_sink)
-                if result.outcome == "indexed":
-                    updated += 1
-                elif result.outcome == "stale":
-                    skipped_stale += 1
-                elif result.outcome in {"failed_retryable", "dlq"}:
-                    failed += 1
+                indexer.process_event(event, replay=True)
             summary = CanonicalReplaySummary(
                 processed=len(events),
-                updated=updated,
-                skipped_stale=skipped_stale,
-                failed=failed + len(dlq_sink.records),
+                updated=counters.indexed,
+                skipped_stale=counters.stale,
+                failed=counters.retryable_failed + counters.non_retryable_failed,
+                duplicates=counters.duplicate,
+                retries=counters.retries,
+                dlq=counters.dlq,
                 elapsed_seconds=time.perf_counter() - started_at,
             )
         else:
@@ -89,6 +99,10 @@ def main() -> int:
     print(f"updated={summary.updated}")
     print(f"skipped_stale={summary.skipped_stale}")
     print(f"failed={summary.failed}")
+    if isinstance(summary, CanonicalReplaySummary):
+        print(f"duplicates={summary.duplicates}")
+        print(f"retries={summary.retries}")
+        print(f"dlq={summary.dlq}")
     print(f"elapsed_seconds={summary.elapsed_seconds:.3f}")
     return 0
 

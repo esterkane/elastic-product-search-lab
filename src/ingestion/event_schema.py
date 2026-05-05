@@ -25,7 +25,13 @@ SOURCE_TOPICS: dict[SourceName, str] = {
     "lifecycle": "product.catalog",
 }
 DLQ_TOPIC = "product.dlq"
-ALL_PRODUCT_TOPICS: tuple[str, ...] = tuple(dict.fromkeys(SOURCE_TOPICS.values()))
+INDEXER_TOPIC_CONTRACTS: dict[str, tuple[SourceName, ...]] = {
+    "product-change": ("catalog", "seller"),
+    "price-stock": ("price", "inventory", "stock"),
+    "merchandising": ("merchandising", "analytics"),
+    "delete": ("lifecycle",),
+}
+ALL_PRODUCT_TOPICS: tuple[str, ...] = tuple(dict.fromkeys([*SOURCE_TOPICS.values(), *INDEXER_TOPIC_CONTRACTS]))
 
 
 class ProductSourceEvent(BaseModel):

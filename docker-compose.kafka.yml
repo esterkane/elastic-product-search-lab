@@ -53,5 +53,16 @@ services:
     ports:
       - "8080:8080"
 
+  redpanda-topic-init:
+    image: docker.redpanda.com/redpandadata/redpanda:${REDPANDA_VERSION:-v24.3.6}
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-lc"]
+    command: >
+      "rpk topic create --brokers=redpanda:9092 -p 3 -r 1
+      product.catalog product.price product.inventory product.reviews product.analytics
+      product-change price-stock merchandising delete product.dlq || true"
+
 volumes:
   redpanda_data:

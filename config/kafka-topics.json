@@ -31,6 +31,34 @@
       "source": "analytics"
     },
     {
+      "name": "product-change",
+      "partitions": 3,
+      "replication_factor": 1,
+      "source": "catalog_or_seller",
+      "description": "Indexer contract alias for product catalog and seller changes."
+    },
+    {
+      "name": "price-stock",
+      "partitions": 3,
+      "replication_factor": 1,
+      "source": "price_or_stock",
+      "description": "Indexer contract alias for price, inventory, and stock changes."
+    },
+    {
+      "name": "merchandising",
+      "partitions": 3,
+      "replication_factor": 1,
+      "source": "merchandising_or_analytics",
+      "description": "Indexer contract alias for merchandising policies and analytics ranking signals."
+    },
+    {
+      "name": "delete",
+      "partitions": 3,
+      "replication_factor": 1,
+      "source": "lifecycle",
+      "description": "Indexer contract alias for product tombstones and soft deletes."
+    },
+    {
       "name": "product.dlq",
       "partitions": 3,
       "replication_factor": 1,

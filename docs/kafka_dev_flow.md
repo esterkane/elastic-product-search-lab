@@ -33,7 +33,7 @@ Open:
 
 ## Topics
 
-Topic definitions live in `config/kafka-topics.json`.
+Topic definitions live in `config/kafka-topics.json`. The indexing-specific contracts, replay semantics, and rollback flow are detailed in `docs/kafka_indexing.md`.
 
 | Topic | Source | Purpose |
 | --- | --- | --- |
@@ -42,12 +42,16 @@ Topic definitions live in `config/kafka-topics.json`.
 | `product.inventory` | `inventory` | Availability |
 | `product.reviews` | `reviews` | Future review aggregates |
 | `product.analytics` | `analytics` | Popularity and behavioral features |
+| `product-change` | `catalog`, `seller` | Product/seller changes for the indexer contract |
+| `price-stock` | `price`, `inventory`, `stock` | Price, inventory, and stock changes for the indexer contract |
+| `merchandising` | `merchandising`, `analytics` | Merchandising and analytics signals |
+| `delete` | `lifecycle` | Tombstones and soft deletes |
 | `product.dlq` | dead letter | Malformed or non-retryable events |
 
 Create topics with Redpanda CLI:
 
 ```powershell
-docker exec elastic-product-search-lab-redpanda rpk topic create -p 3 -r 1 product.catalog product.price product.inventory product.reviews product.analytics product.dlq
+docker exec elastic-product-search-lab-redpanda rpk topic create -p 3 -r 1 product.catalog product.price product.inventory product.reviews product.analytics product-change price-stock merchandising delete product.dlq
 ```
 
 ## Event Schema
@@ -114,6 +118,12 @@ Publish generated events:
 - Retryable downstream failures are returned as `failed_retryable` so the caller can avoid committing offsets.
 
 The low-level `consume_forever(...)` function expects a configured `confluent_kafka.Consumer`, an index sink, a state store, and a DLQ sink. A production worker should replace the in-memory state store with durable per-product state.
+
+Run the lab indexer:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_kafka_indexer.py --index products-build
+```
 
 ## JSONL Replay Compatibility
 

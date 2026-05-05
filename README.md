@@ -43,7 +43,7 @@ The main product-search index is intended to receive complete product documents.
 
 The current `scripts/replay_product_events.py` direct partial-update path is preserved for compatibility and demos. New batch or future Kafka consumers should update canonical source state first, then index the emitted complete product document. See `docs/canonical_builder_architecture.md` and `docs/ingestion.md` for precedence, tombstones, source attribution, and ingest-pipeline rules.
 
-Optional Kafka-compatible ingestion is available through Redpanda. It is off by default so the file-driven lab stays simple. See `docs/kafka_dev_flow.md` for topics, event schema, producer scripts, consumer interfaces, and DLQ behavior.
+Optional Kafka-compatible ingestion and indexing are available through Redpanda. It is off by default so the file-driven lab stays simple. See `docs/kafka_dev_flow.md` for local producer/consumer setup and `docs/kafka_indexing.md` for indexer replay, idempotency, backoff, DLQ, lag, and rollback behavior.
 
 Versioned product index rebuilds are available through staged concrete indices such as `products-v202605041245` and an atomic `products-read` alias switch. Product content indices are configured separately from event/audit data streams and ILM retention. See `docs/index_roles_and_aliasing.md` and `docs/event_retention_and_ilm.md`.
 
@@ -158,13 +158,14 @@ Optional Kafka/Redpanda workflow:
 docker compose -p elastic-product-search-lab `
   -f docker-compose.yml `
   -f docker-compose.kafka.yml `
-  up -d elasticsearch kibana redpanda redpanda-console
+  up -d elasticsearch kibana redpanda redpanda-console redpanda-topic-init
 
-docker exec elastic-product-search-lab-redpanda rpk topic create -p 3 -r 1 product.catalog product.price product.inventory product.reviews product.analytics product.dlq
+docker exec elastic-product-search-lab-redpanda rpk topic create -p 3 -r 1 product.catalog product.price product.inventory product.reviews product.analytics product-change price-stock merchandising delete product.dlq
 
 .\.venv\Scripts\python.exe -m pip install -e ".[kafka]"
 .\.venv\Scripts\python.exe scripts\generate_synthetic_events.py --limit 5
 .\.venv\Scripts\python.exe scripts\publish_events.py --input data\generated\synthetic_product_events.jsonl
+.\.venv\Scripts\python.exe scripts\run_kafka_indexer.py --index products-build
 ```
 
 ## Example Results
