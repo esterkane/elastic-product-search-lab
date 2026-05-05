@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   buildBaselineBm25Query,
   buildBoostedRelevanceQuery,
+  buildEnrichedLexicalQuery,
   buildRankingExtensionFunctions,
   buildSearchDsl,
+  buildSearchDslPlan,
   buildSearchDslDebug,
   buildSuggestDsl,
+  parseQueryVector,
 } from "../src/search/queryBuilder.js";
 import { evaluateSearchPolicies, type SearchPolicy } from "../src/search/policies.js";
 
@@ -154,6 +157,70 @@ describe("product search query builder", () => {
       },
       _source: ["product_id", "title", "brand", "category", "suggest_text"],
     });
+  });
+
+  it("preserves exact-match precision in enriched lexical retrieval", () => {
+    const query = buildEnrichedLexicalQuery({ ...baseParams, q: "Sony WH-1000XM5" });
+
+    expect(query).toMatchObject({
+      bool: {
+        should: expect.arrayContaining([
+          { term: { "title.keyword": { value: "sony wh-1000xm5", boost: 12 } } },
+          { match_phrase: { title: { query: "Sony WH-1000XM5", boost: 8 } } },
+        ]),
+      },
+    });
+  });
+
+  it("builds a real RRF hybrid retriever when a query vector is provided", () => {
+    const plan = buildSearchDslPlan({
+      ...baseParams,
+      q: "quiet headphones for travel",
+      strategy: "hybrid_rrf",
+      queryVector: "0.1,0.2,0.3",
+      vectorField: "embedding",
+    });
+
+    expect(plan.executedStrategy).toBe("hybrid_rrf");
+    expect(plan.vectorProvided).toBe(true);
+    expect(plan.dsl).toMatchObject({
+      retriever: {
+        rrf: {
+          retrievers: [
+            { standard: { query: expect.any(Object) } },
+            {
+              knn: {
+                field: "embedding",
+                query_vector: [0.1, 0.2, 0.3],
+                k: 20,
+                num_candidates: 100,
+              },
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it("falls back to enriched lexical when hybrid lacks a vector", () => {
+    const plan = buildSearchDslPlan({ ...baseParams, q: "quiet headphones", strategy: "hybrid_rrf" });
+
+    expect(plan.executedStrategy).toBe("hybrid_fallback");
+    expect(plan.dsl).toHaveProperty("query");
+    expect(plan.dsl).not.toHaveProperty("retriever");
+  });
+
+  it("keeps multilingual and attribute-heavy queries in explainable lexical fields", () => {
+    const multilingual = buildEnrichedLexicalQuery({ ...baseParams, q: "café molido orgánico" }) as any;
+    const attributeHeavy = buildEnrichedLexicalQuery({ ...baseParams, q: "waterproof black 32gb ebook reader" }) as any;
+
+    expect(multilingual.bool.must[0].multi_match.query).toBe("café molido orgánico");
+    expect(attributeHeavy.bool.must[0].multi_match.fields).toContain("attributes");
+  });
+
+  it("parses comma-separated query vectors for API calls", () => {
+    expect(parseQueryVector("0.1, 0.2, -0.3")).toEqual([0.1, 0.2, -0.3]);
+    expect(parseQueryVector("0.1,nope")).toEqual([]);
   });
 });
 

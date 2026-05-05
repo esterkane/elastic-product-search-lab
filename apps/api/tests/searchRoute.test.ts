@@ -199,6 +199,88 @@ describe("GET /search", () => {
     });
   });
 
+  it("executes hybrid RRF retrieval and exposes profile details in debug mode", async () => {
+    let capturedRequest: any;
+    app = buildTestApp({
+      search: async (request) => {
+        capturedRequest = request;
+        return {
+          took: 7,
+          profile: { shards: [{ id: "0", searches: [] }] },
+          hits: {
+            total: { value: 1 },
+            hits: [
+              {
+                _id: "P1",
+                _score: 3,
+                _explanation: { value: 3, description: "rrf score" },
+                _source: {
+                  product_id: "P1",
+                  title: "Travel Headphones",
+                  description: "Quiet wireless headphones",
+                  brand: "Contoso",
+                  category: "Audio",
+                  attributes: {},
+                  price: 99,
+                  currency: "EUR",
+                  availability: "in_stock",
+                  popularity_score: 9,
+                  seller_id: "seller-1",
+                  updated_at: "2026-05-01T00:00:00Z",
+                },
+              },
+            ],
+          },
+        };
+      },
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/search?q=quiet%20travel%20headphones&strategy=hybrid_rrf&queryVector=0.1,0.2,0.3&debug=true",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(capturedRequest.retriever.rrf.retrievers[1].knn.query_vector).toEqual([0.1, 0.2, 0.3]);
+    expect(response.json().debug.strategy).toMatchObject({
+      requested: "hybrid_rrf",
+      executed: "hybrid_rrf",
+      vectorProvided: true,
+      reranked: false,
+    });
+    expect(response.json().debug.profile).toEqual({ shards: [{ id: "0", searches: [] }] });
+    expect(response.json().debug.explanations).toEqual([{ value: 3, description: "rrf score" }]);
+  });
+
+  it("can rerank first-stage candidates deterministically", async () => {
+    app = buildTestApp({
+      search: async () => ({
+        took: 4,
+        hits: {
+          total: { value: 2 },
+          hits: [
+            {
+              _id: "P2",
+              _score: 10,
+              _source: { product_id: "P2", title: "Generic Audio Case", description: "", brand: "", category: "", attributes: {}, price: 1, availability: "in_stock" },
+            },
+            {
+              _id: "P1",
+              _score: 1,
+              _source: { product_id: "P1", title: "quiet travel headphones", description: "", brand: "", category: "", attributes: {}, price: 2, availability: "in_stock" },
+            },
+          ],
+        },
+      }),
+    });
+
+    const response = await app.inject({ method: "GET", url: "/search?q=quiet%20travel%20headphones&strategy=reranked&rerank=true&debug=true" });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().products[0].productId).toBe("P1");
+    expect(response.json().debug.strategy.reranked).toBe(true);
+  });
+
   it("shows fired policies and cohort boosts in debug output", async () => {
     const policyDir = mkdtempSync(join(tmpdir(), "policy-test-"));
     const policyPath = join(policyDir, "policies.json");

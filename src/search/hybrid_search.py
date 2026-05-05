@@ -10,7 +10,7 @@ from typing import Any, Literal
 from src.embeddings.embedder import Embedder
 from src.evaluation.metrics import ndcg_at_k, precision_at_k, reciprocal_rank
 
-StrategyName = Literal["baseline_lexical", "boosted_lexical", "hybrid_rrf"]
+StrategyName = Literal["baseline_lexical", "boosted_lexical", "enriched_profile", "hybrid_rrf", "reranked"]
 
 
 @dataclass(frozen=True)

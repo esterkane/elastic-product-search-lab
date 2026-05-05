@@ -1,8 +1,10 @@
-import type { SearchQueryParams, SuggestQueryParams } from "./types.js";
+import type { SearchQueryParams, SearchStrategy, SuggestQueryParams } from "./types.js";
 
 type QueryDsl = Record<string, unknown>;
 
 const BASELINE_FIELDS = ["title^4", "brand^2", "category^1.5", "description^0.8", "catalog_text^0.5"];
+const ENRICHED_FIELDS = ["search_profile^3", "title^2", "category^1.5", "brand", "description^0.5", "catalog_text", "attributes"];
+const DEFAULT_VECTOR_FIELD = "semantic_embedding";
 
 export type RankingExtensionContext = {
   analyticsSignals?: Record<string, unknown>;
@@ -15,6 +17,13 @@ export type RankingExtensionContext = {
 
 export type SearchDslDebug = {
   cohortBoosts: { tag: string; weight: number }[];
+};
+
+export type SearchDslBuildResult = {
+  dsl: QueryDsl;
+  requestedStrategy: SearchStrategy;
+  executedStrategy: SearchStrategy | "hybrid_fallback";
+  vectorProvided: boolean;
 };
 
 function textQuery(queryText?: string): QueryDsl {
@@ -48,11 +57,47 @@ function buildFilters(params: SearchQueryParams, context: RankingExtensionContex
   return [...filter, ...(context.policyFilters ?? [])];
 }
 
+function exactMatchShouldClauses(queryText?: string): QueryDsl[] {
+  const query = queryText?.trim();
+  if (!query) return [];
+  const lowerQuery = query.toLowerCase();
+  return [
+    { term: { "title.keyword": { value: lowerQuery, boost: 12 } } },
+    { match_phrase: { title: { query, boost: 8 } } },
+    { term: { brand: { value: lowerQuery, boost: 5 } } },
+    { term: { category: { value: lowerQuery, boost: 3 } } },
+  ];
+}
+
 export function buildBaselineBm25Query(params: SearchQueryParams, context: RankingExtensionContext = {}): QueryDsl {
   return {
     bool: {
       must: [textQuery(params.q)],
       filter: buildFilters(params, context),
+      ...(context.policyMustNot?.length ? { must_not: context.policyMustNot } : {}),
+    },
+  };
+}
+
+export function buildEnrichedLexicalQuery(params: SearchQueryParams, context: RankingExtensionContext = {}): QueryDsl {
+  const trimmed = params.q?.trim();
+  const text = trimmed
+    ? {
+        multi_match: {
+          query: trimmed,
+          fields: ENRICHED_FIELDS,
+          type: "best_fields",
+          operator: "or",
+          minimum_should_match: "2<70%",
+          fuzziness: "AUTO",
+        },
+      }
+    : { match_all: {} };
+  return {
+    bool: {
+      must: [text],
+      filter: buildFilters(params, context),
+      should: exactMatchShouldClauses(trimmed),
       ...(context.policyMustNot?.length ? { must_not: context.policyMustNot } : {}),
     },
   };
@@ -104,15 +149,92 @@ export function buildRankingExtensionFunctions(context: RankingExtensionContext)
 }
 
 export function buildSearchDsl(params: SearchQueryParams, context: RankingExtensionContext = {}): QueryDsl {
+  return buildSearchDslPlan(params, context).dsl;
+}
+
+export function buildSearchDslPlan(params: SearchQueryParams, context: RankingExtensionContext = {}): SearchDslBuildResult {
+  const requestedStrategy = params.strategy ?? ((params.boost ?? true) ? "boosted_bm25" : "baseline_bm25");
+  const vector = parseQueryVector(params.queryVector);
+  const vectorProvided = vector.length > 0;
+  const dsl = buildStrategyDsl(params, context, requestedStrategy, vector);
+  return {
+    dsl,
+    requestedStrategy,
+    executedStrategy: requestedStrategy === "hybrid_rrf" && !vectorProvided ? "hybrid_fallback" : requestedStrategy,
+    vectorProvided,
+  };
+}
+
+function buildStrategyDsl(
+  params: SearchQueryParams,
+  context: RankingExtensionContext,
+  requestedStrategy: SearchStrategy,
+  queryVector: number[],
+): QueryDsl {
+  if (requestedStrategy === "baseline_bm25") {
+    return withDebug({ size: params.size, query: buildBaselineBm25Query(params, context), sort: ["_score"] }, params);
+  }
+  if (requestedStrategy === "boosted_bm25") {
+    return withDebug({ size: params.size, query: buildBoostedRelevanceQuery(params, context), sort: ["_score"] }, params);
+  }
+  if (requestedStrategy === "hybrid_rrf" && queryVector.length > 0) {
+    return withDebug(buildHybridRrfDsl(params, context, queryVector), params);
+  }
+  if (requestedStrategy === "reranked" && queryVector.length > 0) {
+    return withDebug(buildHybridRrfDsl({ ...params, size: Math.max(params.size, 20) }, context, queryVector), params);
+  }
+  if (requestedStrategy === "reranked") {
+    return withDebug({ size: Math.max(params.size, 20), query: buildEnrichedLexicalQuery(params, context), sort: ["_score"] }, params);
+  }
+  if (requestedStrategy === "enriched_lexical" || requestedStrategy === "hybrid_rrf") {
+    return withDebug({ size: params.size, query: buildEnrichedLexicalQuery(params, context), sort: ["_score"] }, params);
+  }
+
   const useBoosts = params.boost ?? true;
   const query = useBoosts ? buildBoostedRelevanceQuery(params, context) : buildBaselineBm25Query(params, context);
+  return withDebug({ size: params.size, query, sort: ["_score"] }, params);
+}
 
+function buildHybridRrfDsl(params: SearchQueryParams, context: RankingExtensionContext, queryVector: number[]): QueryDsl {
+  const filters = buildFilters(params, context);
   return {
     size: params.size,
-    query,
-    sort: ["_score"],
+    retriever: {
+      rrf: {
+        retrievers: [
+          {
+            standard: {
+              query: buildEnrichedLexicalQuery(params, context),
+            },
+          },
+          {
+            knn: {
+              field: params.vectorField || DEFAULT_VECTOR_FIELD,
+              query_vector: queryVector,
+              k: Math.max(params.size, 20),
+              num_candidates: Math.max(params.size * 10, 100),
+              filter: { bool: { filter: filters } },
+            },
+          },
+        ],
+        rank_constant: 60,
+        rank_window_size: Math.max(params.size, 50),
+      },
+    },
+  };
+}
+
+function withDebug(dsl: QueryDsl, params: SearchQueryParams): QueryDsl {
+  return {
+    ...dsl,
     ...(params.debug ? { explain: true, profile: true } : {}),
   };
+}
+
+export function parseQueryVector(raw?: string): number[] {
+  if (!raw) return [];
+  const vector = raw.split(",").map((value) => Number(value.trim()));
+  return vector.every((value) => Number.isFinite(value)) ? vector : [];
 }
 
 export function buildSearchDslDebug(context: RankingExtensionContext = {}): SearchDslDebug {

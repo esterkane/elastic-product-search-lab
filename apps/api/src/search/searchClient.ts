@@ -2,7 +2,7 @@ import type { ElasticsearchLikeClient } from "../app.js";
 import { normalizeProductHit } from "./normalize.js";
 import { mergeVolatileOverlay, type OverlayOptions } from "./overlay.js";
 import { evaluateSearchPolicies, type SearchPolicy } from "./policies.js";
-import { buildSearchDsl, buildSearchDslDebug, buildSuggestDsl, type RankingExtensionContext } from "./queryBuilder.js";
+import { buildSearchDslDebug, buildSearchDslPlan, buildSuggestDsl, type RankingExtensionContext } from "./queryBuilder.js";
 import type { ProductSearchResponse, ProductSuggestOption, ProductSuggestResponse, SearchQueryParams, SuggestQueryParams } from "./types.js";
 
 function totalHitsValue(total: unknown): number {
@@ -30,13 +30,16 @@ export async function searchProducts(
     policyBoostFunctions: policyEvaluation.boostFunctions,
     merchandiserPolicies: policyEvaluation.firedPolicies.map((policy) => policy.id),
   };
-  const dsl = buildSearchDsl(effectiveParams, rankingContext);
+  const plan = buildSearchDslPlan(effectiveParams, rankingContext);
+  const startedAt = performance.now();
   const response = await client.search({
     index: indexName,
-    ...dsl,
+    ...plan.dsl,
   });
+  const latencyMs = performance.now() - startedAt;
   const hits = response.hits?.hits ?? [];
-  const products = hits.map(normalizeProductHit);
+  const products = maybeRerankProducts(effectiveParams.q, hits.map(normalizeProductHit), Boolean(params.rerank || params.strategy === "reranked"))
+    .slice(0, params.size);
   const overlay = await mergeVolatileOverlay(client, products, overlayOptions);
 
   return {
@@ -45,7 +48,7 @@ export async function searchProducts(
     products: overlay.products,
     ...(params.debug ? {
       debug: {
-        query: dsl,
+        query: plan.dsl,
         overlay: overlay.debug,
         policies: {
           fired: policyEvaluation.firedPolicies,
@@ -55,6 +58,15 @@ export async function searchProducts(
           requested: cohorts,
           boosts: buildSearchDslDebug(rankingContext).cohortBoosts,
         },
+        strategy: {
+          requested: plan.requestedStrategy,
+          executed: plan.executedStrategy,
+          vectorProvided: plan.vectorProvided,
+          reranked: Boolean(params.rerank || params.strategy === "reranked"),
+          latencyMs,
+        },
+        profile: response.profile,
+        explanations: hits.map((hit: { _explanation?: unknown }) => hit._explanation).filter(Boolean),
       },
     } : {}),
   };
@@ -65,6 +77,22 @@ function parseCohorts(value?: string): string[] {
     .split(",")
     .map((tag) => tag.trim().toLowerCase())
     .filter(Boolean))];
+}
+
+function maybeRerankProducts(query: string | undefined, products: ReturnType<typeof normalizeProductHit>[], enabled: boolean) {
+  const terms = (query ?? "").toLowerCase().split(/\s+/).filter(Boolean);
+  if (!enabled || terms.length === 0) return products;
+  return products
+    .map((product, position) => {
+      const text = [product.title, product.brand, product.category, product.description, JSON.stringify(product.attributes)]
+        .join(" ")
+        .toLowerCase();
+      const overlap = terms.filter((term) => text.includes(term)).length;
+      const exactTitle = product.title.toLowerCase() === terms.join(" ") ? 10 : 0;
+      return { product, position, rerankScore: exactTitle + overlap + Number(product.score ?? 0) * 0.001 };
+    })
+    .sort((left, right) => right.rerankScore - left.rerankScore || left.position - right.position)
+    .map((row) => ({ ...row.product, score: row.rerankScore }));
 }
 
 function normalizeSuggestHit(hit: { _id?: string; _score?: number; _source?: Record<string, unknown> }): ProductSuggestOption {

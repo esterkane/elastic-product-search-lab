@@ -18,6 +18,10 @@ const searchQuerySchema = {
     debug: { type: "boolean", default: false },
     boost: { type: "boolean", default: true },
     cohorts: { type: "string", minLength: 1 },
+    strategy: { type: "string", enum: ["baseline_bm25", "boosted_bm25", "enriched_lexical", "hybrid_rrf", "reranked"] },
+    queryVector: { type: "string", minLength: 1 },
+    vectorField: { type: "string", minLength: 1, default: "semantic_embedding" },
+    rerank: { type: "boolean", default: false },
   },
 } as const;
 

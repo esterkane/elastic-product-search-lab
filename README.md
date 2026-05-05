@@ -51,6 +51,8 @@ Dataset adapters can prepare small deterministic Amazon ESCI, RetailRocket, and 
 
 The API read path uses `products-read` for stable candidate retrieval, can optionally merge volatile `products-live` fields at response time, and exposes a separate `product-suggest` autocomplete path. See `docs/read_path_strategy.md`.
 
+The search API now supports explicit retrieval strategies for `baseline_bm25`, `boosted_bm25`, `enriched_lexical`, `hybrid_rrf`, and optional `reranked` search, with debug profile capture. See `docs/relevance.md`.
+
 Optional governance and personalization policies can be supplied as data with `SEARCH_POLICY_PATH`, including query-matched boosts, category constraints, exclusions, seasonal rewrites, and modest cohort boosts. See `docs/policy_index_design.md`.
 
 The canonical product schema now includes production-shaped seller, stock, price, nested offers, merchandising, soft-delete lifecycle, semantic vector, and autosuggest fields. See `docs/canonical_product_schema.md`.

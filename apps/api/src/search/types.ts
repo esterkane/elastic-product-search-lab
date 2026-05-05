@@ -1,3 +1,5 @@
+export type SearchStrategy = "baseline_bm25" | "boosted_bm25" | "enriched_lexical" | "hybrid_rrf" | "reranked";
+
 export type SearchQueryParams = {
   q?: string;
   category?: string;
@@ -9,6 +11,10 @@ export type SearchQueryParams = {
   debug: boolean;
   boost?: boolean;
   cohorts?: string;
+  strategy?: SearchStrategy;
+  queryVector?: string;
+  vectorField?: string;
+  rerank?: boolean;
 };
 
 export type SuggestQueryParams = {
@@ -63,6 +69,15 @@ export type ProductSearchResponse = {
       requested: string[];
       boosts: Array<{ tag: string; weight: number }>;
     };
+    strategy?: {
+      requested: SearchStrategy;
+      executed: SearchStrategy | "hybrid_fallback";
+      vectorProvided: boolean;
+      reranked: boolean;
+      latencyMs: number;
+    };
+    profile?: unknown;
+    explanations?: unknown[];
   };
 };
 

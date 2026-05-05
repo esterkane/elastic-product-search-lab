@@ -1,0 +1,13 @@
+{
+  "generated_at_unix": null,
+  "note": "Template artifact. Run scripts/evaluate_hybrid_search.py against a local Elasticsearch index to populate measured metrics.",
+  "rows": [],
+  "strategies": [
+    "baseline_lexical",
+    "boosted_lexical",
+    "enriched_profile",
+    "hybrid_rrf",
+    "reranked"
+  ],
+  "summary": []
+}
