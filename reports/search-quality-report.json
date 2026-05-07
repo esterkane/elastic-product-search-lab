@@ -1,0 +1,1055 @@
+{
+  "comparisons": [
+    {
+      "baseline": "baseline-bm25",
+      "candidate": "hybrid-rrf",
+      "latency_tradeoff": "+12.5 ms p95 vs baseline-bm25",
+      "ndcg_at_10_delta": 0.11148606371224867,
+      "p95_latency_ms_delta": 12.5,
+      "recall_at_10_delta": 0.0,
+      "status": "pass"
+    }
+  ],
+  "decision_summary": {
+    "blocked_changes": [
+      "candidate-bad"
+    ],
+    "recommendation": "review_required",
+    "shippable_changes": [
+      "baseline-bm25",
+      "hybrid-rrf",
+      "candidate-good"
+    ]
+  },
+  "esci_scale": {
+    "complement": 1,
+    "exact": 3,
+    "irrelevant": 0,
+    "substitute": 2
+  },
+  "gates": {
+    "mrr_at_10": 0.68,
+    "ndcg_at_10": 0.72,
+    "p95_latency_ms": 180.0,
+    "p99_latency_ms": 260.0,
+    "precision_at_5": 0.6,
+    "recall_at_10": 0.72,
+    "throughput_qps": 25.0,
+    "zero_result_rate": 0.05
+  },
+  "generated_at": "2026-05-07T11:03:57.850202+00:00",
+  "program": "search-quality",
+  "required_strategies": [
+    "baseline-bm25",
+    "hybrid-rrf"
+  ],
+  "runs": [
+    {
+      "description": "Keyword/BM25 baseline using the lexical candidate set only.",
+      "gates": [
+        {
+          "name": "nDCG@10",
+          "status": "pass",
+          "threshold": 0.72,
+          "value": 0.8548394050147051
+        },
+        {
+          "name": "Precision@5",
+          "status": "pass",
+          "threshold": 0.6,
+          "value": 0.65
+        },
+        {
+          "name": "MRR@10",
+          "status": "pass",
+          "threshold": 0.68,
+          "value": 1.0
+        },
+        {
+          "name": "Recall@10",
+          "status": "pass",
+          "threshold": 0.72,
+          "value": 1.0
+        },
+        {
+          "name": "Zero-result rate",
+          "status": "pass",
+          "threshold": 0.05,
+          "value": 0.0
+        },
+        {
+          "name": "p95 latency",
+          "status": "pass",
+          "threshold": 180.0,
+          "value": 120.5
+        },
+        {
+          "name": "p99 latency",
+          "status": "pass",
+          "threshold": 260.0,
+          "value": 128.10000000000002
+        },
+        {
+          "name": "Throughput",
+          "status": "pass",
+          "threshold": 25.0,
+          "value": 31.0
+        },
+        {
+          "name": "Resilience: replay",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: idempotency",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: 429/backoff",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: partial-cluster degradation",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: alias rollback",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: soft-delete merge",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        }
+      ],
+      "name": "baseline-bm25",
+      "performance": {
+        "p50_latency_ms": 52.0,
+        "p95_latency_ms": 120.5,
+        "p99_latency_ms": 128.10000000000002,
+        "shard_scenarios": {
+          "1_shard_50k_docs": {
+            "p50_latency_ms": 35.0,
+            "p95_latency_ms": 50.25,
+            "p99_latency_ms": 51.65
+          },
+          "3_shards_250k_docs": {
+            "p50_latency_ms": 59.5,
+            "p95_latency_ms": 91.0,
+            "p99_latency_ms": 94.2
+          },
+          "6_shards_1m_docs": {
+            "p50_latency_ms": 107.5,
+            "p95_latency_ms": 165.25,
+            "p99_latency_ms": 170.65
+          }
+        },
+        "throughput_qps": 31.0
+      },
+      "ranked_results": {
+        "q-hybrid": [
+          "p-keyword-only",
+          "p-hybrid-guide",
+          "p-rerank-model",
+          "p-returns-policy"
+        ],
+        "q-ingest": [
+          "p-replay-runbook",
+          "p-idempotent-upsert",
+          "p-soft-delete",
+          "p-homepage"
+        ],
+        "q-vector": [
+          "p-latency-tuning",
+          "p-vector-filter",
+          "p-bulk-ingest",
+          "p-size-chart"
+        ],
+        "q-zero": [
+          "p-fuzzy-fallback",
+          "p-no-match-help",
+          "p-autocorrect",
+          "p-empty-state"
+        ]
+      },
+      "relevance": {
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 0.8548394050147051,
+        "precision_at_5": 0.65,
+        "queries": [
+          {
+            "mrr_at_10": 1.0,
+            "ndcg_at_10": 0.7482484020681008,
+            "precision_at_5": 0.6,
+            "query": "hybrid search reranking product catalog",
+            "query_id": "q-hybrid",
+            "recall_at_10": 1.0,
+            "recall_at_5": 1.0,
+            "result_count": 4,
+            "segment": "relevance",
+            "top_result": "p-keyword-only"
+          },
+          {
+            "mrr_at_10": 1.0,
+            "ndcg_at_10": 0.8428282648809379,
+            "precision_at_5": 0.6,
+            "query": "vector search filtered retrieval latency",
+            "query_id": "q-vector",
+            "recall_at_10": 1.0,
+            "recall_at_5": 1.0,
+            "result_count": 4,
+            "segment": "performance",
+            "top_result": "p-latency-tuning"
+          },
+          {
+            "mrr_at_10": 1.0,
+            "ndcg_at_10": 1.0,
+            "precision_at_5": 0.6,
+            "query": "replay failed product updates idempotently",
+            "query_id": "q-ingest",
+            "recall_at_10": 1.0,
+            "recall_at_5": 1.0,
+            "result_count": 4,
+            "segment": "resilience",
+            "top_result": "p-replay-runbook"
+          },
+          {
+            "mrr_at_10": 1.0,
+            "ndcg_at_10": 0.8282809531097817,
+            "precision_at_5": 0.8,
+            "query": "nonexistent sku nickname",
+            "query_id": "q-zero",
+            "recall_at_10": 1.0,
+            "recall_at_5": 1.0,
+            "result_count": 4,
+            "segment": "zero-results",
+            "top_result": "p-fuzzy-fallback"
+          }
+        ],
+        "recall_at_10": 1.0,
+        "recall_at_5": 1.0,
+        "zero_result_rate": 0.0
+      },
+      "resilience": {
+        "matrix": [
+          {
+            "evidence": "Replay fixture count equals unique output count.",
+            "expected_recovery": "Reprocess failed events without duplicates.",
+            "gate": "No duplicated chunk or product ids.",
+            "name": "replay",
+            "observed": "Replay preserves event ids.",
+            "status": "pass"
+          },
+          {
+            "evidence": "Content hash stays unchanged.",
+            "expected_recovery": "Repeated upsert has the same final state.",
+            "gate": "Hash and version remain stable.",
+            "name": "idempotency",
+            "observed": "Second write is a no-op.",
+            "status": "pass"
+          },
+          {
+            "evidence": "Observed attempts: 3.",
+            "expected_recovery": "Retry with jittered exponential backoff and preserve request budget.",
+            "gate": "No unbounded retry loops; final response must be success or explicit retryable error.",
+            "name": "429/backoff",
+            "observed": "Third attempt succeeds.",
+            "status": "pass"
+          },
+          {
+            "evidence": "warning=semantic_unavailable.",
+            "expected_recovery": "Serve degraded lexical or semantic results with warning.",
+            "gate": "Partial data beats hard failure, and warning is emitted.",
+            "name": "partial-cluster degradation",
+            "observed": "Semantic failure returns lexical results.",
+            "status": "pass"
+          },
+          {
+            "evidence": "alias_before=products_v42 alias_after=products_v41.",
+            "expected_recovery": "Rollback read alias to previous healthy index.",
+            "gate": "Rollback must restore last green alias target.",
+            "name": "alias rollback",
+            "observed": "Alias returns to products_v41.",
+            "status": "pass"
+          },
+          {
+            "evidence": "deleted_at is retained after merge.",
+            "expected_recovery": "Merged updates must not resurrect soft-deleted products.",
+            "gate": "Soft deletes win over stale update events.",
+            "name": "soft-delete merge",
+            "observed": "Deleted sku remains hidden.",
+            "status": "pass"
+          }
+        ],
+        "pass_rate": 1.0
+      },
+      "rrf": null,
+      "ship": true,
+      "strategy": "bm25"
+    },
+    {
+      "description": "Lexical and dense candidate sets fused with reciprocal rank fusion before optional reranking.",
+      "gates": [
+        {
+          "name": "nDCG@10",
+          "status": "pass",
+          "threshold": 0.72,
+          "value": 0.9663254687269538
+        },
+        {
+          "name": "Precision@5",
+          "status": "pass",
+          "threshold": 0.6,
+          "value": 0.65
+        },
+        {
+          "name": "MRR@10",
+          "status": "pass",
+          "threshold": 0.68,
+          "value": 1.0
+        },
+        {
+          "name": "Recall@10",
+          "status": "pass",
+          "threshold": 0.72,
+          "value": 1.0
+        },
+        {
+          "name": "Zero-result rate",
+          "status": "pass",
+          "threshold": 0.05,
+          "value": 0.0
+        },
+        {
+          "name": "p95 latency",
+          "status": "pass",
+          "threshold": 180.0,
+          "value": 133.0
+        },
+        {
+          "name": "p99 latency",
+          "status": "pass",
+          "threshold": 260.0,
+          "value": 142.60000000000002
+        },
+        {
+          "name": "Throughput",
+          "status": "pass",
+          "threshold": 25.0,
+          "value": 27.5
+        },
+        {
+          "name": "Resilience: replay",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: idempotency",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: 429/backoff",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: partial-cluster degradation",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: alias rollback",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: soft-delete merge",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        }
+      ],
+      "name": "hybrid-rrf",
+      "performance": {
+        "p50_latency_ms": 64.0,
+        "p95_latency_ms": 133.0,
+        "p99_latency_ms": 142.60000000000002,
+        "shard_scenarios": {
+          "1_shard_50k_docs": {
+            "p50_latency_ms": 45.5,
+            "p95_latency_ms": 59.5,
+            "p99_latency_ms": 60.7
+          },
+          "3_shards_250k_docs": {
+            "p50_latency_ms": 69.5,
+            "p95_latency_ms": 105.0,
+            "p99_latency_ms": 109.0
+          },
+          "6_shards_1m_docs": {
+            "p50_latency_ms": 131.5,
+            "p95_latency_ms": 196.75,
+            "p99_latency_ms": 203.35
+          }
+        },
+        "throughput_qps": 27.5
+      },
+      "ranked_results": {
+        "q-hybrid": [
+          "p-rerank-model",
+          "p-keyword-only",
+          "p-hybrid-guide",
+          "p-returns-policy"
+        ],
+        "q-ingest": [
+          "p-idempotent-upsert",
+          "p-replay-runbook",
+          "p-soft-delete",
+          "p-homepage"
+        ],
+        "q-vector": [
+          "p-vector-filter",
+          "p-latency-tuning",
+          "p-bulk-ingest",
+          "p-size-chart"
+        ],
+        "q-zero": [
+          "p-no-match-help",
+          "p-fuzzy-fallback",
+          "p-empty-state",
+          "p-autocorrect"
+        ]
+      },
+      "relevance": {
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 0.9663254687269538,
+        "precision_at_5": 0.65,
+        "queries": [
+          {
+            "mrr_at_10": 1.0,
+            "ndcg_at_10": 0.9340764506431116,
+            "precision_at_5": 0.6,
+            "query": "hybrid search reranking product catalog",
+            "query_id": "q-hybrid",
+            "recall_at_10": 1.0,
+            "recall_at_5": 1.0,
+            "result_count": 4,
+            "segment": "relevance",
+            "top_result": "p-rerank-model"
+          },
+          {
+            "mrr_at_10": 1.0,
+            "ndcg_at_10": 1.0,
+            "precision_at_5": 0.6,
+            "query": "vector search filtered retrieval latency",
+            "query_id": "q-vector",
+            "recall_at_10": 1.0,
+            "recall_at_5": 1.0,
+            "result_count": 4,
+            "segment": "performance",
+            "top_result": "p-vector-filter"
+          },
+          {
+            "mrr_at_10": 1.0,
+            "ndcg_at_10": 1.0,
+            "precision_at_5": 0.6,
+            "query": "replay failed product updates idempotently",
+            "query_id": "q-ingest",
+            "recall_at_10": 1.0,
+            "recall_at_5": 1.0,
+            "result_count": 4,
+            "segment": "resilience",
+            "top_result": "p-idempotent-upsert"
+          },
+          {
+            "mrr_at_10": 1.0,
+            "ndcg_at_10": 0.9312254242647038,
+            "precision_at_5": 0.8,
+            "query": "nonexistent sku nickname",
+            "query_id": "q-zero",
+            "recall_at_10": 1.0,
+            "recall_at_5": 1.0,
+            "result_count": 4,
+            "segment": "zero-results",
+            "top_result": "p-no-match-help"
+          }
+        ],
+        "recall_at_10": 1.0,
+        "recall_at_5": 1.0,
+        "zero_result_rate": 0.0
+      },
+      "resilience": {
+        "matrix": [
+          {
+            "evidence": "Replay fixture count equals unique output count.",
+            "expected_recovery": "Reprocess failed events without duplicates.",
+            "gate": "No duplicated chunk or product ids.",
+            "name": "replay",
+            "observed": "Replay preserves event ids.",
+            "status": "pass"
+          },
+          {
+            "evidence": "Content hash stays unchanged.",
+            "expected_recovery": "Repeated upsert has the same final state.",
+            "gate": "Hash and version remain stable.",
+            "name": "idempotency",
+            "observed": "Second write is a no-op.",
+            "status": "pass"
+          },
+          {
+            "evidence": "Observed attempts: 3.",
+            "expected_recovery": "Retry with jittered exponential backoff and preserve request budget.",
+            "gate": "No unbounded retry loops; final response must be success or explicit retryable error.",
+            "name": "429/backoff",
+            "observed": "Third attempt succeeds.",
+            "status": "pass"
+          },
+          {
+            "evidence": "warning=semantic_unavailable.",
+            "expected_recovery": "Serve degraded lexical or semantic results with warning.",
+            "gate": "Partial data beats hard failure, and warning is emitted.",
+            "name": "partial-cluster degradation",
+            "observed": "Semantic failure returns lexical results.",
+            "status": "pass"
+          },
+          {
+            "evidence": "alias_before=products_v42 alias_after=products_v41.",
+            "expected_recovery": "Rollback read alias to previous healthy index.",
+            "gate": "Rollback must restore last green alias target.",
+            "name": "alias rollback",
+            "observed": "Alias returns to products_v41.",
+            "status": "pass"
+          },
+          {
+            "evidence": "deleted_at is retained after merge.",
+            "expected_recovery": "Merged updates must not resurrect soft-deleted products.",
+            "gate": "Soft deletes win over stale update events.",
+            "name": "soft-delete merge",
+            "observed": "Deleted sku remains hidden.",
+            "status": "pass"
+          }
+        ],
+        "pass_rate": 1.0
+      },
+      "rrf": {
+        "channels": [
+          "dense",
+          "lexical"
+        ],
+        "rank_constant": 60
+      },
+      "ship": true,
+      "strategy": "hybrid-rrf"
+    },
+    {
+      "description": "Hybrid retrieval with reranker scores applied after fusion.",
+      "gates": [
+        {
+          "name": "nDCG@10",
+          "status": "pass",
+          "threshold": 0.72,
+          "value": 1.0
+        },
+        {
+          "name": "Precision@5",
+          "status": "pass",
+          "threshold": 0.6,
+          "value": 0.65
+        },
+        {
+          "name": "MRR@10",
+          "status": "pass",
+          "threshold": 0.68,
+          "value": 1.0
+        },
+        {
+          "name": "Recall@10",
+          "status": "pass",
+          "threshold": 0.72,
+          "value": 1.0
+        },
+        {
+          "name": "Zero-result rate",
+          "status": "pass",
+          "threshold": 0.05,
+          "value": 0.0
+        },
+        {
+          "name": "p95 latency",
+          "status": "pass",
+          "threshold": 180.0,
+          "value": 133.0
+        },
+        {
+          "name": "p99 latency",
+          "status": "pass",
+          "threshold": 260.0,
+          "value": 142.60000000000002
+        },
+        {
+          "name": "Throughput",
+          "status": "pass",
+          "threshold": 25.0,
+          "value": 27.5
+        },
+        {
+          "name": "Resilience: replay",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: idempotency",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: 429/backoff",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: partial-cluster degradation",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: alias rollback",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: soft-delete merge",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        }
+      ],
+      "name": "candidate-good",
+      "performance": {
+        "p50_latency_ms": 64.0,
+        "p95_latency_ms": 133.0,
+        "p99_latency_ms": 142.60000000000002,
+        "shard_scenarios": {
+          "1_shard_50k_docs": {
+            "p50_latency_ms": 45.5,
+            "p95_latency_ms": 59.5,
+            "p99_latency_ms": 60.7
+          },
+          "3_shards_250k_docs": {
+            "p50_latency_ms": 69.5,
+            "p95_latency_ms": 105.0,
+            "p99_latency_ms": 109.0
+          },
+          "6_shards_1m_docs": {
+            "p50_latency_ms": 131.5,
+            "p95_latency_ms": 196.75,
+            "p99_latency_ms": 203.35
+          }
+        },
+        "throughput_qps": 27.5
+      },
+      "ranked_results": {
+        "q-hybrid": [
+          "p-rerank-model",
+          "p-hybrid-guide",
+          "p-keyword-only",
+          "p-returns-policy"
+        ],
+        "q-ingest": [
+          "p-idempotent-upsert",
+          "p-replay-runbook",
+          "p-soft-delete",
+          "p-homepage"
+        ],
+        "q-vector": [
+          "p-vector-filter",
+          "p-latency-tuning",
+          "p-bulk-ingest",
+          "p-size-chart"
+        ],
+        "q-zero": [
+          "p-no-match-help",
+          "p-autocorrect",
+          "p-fuzzy-fallback",
+          "p-empty-state",
+          "p-homepage"
+        ]
+      },
+      "relevance": {
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0,
+        "precision_at_5": 0.65,
+        "queries": [
+          {
+            "mrr_at_10": 1.0,
+            "ndcg_at_10": 1.0,
+            "precision_at_5": 0.6,
+            "query": "hybrid search reranking product catalog",
+            "query_id": "q-hybrid",
+            "recall_at_10": 1.0,
+            "recall_at_5": 1.0,
+            "result_count": 4,
+            "segment": "relevance",
+            "top_result": "p-rerank-model"
+          },
+          {
+            "mrr_at_10": 1.0,
+            "ndcg_at_10": 1.0,
+            "precision_at_5": 0.6,
+            "query": "vector search filtered retrieval latency",
+            "query_id": "q-vector",
+            "recall_at_10": 1.0,
+            "recall_at_5": 1.0,
+            "result_count": 4,
+            "segment": "performance",
+            "top_result": "p-vector-filter"
+          },
+          {
+            "mrr_at_10": 1.0,
+            "ndcg_at_10": 1.0,
+            "precision_at_5": 0.6,
+            "query": "replay failed product updates idempotently",
+            "query_id": "q-ingest",
+            "recall_at_10": 1.0,
+            "recall_at_5": 1.0,
+            "result_count": 4,
+            "segment": "resilience",
+            "top_result": "p-idempotent-upsert"
+          },
+          {
+            "mrr_at_10": 1.0,
+            "ndcg_at_10": 1.0,
+            "precision_at_5": 0.8,
+            "query": "nonexistent sku nickname",
+            "query_id": "q-zero",
+            "recall_at_10": 1.0,
+            "recall_at_5": 1.0,
+            "result_count": 5,
+            "segment": "zero-results",
+            "top_result": "p-no-match-help"
+          }
+        ],
+        "recall_at_10": 1.0,
+        "recall_at_5": 1.0,
+        "zero_result_rate": 0.0
+      },
+      "resilience": {
+        "matrix": [
+          {
+            "evidence": "Replay fixture count equals unique output count.",
+            "expected_recovery": "Reprocess failed events without duplicates.",
+            "gate": "No duplicated chunk or product ids.",
+            "name": "replay",
+            "observed": "Replay preserves event ids.",
+            "status": "pass"
+          },
+          {
+            "evidence": "Content hash stays unchanged.",
+            "expected_recovery": "Repeated upsert has the same final state.",
+            "gate": "Hash and version remain stable.",
+            "name": "idempotency",
+            "observed": "Second write is a no-op.",
+            "status": "pass"
+          },
+          {
+            "evidence": "Observed attempts: 3.",
+            "expected_recovery": "Retry with jittered exponential backoff and preserve request budget.",
+            "gate": "No unbounded retry loops; final response must be success or explicit retryable error.",
+            "name": "429/backoff",
+            "observed": "Third attempt succeeds.",
+            "status": "pass"
+          },
+          {
+            "evidence": "warning=semantic_unavailable.",
+            "expected_recovery": "Serve degraded lexical or semantic results with warning.",
+            "gate": "Partial data beats hard failure, and warning is emitted.",
+            "name": "partial-cluster degradation",
+            "observed": "Semantic failure returns lexical results.",
+            "status": "pass"
+          },
+          {
+            "evidence": "alias_before=products_v42 alias_after=products_v41.",
+            "expected_recovery": "Rollback read alias to previous healthy index.",
+            "gate": "Rollback must restore last green alias target.",
+            "name": "alias rollback",
+            "observed": "Alias returns to products_v41.",
+            "status": "pass"
+          },
+          {
+            "evidence": "deleted_at is retained after merge.",
+            "expected_recovery": "Merged updates must not resurrect soft-deleted products.",
+            "gate": "Soft deletes win over stale update events.",
+            "name": "soft-delete merge",
+            "observed": "Deleted sku remains hidden.",
+            "status": "pass"
+          }
+        ],
+        "pass_rate": 1.0
+      },
+      "rrf": null,
+      "ship": true,
+      "strategy": "hybrid-rerank"
+    },
+    {
+      "description": "Known-bad run that demonstrates gate failure behavior.",
+      "gates": [
+        {
+          "name": "nDCG@10",
+          "status": "fail",
+          "threshold": 0.72,
+          "value": 0.1966135091371533
+        },
+        {
+          "name": "Precision@5",
+          "status": "fail",
+          "threshold": 0.6,
+          "value": 0.2
+        },
+        {
+          "name": "MRR@10",
+          "status": "fail",
+          "threshold": 0.68,
+          "value": 0.25
+        },
+        {
+          "name": "Recall@10",
+          "status": "fail",
+          "threshold": 0.72,
+          "value": 0.3333333333333333
+        },
+        {
+          "name": "Zero-result rate",
+          "status": "fail",
+          "threshold": 0.05,
+          "value": 0.5
+        },
+        {
+          "name": "p95 latency",
+          "status": "fail",
+          "threshold": 180.0,
+          "value": 642.5000000000001
+        },
+        {
+          "name": "p99 latency",
+          "status": "fail",
+          "threshold": 260.0,
+          "value": 696.5
+        },
+        {
+          "name": "Throughput",
+          "status": "fail",
+          "threshold": 25.0,
+          "value": 12.0
+        },
+        {
+          "name": "Resilience: replay",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: idempotency",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: 429/backoff",
+          "status": "fail",
+          "threshold": "pass",
+          "value": "fail"
+        },
+        {
+          "name": "Resilience: partial-cluster degradation",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: alias rollback",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        },
+        {
+          "name": "Resilience: soft-delete merge",
+          "status": "pass",
+          "threshold": "pass",
+          "value": "pass"
+        }
+      ],
+      "name": "candidate-bad",
+      "performance": {
+        "p50_latency_ms": 305.0,
+        "p95_latency_ms": 642.5000000000001,
+        "p99_latency_ms": 696.5,
+        "shard_scenarios": {
+          "1_shard_50k_docs": {
+            "p50_latency_ms": 160.0,
+            "p95_latency_ms": 252.0,
+            "p99_latency_ms": 258.4
+          },
+          "3_shards_250k_docs": {
+            "p50_latency_ms": 310.0,
+            "p95_latency_ms": 506.0,
+            "p99_latency_ms": 525.2
+          },
+          "6_shards_1m_docs": {
+            "p50_latency_ms": 540.0,
+            "p95_latency_ms": 866.0,
+            "p99_latency_ms": 893.2
+          }
+        },
+        "throughput_qps": 12.0
+      },
+      "ranked_results": {
+        "q-hybrid": [
+          "p-returns-policy",
+          "p-keyword-only",
+          "p-hybrid-guide"
+        ],
+        "q-ingest": [],
+        "q-vector": [
+          "p-size-chart",
+          "p-bulk-ingest",
+          "p-vector-filter"
+        ],
+        "q-zero": []
+      },
+      "relevance": {
+        "mrr_at_10": 0.25,
+        "ndcg_at_10": 0.1966135091371533,
+        "precision_at_5": 0.2,
+        "queries": [
+          {
+            "mrr_at_10": 0.5,
+            "ndcg_at_10": 0.3466560554686803,
+            "precision_at_5": 0.4,
+            "query": "hybrid search reranking product catalog",
+            "query_id": "q-hybrid",
+            "recall_at_10": 0.6666666666666666,
+            "recall_at_5": 0.6666666666666666,
+            "result_count": 3,
+            "segment": "relevance",
+            "top_result": "p-returns-policy"
+          },
+          {
+            "mrr_at_10": 0.5,
+            "ndcg_at_10": 0.439797981079933,
+            "precision_at_5": 0.4,
+            "query": "vector search filtered retrieval latency",
+            "query_id": "q-vector",
+            "recall_at_10": 0.6666666666666666,
+            "recall_at_5": 0.6666666666666666,
+            "result_count": 3,
+            "segment": "performance",
+            "top_result": "p-size-chart"
+          },
+          {
+            "mrr_at_10": 0.0,
+            "ndcg_at_10": 0.0,
+            "precision_at_5": 0.0,
+            "query": "replay failed product updates idempotently",
+            "query_id": "q-ingest",
+            "recall_at_10": 0.0,
+            "recall_at_5": 0.0,
+            "result_count": 0,
+            "segment": "resilience",
+            "top_result": null
+          },
+          {
+            "mrr_at_10": 0.0,
+            "ndcg_at_10": 0.0,
+            "precision_at_5": 0.0,
+            "query": "nonexistent sku nickname",
+            "query_id": "q-zero",
+            "recall_at_10": 0.0,
+            "recall_at_5": 0.0,
+            "result_count": 0,
+            "segment": "zero-results",
+            "top_result": null
+          }
+        ],
+        "recall_at_10": 0.3333333333333333,
+        "recall_at_5": 0.3333333333333333,
+        "zero_result_rate": 0.5
+      },
+      "resilience": {
+        "matrix": [
+          {
+            "evidence": "Replay fixture count equals unique output count.",
+            "expected_recovery": "Reprocess failed events without duplicates.",
+            "gate": "No duplicated chunk or product ids.",
+            "name": "replay",
+            "observed": "Replay preserves event ids.",
+            "status": "pass"
+          },
+          {
+            "evidence": "Content hash stays unchanged.",
+            "expected_recovery": "Repeated upsert has the same final state.",
+            "gate": "Hash and version remain stable.",
+            "name": "idempotency",
+            "observed": "Second write is a no-op.",
+            "status": "pass"
+          },
+          {
+            "evidence": "Synthetic 429 sequence never reaches the success response.",
+            "expected_recovery": "Retry with jittered exponential backoff and preserve request budget.",
+            "gate": "No unbounded retry loops; final response must be success or explicit retryable error.",
+            "name": "429/backoff",
+            "observed": "Retries stampede immediately and exhaust the budget.",
+            "status": "fail"
+          },
+          {
+            "evidence": "warning=semantic_unavailable.",
+            "expected_recovery": "Serve degraded lexical or semantic results with warning.",
+            "gate": "Partial data beats hard failure, and warning is emitted.",
+            "name": "partial-cluster degradation",
+            "observed": "Semantic failure returns lexical results.",
+            "status": "pass"
+          },
+          {
+            "evidence": "alias_before=products_v42 alias_after=products_v41.",
+            "expected_recovery": "Rollback read alias to previous healthy index.",
+            "gate": "Rollback must restore last green alias target.",
+            "name": "alias rollback",
+            "observed": "Alias returns to products_v41.",
+            "status": "pass"
+          },
+          {
+            "evidence": "deleted_at is retained after merge.",
+            "expected_recovery": "Merged updates must not resurrect soft-deleted products.",
+            "gate": "Soft deletes win over stale update events.",
+            "name": "soft-delete merge",
+            "observed": "Deleted sku remains hidden.",
+            "status": "pass"
+          }
+        ],
+        "pass_rate": 0.8333333333333334
+      },
+      "rrf": null,
+      "ship": false,
+      "strategy": "regression"
+    }
+  ]
+}

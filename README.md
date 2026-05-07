@@ -230,6 +230,21 @@ docker stats --no-stream
 docker compose logs --tail=120 api
 ```
 
+## Search Quality Gate
+
+Run the main offline quality gate:
+
+```powershell
+npm run evaluate:relevance
+```
+
+This writes:
+
+- `reports/search-quality-report.json`
+- `reports/search-quality-decision.md`
+
+The default benchmark compares `baseline-bm25` against `hybrid-rrf`. The hybrid run fuses lexical and dense candidate sets with reciprocal rank fusion, then reports nDCG@10, Precision@5, MRR@10, Recall@10, zero-result rate, p95/p99 latency, throughput, and the p95 latency trade-off against BM25. Gate thresholds and the intended before/after pair live in `config/search-quality-gate.json`.
+
 ## Source Attribution And Licensing
 
 Do not generate an answer or release briefing that cannot be traced back to direct source links. Each transformed, chunked, embedded, reranked, or summarized record must retain `source_url`, `repo`, `path`, `content_type`, and `license_family`.
