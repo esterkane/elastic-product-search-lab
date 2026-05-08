@@ -1,0 +1,161 @@
+{
+  "hybrid_config": {
+    "lexical_weight": 0.55,
+    "semantic_weight": 0.45,
+    "normalization": "min_max",
+    "combination": "weighted_arithmetic_mean",
+    "top_k": 3
+  },
+  "queries": [
+    {
+      "query_id": "q-lexical-miss",
+      "query": "ANC cans last all day",
+      "expected_page": "doc-headphones-battery",
+      "failure_category": "lexical_miss",
+      "recommended_fix": "Add synonym expansion for ANC/cans/headphones and battery-life phrasing before BM25 retrieval.",
+      "results": [
+        {
+          "doc_id": "doc-headphones-battery",
+          "title": "Noise cancelling headphones battery life",
+          "lexical_score": 0.18,
+          "semantic_score": 0.91,
+          "metadata_score": 1.0
+        },
+        {
+          "doc_id": "doc-headphones-codec",
+          "title": "Bluetooth codec compatibility",
+          "lexical_score": 0.34,
+          "semantic_score": 0.41,
+          "metadata_score": 1.0
+        },
+        {
+          "doc_id": "doc-power-bank",
+          "title": "Power bank airline policy",
+          "lexical_score": 0.22,
+          "semantic_score": 0.28,
+          "metadata_score": 0.4
+        }
+      ]
+    },
+    {
+      "query_id": "q-semantic-miss",
+      "query": "return muddy trail shoes",
+      "expected_page": "doc-boots-waterproof",
+      "failure_category": "semantic_miss",
+      "recommended_fix": "Improve embeddings or add domain examples connecting trail shoes, hiking boots, mud, and return policy language.",
+      "results": [
+        {
+          "doc_id": "doc-boots-sizing",
+          "title": "Trail boot sizing guidance",
+          "lexical_score": 0.62,
+          "semantic_score": 0.73,
+          "metadata_score": 1.0
+        },
+        {
+          "doc_id": "doc-boots-waterproof",
+          "title": "Waterproof hiking boots returns",
+          "lexical_score": 0.88,
+          "semantic_score": 0.31,
+          "metadata_score": 1.0
+        },
+        {
+          "doc_id": "doc-rain-jacket",
+          "title": "Rain jacket waterproof rating",
+          "lexical_score": 0.29,
+          "semantic_score": 0.45,
+          "metadata_score": 0.6
+        }
+      ]
+    },
+    {
+      "query_id": "q-fusion-issue",
+      "query": "espresso grinder cleaning tablets",
+      "expected_page": "doc-grinder-cleaning",
+      "failure_category": "fusion_issue",
+      "recommended_fix": "Reduce semantic weight or add query-intent routing when exact maintenance terms appear.",
+      "results": [
+        {
+          "doc_id": "doc-grinder-settings",
+          "title": "Espresso grinder fine adjustment",
+          "lexical_score": 0.61,
+          "semantic_score": 0.92,
+          "metadata_score": 1.0
+        },
+        {
+          "doc_id": "doc-grinder-cleaning",
+          "title": "Burr grinder cleaning workflow",
+          "lexical_score": 0.93,
+          "semantic_score": 0.59,
+          "metadata_score": 1.0
+        },
+        {
+          "doc_id": "doc-espresso-scale",
+          "title": "Coffee scale for espresso dosing",
+          "lexical_score": 0.24,
+          "semantic_score": 0.66,
+          "metadata_score": 0.7
+        }
+      ]
+    },
+    {
+      "query_id": "q-metadata-issue",
+      "query": "usb c backpack warranty defects",
+      "expected_page": "doc-backpack-warranty",
+      "failure_category": "metadata_issue",
+      "recommended_fix": "Repair category metadata and boost policy/warranty content type for warranty-intent queries.",
+      "results": [
+        {
+          "doc_id": "doc-power-bank",
+          "title": "Power bank airline policy",
+          "lexical_score": 0.57,
+          "semantic_score": 0.61,
+          "metadata_score": 1.0
+        },
+        {
+          "doc_id": "doc-backpack-warranty",
+          "title": "USB-C laptop backpack warranty",
+          "lexical_score": 0.81,
+          "semantic_score": 0.84,
+          "metadata_score": 0.2
+        },
+        {
+          "doc_id": "doc-backpack-capacity",
+          "title": "Commuter backpack laptop capacity",
+          "lexical_score": 0.49,
+          "semantic_score": 0.67,
+          "metadata_score": 1.0
+        }
+      ]
+    },
+    {
+      "query_id": "q-balanced-win",
+      "query": "waterproof shell for wet hikes",
+      "expected_page": "doc-rain-jacket",
+      "failure_category": "no_failure",
+      "recommended_fix": "No immediate fix; this is a control query where lexical and semantic channels agree.",
+      "results": [
+        {
+          "doc_id": "doc-rain-jacket",
+          "title": "Rain jacket waterproof rating",
+          "lexical_score": 0.86,
+          "semantic_score": 0.88,
+          "metadata_score": 1.0
+        },
+        {
+          "doc_id": "doc-boots-waterproof",
+          "title": "Waterproof hiking boots returns",
+          "lexical_score": 0.52,
+          "semantic_score": 0.64,
+          "metadata_score": 0.7
+        },
+        {
+          "doc_id": "doc-boots-sizing",
+          "title": "Trail boot sizing guidance",
+          "lexical_score": 0.26,
+          "semantic_score": 0.39,
+          "metadata_score": 0.5
+        }
+      ]
+    }
+  ]
+}
