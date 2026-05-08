@@ -1,0 +1,76 @@
+{
+  "conversations": [
+    {
+      "id": "conv-hybrid-tuning",
+      "description": "A user moves from broad hybrid retrieval into RRF tuning details.",
+      "turns": [
+        {
+          "turn_id": "hybrid-1",
+          "user": "How should I combine keyword and semantic search?",
+          "judgments": {
+            "hybrid-search": 3,
+            "rrf-tuning": 2,
+            "semantic-filters": 1,
+            "conversation-context": 0
+          }
+        },
+        {
+          "turn_id": "hybrid-2",
+          "user": "How do I tune it?",
+          "judgments": {
+            "rrf-tuning": 3,
+            "hybrid-search": 2,
+            "evaluation-metrics": 1,
+            "latency-budget": 0
+          }
+        },
+        {
+          "turn_id": "hybrid-3",
+          "user": "Which metrics prove the ranking improved?",
+          "judgments": {
+            "evaluation-metrics": 3,
+            "rrf-tuning": 2,
+            "hybrid-search": 1,
+            "semantic-filters": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "conv-latency-filters",
+      "description": "A user asks about reranking latency and then narrows to filtered follow-ups.",
+      "turns": [
+        {
+          "turn_id": "latency-1",
+          "user": "When should I add reranking after hybrid retrieval?",
+          "judgments": {
+            "latency-budget": 3,
+            "hybrid-search": 2,
+            "evaluation-metrics": 1,
+            "rrf-tuning": 0
+          }
+        },
+        {
+          "turn_id": "latency-2",
+          "user": "What should I watch for in filters?",
+          "judgments": {
+            "semantic-filters": 3,
+            "conversation-context": 2,
+            "hybrid-search": 1,
+            "latency-budget": 0
+          }
+        },
+        {
+          "turn_id": "latency-3",
+          "user": "How do follow-up questions change the evaluation?",
+          "judgments": {
+            "conversation-context": 3,
+            "evaluation-metrics": 2,
+            "semantic-filters": 1,
+            "rrf-tuning": 0
+          }
+        }
+      ]
+    }
+  ]
+}

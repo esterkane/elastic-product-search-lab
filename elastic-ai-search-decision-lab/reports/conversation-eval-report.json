@@ -1,0 +1,196 @@
+{
+  "generated_at": "2026-05-08T07:29:55.279Z",
+  "corpus_pages": 6,
+  "conversations": 2,
+  "turns": [
+    {
+      "conversation_id": "conv-hybrid-tuning",
+      "turn_id": "hybrid-1",
+      "turn_index": 1,
+      "strategy": "isolated",
+      "query": "How should I combine keyword and semantic search?",
+      "effective_query": "How should I combine keyword and semantic search?",
+      "context_terms": [],
+      "ranked_ids": [
+        "hybrid-search",
+        "semantic-filters",
+        "conversation-context",
+        "evaluation-metrics",
+        "latency-budget"
+      ],
+      "top_result": "hybrid-search",
+      "ndcg_at_5": 0.8124242481930318,
+      "mrr_at_5": 1,
+      "precision_at_3": 0.6666666666666666,
+      "recall_at_5": 0.6666666666666666
+    },
+    {
+      "conversation_id": "conv-hybrid-tuning",
+      "turn_id": "hybrid-2",
+      "turn_index": 2,
+      "strategy": "contextual",
+      "query": "How do I tune it?",
+      "effective_query": "combine keyword search semantic How do I tune it?",
+      "context_terms": [
+        "combine",
+        "keyword",
+        "search",
+        "semantic"
+      ],
+      "ranked_ids": [
+        "hybrid-search",
+        "rrf-tuning",
+        "semantic-filters",
+        "conversation-context",
+        "evaluation-metrics"
+      ],
+      "top_result": "hybrid-search",
+      "ndcg_at_5": 0.8307820888596468,
+      "mrr_at_5": 1,
+      "precision_at_3": 0.6666666666666666,
+      "recall_at_5": 1
+    },
+    {
+      "conversation_id": "conv-hybrid-tuning",
+      "turn_id": "hybrid-3",
+      "turn_index": 3,
+      "strategy": "contextual",
+      "query": "Which metrics prove the ranking improved?",
+      "effective_query": "combine keyword search semantic tune Which metrics prove the ranking improved?",
+      "context_terms": [
+        "combine",
+        "keyword",
+        "search",
+        "semantic",
+        "tune"
+      ],
+      "ranked_ids": [
+        "evaluation-metrics",
+        "hybrid-search",
+        "rrf-tuning",
+        "semantic-filters",
+        "conversation-context"
+      ],
+      "top_result": "evaluation-metrics",
+      "ndcg_at_5": 0.9721212198129313,
+      "mrr_at_5": 1,
+      "precision_at_3": 1,
+      "recall_at_5": 1
+    },
+    {
+      "conversation_id": "conv-latency-filters",
+      "turn_id": "latency-1",
+      "turn_index": 1,
+      "strategy": "isolated",
+      "query": "When should I add reranking after hybrid retrieval?",
+      "effective_query": "When should I add reranking after hybrid retrieval?",
+      "context_terms": [],
+      "ranked_ids": [
+        "hybrid-search",
+        "latency-budget",
+        "conversation-context",
+        "evaluation-metrics",
+        "semantic-filters"
+      ],
+      "top_result": "hybrid-search",
+      "ndcg_at_5": 0.8354477690556398,
+      "mrr_at_5": 1,
+      "precision_at_3": 0.6666666666666666,
+      "recall_at_5": 1
+    },
+    {
+      "conversation_id": "conv-latency-filters",
+      "turn_id": "latency-2",
+      "turn_index": 2,
+      "strategy": "contextual",
+      "query": "What should I watch for in filters?",
+      "effective_query": "add hybrid reranking retrieval What should I watch for in filters?",
+      "context_terms": [
+        "add",
+        "hybrid",
+        "reranking",
+        "retrieval"
+      ],
+      "ranked_ids": [
+        "semantic-filters",
+        "hybrid-search",
+        "latency-budget",
+        "conversation-context",
+        "evaluation-metrics"
+      ],
+      "top_result": "semantic-filters",
+      "ndcg_at_5": 0.9499797323370371,
+      "mrr_at_5": 1,
+      "precision_at_3": 0.6666666666666666,
+      "recall_at_5": 1
+    },
+    {
+      "conversation_id": "conv-latency-filters",
+      "turn_id": "latency-3",
+      "turn_index": 3,
+      "strategy": "contextual",
+      "query": "How do follow-up questions change the evaluation?",
+      "effective_query": "add filters hybrid reranking retrieval watch How do follow-up questions change the evaluation?",
+      "context_terms": [
+        "add",
+        "filters",
+        "hybrid",
+        "reranking",
+        "retrieval",
+        "watch"
+      ],
+      "ranked_ids": [
+        "semantic-filters",
+        "evaluation-metrics",
+        "hybrid-search",
+        "latency-budget",
+        "conversation-context"
+      ],
+      "top_result": "semantic-filters",
+      "ndcg_at_5": 0.596282824611163,
+      "mrr_at_5": 1,
+      "precision_at_3": 0.6666666666666666,
+      "recall_at_5": 1
+    }
+  ],
+  "aggregate": {
+    "ndcg_at_5": 0.8328396471449083,
+    "mrr_at_5": 1,
+    "precision_at_3": 0.7222222222222222,
+    "recall_at_5": 0.9444444444444443
+  },
+  "by_turn_index": {
+    "turn_1": {
+      "ndcg_at_5": 0.8239360086243358,
+      "mrr_at_5": 1,
+      "precision_at_3": 0.6666666666666666,
+      "recall_at_5": 0.8333333333333333
+    },
+    "turn_2": {
+      "ndcg_at_5": 0.890380910598342,
+      "mrr_at_5": 1,
+      "precision_at_3": 0.6666666666666666,
+      "recall_at_5": 1
+    },
+    "turn_3": {
+      "ndcg_at_5": 0.7842020222120472,
+      "mrr_at_5": 1,
+      "precision_at_3": 0.8333333333333333,
+      "recall_at_5": 1
+    }
+  },
+  "by_strategy": {
+    "isolated": {
+      "ndcg_at_5": 0.8239360086243358,
+      "mrr_at_5": 1,
+      "precision_at_3": 0.6666666666666666,
+      "recall_at_5": 0.8333333333333333
+    },
+    "contextual": {
+      "ndcg_at_5": 0.8372914664051945,
+      "mrr_at_5": 1,
+      "precision_at_3": 0.7499999999999999,
+      "recall_at_5": 1
+    }
+  }
+}
