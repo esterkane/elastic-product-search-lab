@@ -1,0 +1,99 @@
+name: Benchmark Artifacts
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/benchmark-artifacts.yml"
+      - "scripts/**"
+      - "config/**"
+      - "reports/**"
+      - "reranker-ablation-benchmark/**"
+      - "ingestion-sensitivity-experiment/**"
+      - "hybrid-explain-report/**"
+      - "elastic-ai-search-decision-lab/**"
+      - "opensearch-parity-benchmark/reports/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish-benchmark-artifacts:
+    name: Publish Benchmark Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Generate search quality report
+        run: python scripts/search_quality_program.py
+
+      - name: Generate reranker ablation report
+        working-directory: reranker-ablation-benchmark
+        run: python scripts/reranker_ablation.py
+
+      - name: Generate ingestion sensitivity report
+        working-directory: ingestion-sensitivity-experiment
+        run: python scripts/ingestion_sensitivity.py
+
+      - name: Generate hybrid explain report
+        working-directory: hybrid-explain-report
+        run: python scripts/generate_hybrid_explain.py
+
+      - name: Generate conversational evaluation report
+        working-directory: elastic-ai-search-decision-lab
+        run: node src/evaluate.ts
+
+      - name: Record artifact manifest
+        run: |
+          mkdir -p artifacts/benchmark-review
+          cat > artifacts/benchmark-review/manifest.md <<'EOF'
+# Benchmark Artifact Manifest
+
+These artifacts are generated or included for reviewer inspection:
+
+- `reports/search-quality-report.json`
+- `reports/search-quality-decision.md`
+- `reranker-ablation-benchmark/reports/reranker-ablation-report.json`
+- `reranker-ablation-benchmark/reports/reranker-ablation-report.md`
+- `ingestion-sensitivity-experiment/reports/ingestion-sensitivity-report.json`
+- `ingestion-sensitivity-experiment/reports/ingestion-sensitivity-report.md`
+- `hybrid-explain-report/reports/hybrid-explain-report.json`
+- `hybrid-explain-report/reports/hybrid-explain-report.md`
+- `elastic-ai-search-decision-lab/reports/conversation-eval-report.json`
+- `elastic-ai-search-decision-lab/reports/conversation-eval-report.md`
+- `opensearch-parity-benchmark/reports/opensearch-parity-report.json`
+- `opensearch-parity-benchmark/reports/opensearch-parity-report.md`
+
+The OpenSearch parity report is uploaded from the checked-in report artifact so this workflow stays lightweight and does not boot Docker.
+          EOF
+
+      - name: Upload benchmark reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-review-reports
+          if-no-files-found: error
+          path: |
+            artifacts/benchmark-review/manifest.md
+            reports/search-quality-report.json
+            reports/search-quality-decision.md
+            reranker-ablation-benchmark/reports/reranker-ablation-report.json
+            reranker-ablation-benchmark/reports/reranker-ablation-report.md
+            ingestion-sensitivity-experiment/reports/ingestion-sensitivity-report.json
+            ingestion-sensitivity-experiment/reports/ingestion-sensitivity-report.md
+            hybrid-explain-report/reports/hybrid-explain-report.json
+            hybrid-explain-report/reports/hybrid-explain-report.md
+            elastic-ai-search-decision-lab/reports/conversation-eval-report.json
+            elastic-ai-search-decision-lab/reports/conversation-eval-report.md
+            opensearch-parity-benchmark/reports/opensearch-parity-report.json
+            opensearch-parity-benchmark/reports/opensearch-parity-report.md

@@ -245,6 +245,10 @@ This writes:
 
 The default benchmark compares `baseline-bm25` against `hybrid-rrf`. The hybrid run fuses lexical and dense candidate sets with reciprocal rank fusion, then reports nDCG@10, Precision@5, MRR@10, Recall@10, zero-result rate, p95/p99 latency, throughput, and the p95 latency trade-off against BM25. Gate thresholds and the intended before/after pair live in `config/search-quality-gate.json`.
 
+## Benchmark Artifacts In CI
+
+The `Benchmark Artifacts` workflow uploads Markdown and JSON benchmark reports as a downloadable GitHub Actions artifact named `benchmark-review-reports`. See [Benchmark Artifacts](docs/benchmark-artifacts.md) for included paths and local reproduction commands.
+
 ## Source Attribution And Licensing
 
 Do not generate an answer or release briefing that cannot be traced back to direct source links. Each transformed, chunked, embedded, reranked, or summarized record must retain `source_url`, `repo`, `path`, `content_type`, and `license_family`.

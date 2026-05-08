@@ -23,7 +23,7 @@
     }
   ],
   "documents": 12,
-  "generated_at": "2026-05-08T08:12:37.862096+00:00",
+  "generated_at": "2026-05-08T09:16:58.392471+00:00",
   "interpretation": "bad_chunking caused the largest nDCG@5 drop because bad chunk boundaries split context and create weaker fragments.",
   "seed": 30,
   "variants": [

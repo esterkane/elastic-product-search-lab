@@ -1,6 +1,6 @@
 # Reranker Ablation Benchmark
 
-Generated: `2026-05-08T07:42:59.496219+00:00`
+Generated: `2026-05-08T09:16:58.356098+00:00`
 Top-k reranked: `5`
 
 ## ROI Summary
