@@ -1,0 +1,132 @@
+{
+  "top_k": 5,
+  "queries": [
+    {
+      "query_id": "q-hybrid",
+      "query": "hybrid search product catalog reranking",
+      "candidates": [
+        {
+          "doc_id": "p-keyword-only",
+          "title": "Keyword-only catalog retrieval",
+          "retrieval_score": 12.4,
+          "reranker_score": 0.32,
+          "grade": 1
+        },
+        {
+          "doc_id": "p-hybrid-guide",
+          "title": "Hybrid product search guide",
+          "retrieval_score": 11.8,
+          "reranker_score": 0.91,
+          "grade": 3
+        },
+        {
+          "doc_id": "p-rerank-model",
+          "title": "Reranking models for candidate refinement",
+          "retrieval_score": 10.9,
+          "reranker_score": 0.88,
+          "grade": 3
+        },
+        {
+          "doc_id": "p-returns-policy",
+          "title": "Product returns policy",
+          "retrieval_score": 9.1,
+          "reranker_score": 0.12,
+          "grade": 0
+        },
+        {
+          "doc_id": "p-filtering",
+          "title": "Metadata filters for product search",
+          "retrieval_score": 8.7,
+          "reranker_score": 0.47,
+          "grade": 1
+        }
+      ]
+    },
+    {
+      "query_id": "q-latency",
+      "query": "vector search latency tuning",
+      "candidates": [
+        {
+          "doc_id": "p-bulk-ingest",
+          "title": "Bulk indexing throughput guide",
+          "retrieval_score": 13.2,
+          "reranker_score": 0.38,
+          "grade": 1
+        },
+        {
+          "doc_id": "p-latency-tuning",
+          "title": "Search latency tuning runbook",
+          "retrieval_score": 12.7,
+          "reranker_score": 0.89,
+          "grade": 3
+        },
+        {
+          "doc_id": "p-vector-filter",
+          "title": "Filtered vector retrieval latency",
+          "retrieval_score": 11.9,
+          "reranker_score": 0.84,
+          "grade": 3
+        },
+        {
+          "doc_id": "p-size-chart",
+          "title": "Product size chart",
+          "retrieval_score": 10.3,
+          "reranker_score": 0.08,
+          "grade": 0
+        },
+        {
+          "doc_id": "p-cache-policy",
+          "title": "Search cache policy",
+          "retrieval_score": 9.8,
+          "reranker_score": 0.51,
+          "grade": 2
+        }
+      ]
+    },
+    {
+      "query_id": "q-zero",
+      "query": "no results fallback query expansion",
+      "candidates": [
+        {
+          "doc_id": "p-empty-state",
+          "title": "Empty-state copy patterns",
+          "retrieval_score": 7.8,
+          "reranker_score": 0.48,
+          "grade": 1
+        },
+        {
+          "doc_id": "p-no-match-help",
+          "title": "No-match help and recovery",
+          "retrieval_score": 7.6,
+          "reranker_score": 0.92,
+          "grade": 3
+        },
+        {
+          "doc_id": "p-autocorrect",
+          "title": "Autocorrect and spelling correction",
+          "retrieval_score": 7.1,
+          "reranker_score": 0.77,
+          "grade": 2
+        },
+        {
+          "doc_id": "p-fuzzy-fallback",
+          "title": "Fuzzy fallback retrieval",
+          "retrieval_score": 6.9,
+          "reranker_score": 0.69,
+          "grade": 2
+        },
+        {
+          "doc_id": "p-homepage",
+          "title": "Homepage merchandising slots",
+          "retrieval_score": 6.2,
+          "reranker_score": 0.11,
+          "grade": 0
+        }
+      ]
+    }
+  ],
+  "latency_ms": {
+    "baseline_retrieval": [32, 35, 39, 44, 48, 52, 59],
+    "reranker_stage": [18, 21, 24, 27, 31, 36, 41]
+  }
+}

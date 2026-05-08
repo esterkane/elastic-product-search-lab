@@ -1,0 +1,140 @@
+{
+  "comparison": {
+    "baseline": "baseline",
+    "candidate": "reranked",
+    "mrr_at_5_delta": 0.0,
+    "ndcg_at_5_delta": 0.24437400200237303,
+    "p95_latency_ms_delta": 39.50000000000001,
+    "precision_at_3_delta": 0.0,
+    "recall_at_5_delta": 0.0
+  },
+  "generated_at": "2026-05-08T07:42:59.496219+00:00",
+  "recommendation": "Use reranking conditionally for ambiguous, high-value, or answer-generating searches; keep first-stage retrieval for low-latency browsing.",
+  "runs": [
+    {
+      "description": "First-stage retrieval order, no reranker.",
+      "metrics": {
+        "mrr_at_5": 1.0,
+        "ndcg_at_5": 0.755625997997627,
+        "p50_latency_ms": 44.0,
+        "p95_latency_ms": 56.9,
+        "precision_at_3": 1.0,
+        "recall_at_5": 1.0
+      },
+      "name": "baseline",
+      "queries": [
+        {
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 0.7534803445490214,
+          "precision_at_3": 1.0,
+          "query": "hybrid search product catalog reranking",
+          "query_id": "q-hybrid",
+          "ranked_ids": [
+            "p-keyword-only",
+            "p-hybrid-guide",
+            "p-rerank-model",
+            "p-returns-policy",
+            "p-filtering"
+          ],
+          "recall_at_5": 1.0,
+          "top_result": "p-keyword-only"
+        },
+        {
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 0.754995665582858,
+          "precision_at_3": 1.0,
+          "query": "vector search latency tuning",
+          "query_id": "q-latency",
+          "ranked_ids": [
+            "p-bulk-ingest",
+            "p-latency-tuning",
+            "p-vector-filter",
+            "p-size-chart",
+            "p-cache-policy"
+          ],
+          "recall_at_5": 1.0,
+          "top_result": "p-bulk-ingest"
+        },
+        {
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 0.7584019838610017,
+          "precision_at_3": 1.0,
+          "query": "no results fallback query expansion",
+          "query_id": "q-zero",
+          "ranked_ids": [
+            "p-empty-state",
+            "p-no-match-help",
+            "p-autocorrect",
+            "p-fuzzy-fallback",
+            "p-homepage"
+          ],
+          "recall_at_5": 1.0,
+          "top_result": "p-empty-state"
+        }
+      ]
+    },
+    {
+      "description": "Same top-5 candidate set reranked by deterministic cross-encoder score.",
+      "metrics": {
+        "mrr_at_5": 1.0,
+        "ndcg_at_5": 1.0,
+        "p50_latency_ms": 71.0,
+        "p95_latency_ms": 96.4,
+        "precision_at_3": 1.0,
+        "recall_at_5": 1.0
+      },
+      "name": "reranked",
+      "queries": [
+        {
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "precision_at_3": 1.0,
+          "query": "hybrid search product catalog reranking",
+          "query_id": "q-hybrid",
+          "ranked_ids": [
+            "p-hybrid-guide",
+            "p-rerank-model",
+            "p-filtering",
+            "p-keyword-only",
+            "p-returns-policy"
+          ],
+          "recall_at_5": 1.0,
+          "top_result": "p-hybrid-guide"
+        },
+        {
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "precision_at_3": 1.0,
+          "query": "vector search latency tuning",
+          "query_id": "q-latency",
+          "ranked_ids": [
+            "p-latency-tuning",
+            "p-vector-filter",
+            "p-cache-policy",
+            "p-bulk-ingest",
+            "p-size-chart"
+          ],
+          "recall_at_5": 1.0,
+          "top_result": "p-latency-tuning"
+        },
+        {
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0000000000000002,
+          "precision_at_3": 1.0,
+          "query": "no results fallback query expansion",
+          "query_id": "q-zero",
+          "ranked_ids": [
+            "p-no-match-help",
+            "p-autocorrect",
+            "p-fuzzy-fallback",
+            "p-empty-state",
+            "p-homepage"
+          ],
+          "recall_at_5": 1.0,
+          "top_result": "p-no-match-help"
+        }
+      ]
+    }
+  ],
+  "top_k": 5
+}
