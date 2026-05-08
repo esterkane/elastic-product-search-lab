@@ -1,0 +1,16 @@
+{"query_id":"q-headphones","query":"noise cancelling headphones battery","doc_id":"doc-headphones-battery","grade":3}
+{"query_id":"q-headphones","query":"noise cancelling headphones battery","doc_id":"doc-headphones-fit","grade":1}
+{"query_id":"q-headphones","query":"noise cancelling headphones battery","doc_id":"doc-headphones-codec","grade":1}
+{"query_id":"q-headphones","query":"noise cancelling headphones battery","doc_id":"doc-power-bank","grade":0}
+{"query_id":"q-boots","query":"return waterproof hiking boots","doc_id":"doc-boots-waterproof","grade":3}
+{"query_id":"q-boots","query":"return waterproof hiking boots","doc_id":"doc-boots-sizing","grade":1}
+{"query_id":"q-boots","query":"return waterproof hiking boots","doc_id":"doc-rain-jacket","grade":1}
+{"query_id":"q-boots","query":"return waterproof hiking boots","doc_id":"doc-backpack-warranty","grade":0}
+{"query_id":"q-grinder","query":"espresso burr grinder cleaning","doc_id":"doc-grinder-cleaning","grade":3}
+{"query_id":"q-grinder","query":"espresso burr grinder cleaning","doc_id":"doc-grinder-settings","grade":2}
+{"query_id":"q-grinder","query":"espresso burr grinder cleaning","doc_id":"doc-espresso-scale","grade":1}
+{"query_id":"q-grinder","query":"espresso burr grinder cleaning","doc_id":"doc-headphones-fit","grade":0}
+{"query_id":"q-backpack","query":"usb c laptop backpack warranty","doc_id":"doc-backpack-warranty","grade":3}
+{"query_id":"q-backpack","query":"usb c laptop backpack warranty","doc_id":"doc-backpack-capacity","grade":2}
+{"query_id":"q-backpack","query":"usb c laptop backpack warranty","doc_id":"doc-power-bank","grade":1}
+{"query_id":"q-backpack","query":"usb c laptop backpack warranty","doc_id":"doc-boots-waterproof","grade":0}

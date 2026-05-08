@@ -1,0 +1,25 @@
+{
+  "size": 10,
+  "_source": ["title", "category"],
+  "query": {
+    "hybrid": {
+      "queries": [
+        {
+          "multi_match": {
+            "query": "usb c laptop backpack warranty",
+            "fields": ["title^3", "body"],
+            "operator": "or"
+          }
+        },
+        {
+          "knn": {
+            "embedding": {
+              "vector": [0.0, 0.0, 0.0, 0.408248, 0.408248, 0.408248, 0.0, -0.408248, 0.0, 0.0, 0.408248, 0.0, 0.0, 0.0, 0.0, 0.408248],
+              "k": 10
+            }
+          }
+        }
+      ]
+    }
+  }
+}

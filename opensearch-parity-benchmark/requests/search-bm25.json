@@ -1,0 +1,11 @@
+{
+  "size": 10,
+  "_source": ["title", "category"],
+  "query": {
+    "multi_match": {
+      "query": "usb c laptop backpack warranty",
+      "fields": ["title^3", "body"],
+      "operator": "or"
+    }
+  }
+}

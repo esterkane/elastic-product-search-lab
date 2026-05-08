@@ -1,0 +1,185 @@
+{
+  "comparison": {
+    "baseline": "bm25",
+    "candidate": "hybrid_rrf",
+    "ndcg_at_10_delta": 0.00142676919908713,
+    "p95_latency_ms_delta": 4.338285006815568,
+    "recall_at_10_delta": 0.08333333333333337
+  },
+  "engine": "OpenSearch 2.19.1",
+  "generated_at": "2026-05-07T12:17:04.166856+00:00",
+  "index": "product_support_docs",
+  "runs": [
+    {
+      "metrics": {
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 0.9866919190316751,
+        "p50_latency_ms": 17.27709997794591,
+        "p95_latency_ms": 39.83090501278639,
+        "precision_at_5": 0.55,
+        "recall_at_10": 0.9166666666666666
+      },
+      "name": "bm25",
+      "queries": [
+        {
+          "mrr_at_10": 1.0,
+          "ndcg_at_10": 1.0,
+          "precision_at_5": 0.6,
+          "query": "noise cancelling headphones battery",
+          "query_id": "q-headphones",
+          "ranked_ids": [
+            "doc-headphones-battery",
+            "doc-headphones-fit",
+            "doc-headphones-codec"
+          ],
+          "recall_at_10": 1.0,
+          "top_result": "doc-headphones-battery"
+        },
+        {
+          "mrr_at_10": 1.0,
+          "ndcg_at_10": 1.0,
+          "precision_at_5": 0.6,
+          "query": "return waterproof hiking boots",
+          "query_id": "q-boots",
+          "ranked_ids": [
+            "doc-boots-waterproof",
+            "doc-rain-jacket",
+            "doc-boots-sizing"
+          ],
+          "recall_at_10": 1.0,
+          "top_result": "doc-boots-waterproof"
+        },
+        {
+          "mrr_at_10": 1.0,
+          "ndcg_at_10": 1.0,
+          "precision_at_5": 0.6,
+          "query": "espresso burr grinder cleaning",
+          "query_id": "q-grinder",
+          "ranked_ids": [
+            "doc-grinder-cleaning",
+            "doc-grinder-settings",
+            "doc-espresso-scale"
+          ],
+          "recall_at_10": 1.0,
+          "top_result": "doc-grinder-cleaning"
+        },
+        {
+          "mrr_at_10": 1.0,
+          "ndcg_at_10": 0.9467676761267002,
+          "precision_at_5": 0.4,
+          "query": "usb c laptop backpack warranty",
+          "query_id": "q-backpack",
+          "ranked_ids": [
+            "doc-backpack-warranty",
+            "doc-backpack-capacity",
+            "doc-headphones-codec",
+            "doc-headphones-battery"
+          ],
+          "recall_at_10": 0.6666666666666666,
+          "top_result": "doc-backpack-warranty"
+        }
+      ]
+    },
+    {
+      "metrics": {
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 0.9881186882307622,
+        "p50_latency_ms": 20.69855001172982,
+        "p95_latency_ms": 44.169190019601956,
+        "precision_at_5": 0.55,
+        "recall_at_10": 1.0
+      },
+      "name": "hybrid_rrf",
+      "queries": [
+        {
+          "mrr_at_10": 1.0,
+          "ndcg_at_10": 1.0,
+          "precision_at_5": 0.6,
+          "query": "noise cancelling headphones battery",
+          "query_id": "q-headphones",
+          "ranked_ids": [
+            "doc-headphones-battery",
+            "doc-headphones-fit",
+            "doc-headphones-codec",
+            "doc-power-bank",
+            "doc-backpack-warranty",
+            "doc-boots-sizing",
+            "doc-espresso-scale",
+            "doc-rain-jacket",
+            "doc-grinder-cleaning",
+            "doc-grinder-settings"
+          ],
+          "recall_at_10": 1.0,
+          "top_result": "doc-headphones-battery"
+        },
+        {
+          "mrr_at_10": 1.0,
+          "ndcg_at_10": 1.0,
+          "precision_at_5": 0.6,
+          "query": "return waterproof hiking boots",
+          "query_id": "q-boots",
+          "ranked_ids": [
+            "doc-boots-waterproof",
+            "doc-rain-jacket",
+            "doc-boots-sizing",
+            "doc-grinder-settings",
+            "doc-backpack-capacity",
+            "doc-power-bank",
+            "doc-espresso-scale",
+            "doc-grinder-cleaning",
+            "doc-headphones-codec",
+            "doc-headphones-battery"
+          ],
+          "recall_at_10": 1.0,
+          "top_result": "doc-boots-waterproof"
+        },
+        {
+          "mrr_at_10": 1.0,
+          "ndcg_at_10": 0.9721212198129313,
+          "precision_at_5": 0.6,
+          "query": "espresso burr grinder cleaning",
+          "query_id": "q-grinder",
+          "ranked_ids": [
+            "doc-grinder-cleaning",
+            "doc-espresso-scale",
+            "doc-grinder-settings",
+            "doc-rain-jacket",
+            "doc-power-bank",
+            "doc-boots-waterproof",
+            "doc-boots-sizing",
+            "doc-headphones-battery",
+            "doc-backpack-capacity",
+            "doc-backpack-warranty"
+          ],
+          "recall_at_10": 1.0,
+          "top_result": "doc-grinder-cleaning"
+        },
+        {
+          "mrr_at_10": 1.0,
+          "ndcg_at_10": 0.9803535331101173,
+          "precision_at_5": 0.4,
+          "query": "usb c laptop backpack warranty",
+          "query_id": "q-backpack",
+          "ranked_ids": [
+            "doc-backpack-warranty",
+            "doc-backpack-capacity",
+            "doc-headphones-codec",
+            "doc-headphones-battery",
+            "doc-espresso-scale",
+            "doc-boots-sizing",
+            "doc-grinder-settings",
+            "doc-power-bank",
+            "doc-headphones-fit",
+            "doc-grinder-cleaning"
+          ],
+          "recall_at_10": 1.0,
+          "top_result": "doc-backpack-warranty"
+        }
+      ]
+    }
+  ],
+  "strategies": [
+    "bm25",
+    "hybrid_rrf"
+  ]
+}
