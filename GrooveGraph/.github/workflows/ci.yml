@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-typecheck-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install frontend dependencies
+        working-directory: apps/web
+        run: npm install
+      - name: Lint frontend
+        working-directory: apps/web
+        run: npm run lint
+      - name: Typecheck frontend
+        working-directory: apps/web
+        run: npm run typecheck
+      - name: Frontend unit tests
+        working-directory: apps/web
+        run: npm test
+      - name: Install backend dependencies
+        working-directory: apps/api
+        run: pip install -r requirements.txt
+      - name: Backend tests
+        working-directory: apps/api
+        run: pytest -m "not integration and not e2e and not requires_docker"
+
+  docker-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Docker smoke
+        run: |
+          docker compose up -d --build
+          docker compose exec -T api alembic upgrade head
+          docker compose exec -T api python -c "import json, urllib.request; data=json.load(urllib.request.urlopen('http://localhost:8000/health', timeout=5)); assert data['status'] == 'ok'"
+          docker compose exec -T web node -e "fetch('http://localhost:3000').then(r => { if (!r.ok) throw new Error('web failed') })"
+          docker compose run --rm api pytest -m "integration or e2e or requires_docker"
