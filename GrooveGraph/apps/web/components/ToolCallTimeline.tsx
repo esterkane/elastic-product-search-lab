@@ -9,8 +9,8 @@ export function ToolCallTimeline({ toolCalls, sources }: { toolCalls: ToolCall[]
       <h2 className="text-sm font-semibold text-slate-900">Research Activity</h2>
       <div className="mt-4 space-y-3" aria-label="tool calls">
         {toolCalls.length === 0 ? <p className="text-sm text-slate-500">No tool calls yet.</p> : null}
-        {toolCalls.map((call) => (
-          <div key={call.id} className="border-l-2 border-groove pl-3">
+        {toolCalls.map((call, index) => (
+          <div key={`${call.id}-${index}`} className="border-l-2 border-groove pl-3">
             <p className="text-sm font-medium text-slate-900">{call.name}</p>
             <p className="text-xs uppercase text-slate-500">{call.status}</p>
             {call.summary ? <p className="mt-1 text-sm text-slate-600">{call.summary}</p> : null}

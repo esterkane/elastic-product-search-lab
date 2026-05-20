@@ -47,7 +47,7 @@ export function ChatPanel({ initialSessionId = "web-session" }: { initialSession
           setToolCalls((current) => [
             ...current,
             {
-              id: call.run_id ?? `${node}-${current.length}`,
+              id: `${call.run_id ?? "run"}-${call.tool_name ?? node}-${current.length}`,
               name: call.tool_name ?? node,
               status: "completed",
               summary: call.result ?? ""
