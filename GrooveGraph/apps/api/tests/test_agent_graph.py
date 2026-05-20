@@ -48,3 +48,20 @@ def test_follow_up_pronouns_resolve_against_isolated_session_memory() -> None:
     tool_calls = db.scalars(select(ToolCall)).all()
     assert len(checkpoints) == 2
     assert len(tool_calls) == 4
+
+
+def test_person_band_membership_question_routes_to_graph_answer() -> None:
+    db = build_session()
+    user = User(email="listener@example.com")
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    result = GrooveGraphAgent(db).invoke(user, "patton-session", "what are the bands with mike patton")
+
+    assert result["intent"] == "band_connections"
+    assert result["current_entities"] == ["Mike Patton"]
+    assert result["retrieval_question"]["rewritten"] == "what are the bands with mike patton"
+    assert "Faith No More" in result["answer"]
+    assert "Mr. Bungle" in result["answer"]
+    assert result["citations"][0]["source"] == "curated_graph_seed"

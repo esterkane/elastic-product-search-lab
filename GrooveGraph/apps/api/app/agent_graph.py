@@ -56,11 +56,16 @@ KNOWN_BANDS = {
     "pixies": "Pixies",
     "nirvana": "Nirvana",
     "foo fighters": "Foo Fighters",
+    "mike patton": "Mike Patton",
 }
 
 SIDE_PROJECTS = {
     "Radiohead": ["Atoms for Peace", "The Smile", "EOB", "Philip Selway solo work"],
     "Pixies": ["The Breeders", "Frank Black solo work", "Grand Duchy", "The Martinis"],
+}
+
+PERSON_BAND_MEMBERSHIPS = {
+    "Mike Patton": ["Faith No More", "Mr. Bungle", "Fantomas", "Tomahawk", "Peeping Tom", "Dead Cross"],
 }
 
 
@@ -119,7 +124,15 @@ def load_session_context(state: AgentState) -> AgentState:
 def classify_intent(state: AgentState) -> AgentState:
     text = state["messages"][-1]["content"].lower()
     intent: Intent = "general_chat"
-    if "connect" in text or "connection" in text or "connected" in text:
+    if (
+        "connect" in text
+        or "connection" in text
+        or "connected" in text
+        or "bands with" in text
+        or "member of" in text
+        or "fronted" in text
+        or "singer in" in text
+    ):
         intent = "band_connections"
     elif "side project" in text:
         intent = "side_projects"
@@ -218,6 +231,16 @@ def graph_retrieval(state: AgentState) -> AgentState:
     facts = []
     if state.get("intent") == "side_projects" and entity in SIDE_PROJECTS:
         facts = [f"{entity} side projects include {', '.join(SIDE_PROJECTS[entity])}."]
+    elif state.get("intent") == "band_connections" and entity in PERSON_BAND_MEMBERSHIPS:
+        bands = PERSON_BAND_MEMBERSHIPS[entity]
+        claim = f"{entity} is associated with bands and projects including {', '.join(bands)}."
+        evidence = {
+            "source": "curated_graph_seed",
+            "title": f"{entity} band memberships",
+            "claim": claim,
+            "confidence": 0.82,
+        }
+        return _append_tool_result({**state, "evidence": [*state.get("evidence", []), evidence]}, "graph_retrieval", claim)
     elif entity:
         facts = [f"{entity} is the active entity for this session-scoped question."]
     else:
