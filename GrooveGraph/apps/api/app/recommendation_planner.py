@@ -49,6 +49,9 @@ class RecommendationResult:
 
 
 class RecommendationPlannerService:
+    max_external_seeds = 12
+    max_musicbrainz_expansions = 8
+
     def __init__(
         self,
         lastfm: LastFmLike | None = None,
@@ -144,7 +147,7 @@ class RecommendationPlannerService:
     def _generate_candidates(self, db: Session, user: User) -> list[NormalizedCandidate]:
         seeds = self._seed_items(db, user)
         candidates: list[NormalizedCandidate] = []
-        for seed in seeds:
+        for seed in seeds[: self.max_external_seeds]:
             if seed["kind"] == "artist":
                 candidates.extend(self.lastfm.artist_get_similar(seed["name"], limit=10))
             elif seed["kind"] == "track" and seed.get("artist"):
@@ -154,9 +157,12 @@ class RecommendationPlannerService:
             candidates.extend(self._profile_fallback_candidates(seeds))
 
         expanded = [*candidates]
-        for candidate in candidates:
+        for candidate in candidates[: self.max_musicbrainz_expansions]:
             if candidate.kind == "artist" and candidate.mbid:
-                relationships = self.musicbrainz.fetch_artist_relationships(candidate.mbid)
+                try:
+                    relationships = self.musicbrainz.fetch_artist_relationships(candidate.mbid)
+                except Exception:
+                    continue
                 for collaborator in relationships.get("collaborations", []):
                     expanded.append(
                         NormalizedCandidate(
