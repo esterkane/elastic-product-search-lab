@@ -167,6 +167,47 @@ adapter and harness wiring are covered offline (no Elasticsearch, no network)
 with a fake search in `tests/python/test_eval_skill_integration.py`, which runs
 under `pytest -m "not integration"` once the `eval` extra is installed.
 
+## How It Learns
+
+The lab includes the procedural-learning half of a memory/learning loop: an
+**experiment store plus a tuner**. There is no agent loop here, so there is no
+episodic recall-before-acting; the experiment store *is* the memory.
+
+- **Experiment store** (`src/learning/experiments.py`): every tried configuration
+  is persisted as a record — `{id, timestamp, config, metrics, gate_passed}` — to a
+  committed JSON-lines log under `experiments/` (reusing existing infra; no new
+  datastore). Access goes through an `ExperimentStore` abstraction with a
+  `FileExperimentStore` and an `InMemoryExperimentStore` fake for tests.
+- **Tunable config** (`src/learning/config.py`): the per-field boosts of a
+  strategy's `multi_match` query (e.g. `search_profile^3`, `title^2`). The live
+  strategy query builders are left untouched; the tuner explores copies of their
+  baseline boosts.
+- **Tuner** (`src/learning/tuner.py`): deterministically proposes the next config
+  (coordinate ascent over one boost at a time — no randomness), evaluates it over
+  the checked-in judgments **reusing the existing relevance metrics**, then runs
+  the **existing search-quality gate** (`scripts/gate_search_quality.py`). A
+  proposal is **kept only if it passes the gate *and* improves the headline metric
+  (Precision@5) versus the current best**. A proposal that worsens the gate is
+  rejected. Rejected experiments are still recorded, so the memory keeps failures.
+- **Staging, not promotion**: a kept proposal is *staged* in the experiment store.
+  The tuner never mutates the live strategy config; promoting a staged config to
+  the default is a separate, explicit step.
+- **Off by default**: the loop is inert unless `MEMORY_ENABLED` is truthy. With it
+  off (default), the lab's existing evaluation and gate behaviour is reproducible
+  and unchanged.
+
+```powershell
+# Inert (default): prints that memory is off, proposes/persists nothing.
+py -3 scripts/tune.py
+
+# Offline dry run (no live ES; deterministic judgment-backed search):
+$env:MEMORY_ENABLED = "true"; py -3 scripts/tune.py --offline
+
+# Real tuning needs a running Elasticsearch with indexed data (integration):
+$env:MEMORY_ENABLED = "true"; py -3 scripts/tune.py --strategy enriched_profile
+```
+
+
 ## Search Profile Enrichment
 
 `search_profile` is deterministic plain text built during ingestion from product title, brand, category, description, attributes, material/color, inferred use cases, and tags.

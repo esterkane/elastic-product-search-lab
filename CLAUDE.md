@@ -121,3 +121,25 @@ Repo-specific invariants:
 - API config from env (`apps/api/src/config.ts`): `ELASTICSEARCH_URL`, `ELASTICSEARCH_USERNAME/PASSWORD`, `ELASTICSEARCH_USE_AUTH`, `PRODUCT_INDEX` (default `products-v1`), `PORT` (default 3000).
 - Python config loads `.env` via `python-dotenv`.
 - No external LLM or cloud services required.
+
+## How it learns (procedural learning loop)
+
+The procedural-learning half of the memory loop lives in `src/learning/` (no agent
+loop here, so there is no episodic recall — the experiment store *is* the memory):
+
+- **Experiment store** (`src/learning/experiments.py`) — every tried config is
+  recorded `{id, timestamp, config, metrics, gate_passed}` to a JSON-lines log under
+  `experiments/` (no new datastore / no vector DB). `FileExperimentStore` +
+  `InMemoryExperimentStore` (test fake).
+- **Tuner** (`src/learning/tuner.py`) — deterministic coordinate ascent over a
+  strategy's `multi_match` field boosts (live strategy builders untouched). Each
+  proposal is scored with the **existing** relevance metrics (`src/evaluation`) and
+  run through the **existing gate** (`scripts/gate_search_quality.py:evaluate_gate`,
+  driven by `config/relevance-gate.json`). **Kept only if it passes the gate AND
+  improves Precision@5 vs the current best; a worse proposal is rejected.** Never
+  mutates the live strategy config — a kept config is staged, promotion is explicit.
+- **`MEMORY_ENABLED`** (env, default **false**) — off ⇒ the tuner is inert and the
+  lab's existing eval/gate behaviour is unchanged. Run: `MEMORY_ENABLED=true py -3 scripts/tune.py`.
+
+Invariant: a learned change is proposed → evaluated against the existing gate →
+kept only if it improves it. Never silently mutate the tuned config.
