@@ -16,6 +16,7 @@ Product search relevance is not guesswork. Search changes should be evaluated wi
 - [x] Latency benchmarking with p50/p95/p99
 - [x] CI checks plus local search quality gates
 - [x] JSON and Markdown reports for review
+- [x] Read-only MCP server exposing the search core as agent tools
 
 ## Architecture
 
@@ -146,6 +147,24 @@ Product: Sony wireless noise cancelling headphones. Brand: Sony. Category: Elect
 ```
 
 This demonstrates that search quality can improve by improving indexed data quality, not only by changing query boosts.
+
+## Agent Access (MCP)
+
+A read-only [Model Context Protocol](https://modelcontextprotocol.io) server exposes the product-search core as agent tools, so an MCP client (Claude Code, Cursor, a LangGraph agent) can drive the same three comparable BM25 strategies the CLIs use. It is a **thin** adapter — no business logic in the MCP layer — over the shared strategy registry in `src/search/strategies.py`, and both tools are **read-only**.
+
+Tools:
+
+- `product_search(query, strategy?, size?)` — run one strategy (`baseline_bm25` / `boosted_bm25` / `enriched_profile`) and return the same normalized product shape as the HTTP `/search` route (never raw Elasticsearch hits).
+- `list_strategies()` — list the strategy names with a one-line description each.
+
+Failures return a structured `{ isError, errorCategory: validation|transient|business, isRetryable, message, details }` payload — never a stack trace.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[mcp]"
+npm run mcp   # stdio server (equivalently: .\.venv\Scripts\python.exe -m src.mcp.server)
+```
+
+`list_strategies` works without Elasticsearch; `product_search` needs a reachable cluster with the `products-v1` index loaded. Full tool reference, error contract, example calls/outputs, and client registration are in [`docs/mcp.md`](docs/mcp.md).
 
 ## Trade-Offs
 

@@ -52,6 +52,16 @@ There is **no Python lint or type-check** configured (no ruff/mypy/flake8). Do
 not invent one. TypeScript is type-checked via `npm run build` (tsc) and linted
 via `npm run lint` (eslint).
 
+### MCP server (read-only agent tools)
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[mcp]"   # one-time: install the mcp extra
+npm run mcp                                              # stdio server
+# equivalently: .\.venv\Scripts\python.exe -m src.mcp.server
+```
+Exposes `product_search` and `list_strategies` (see `docs/mcp.md`). Unit-tested
+in `tests/python/test_mcp_tools.py` with a fake ES client — no live Elasticsearch
+needed for the tests; the running server needs ES for `product_search`.
+
 ## Architecture in 5 lines
 1. **Ingestion** (`src/ingestion/`): deterministic — product ID is the ES doc ID; builds a plain-text `search_profile` field from product attributes before indexing.
 2. **Index**: Elasticsearch `products-v1` (mapping in `src/search/product_mapping.json`, `scripts/create_index.py`).
@@ -70,6 +80,15 @@ Repo-specific invariants:
 - **Strategies are comparable.** The baseline_bm25 / boosted_bm25 / enriched_profile strategies must remain side-by-side comparable so the relevance-vs-latency trade-off stays measurable.
 - **"Hybrid retrieval only" does NOT apply.** The main loop is intentionally lexical BM25 + enrichment. Vector/hybrid/rerank code (`src/search/hybrid_search.py`, `src/search/rerank.py`) is optional and not part of the default gate. Do not force the main search path to be vector/hybrid.
 - **Every new Python module under `src/` should get a test** in `tests/python/`.
+- **The MCP server stays thin and read-only.** `src/mcp/` contains no business
+  logic: tools validate inputs and delegate to `src/search/strategies.py` (the
+  single source of truth shared with the eval/benchmark CLIs). No writes, no
+  ingestion. Tools return the API's shaped product objects, never raw ES hits,
+  and every failure maps to the structured `{ isError, errorCategory:
+  validation|transient|business, isRetryable, message, details }` contract — no
+  stack traces. Keeping the strategy registry shared means the three strategies
+  stay comparable and the search-quality gate is unaffected. Lexical + enrichment
+  is intentional; vector/hybrid is optional and not exposed via MCP.
 
 ## Definition of done
 - [ ] `pytest tests/python -m "not integration"` passes.
@@ -78,6 +97,9 @@ Repo-specific invariants:
 - [ ] Reports regenerated and committed as paired `.json` + `.md` in `reports/` when evaluation logic changes.
 - [ ] README / `docs/` updated when behavior or commands change.
 - [ ] No secrets added; `.env` stays ignored, `.env.example` placeholders only.
+- [ ] If MCP tools changed: `src/mcp/` stays thin + read-only, returns API-shaped
+      objects with the structured error contract, and `tests/python/test_mcp_tools.py`
+      passes. `docs/mcp.md` updated.
 
 ## Services & config
 - **Elasticsearch 9.3.0** (`:9200`, security enabled, `elastic` superuser) and **Kibana 9.3.0** (`:5601`) via `docker-compose.yml`.
