@@ -20,7 +20,16 @@ from src.evaluation.relevance_report import (  # noqa: E402
     write_json_report,
     write_markdown_report,
 )
-from src.search.hybrid_search import baseline_lexical_query, extract_ids  # noqa: E402
+from src.search.hybrid_search import extract_ids  # noqa: E402
+from src.search.strategies import build_strategy_query  # noqa: E402
+
+# Re-exported for backwards compatibility (tests/python/test_search_profile.py
+# imports these names from this module). The canonical implementations live in
+# src/search/strategies.py so every caller stays comparable.
+from src.search.strategies import (  # noqa: E402,F401
+    boosted_bm25_query as boosted_bm25_evaluation_query,
+)
+from src.search.strategies import enriched_profile_query  # noqa: E402,F401
 
 DEFAULT_INDEX = "products-v1"
 DEFAULT_JUDGMENTS_PATH = PROJECT_ROOT / "data" / "judgments" / "product_search_judgments.json"
@@ -28,64 +37,8 @@ DEFAULT_JSON_REPORT_PATH = PROJECT_ROOT / "reports" / "relevance-report.json"
 DEFAULT_MD_REPORT_PATH = PROJECT_ROOT / "reports" / "relevance-report.md"
 
 
-def boosted_bm25_evaluation_query(query: str, size: int) -> dict[str, Any]:
-    """More forgiving BM25 variant for offline comparison."""
-
-    return {
-        "size": size,
-        "query": {
-            "function_score": {
-                "query": {
-                    "multi_match": {
-                        "query": query,
-                        "fields": ["title^4", "brand^2", "category^1.5", "description", "catalog_text^0.8"],
-                        "type": "best_fields",
-                        "operator": "or",
-                        "minimum_should_match": "2<75%",
-                        "fuzziness": "AUTO",
-                    }
-                },
-                "score_mode": "sum",
-                "boost_mode": "sum",
-                "functions": [
-                    {"field_value_factor": {"field": "popularity_score", "factor": 0.01, "modifier": "sqrt", "missing": 0}},
-                    {"gauss": {"updated_at": {"origin": "now", "scale": "30d", "offset": "7d", "decay": 0.5}}, "weight": 0.1},
-                ],
-            }
-        },
-        "sort": ["_score"],
-    }
-
-
-def enriched_profile_query(query: str, size: int) -> dict[str, Any]:
-    """Readable strategy that searches ingestion-time enriched product profiles."""
-
-    return {
-        "size": size,
-        "query": {
-            "multi_match": {
-                "query": query,
-                "fields": ["search_profile^3", "title^2", "category^1.5", "brand", "description^0.5"],
-                "type": "best_fields",
-                "operator": "or",
-                "minimum_should_match": "2<70%",
-                "fuzziness": "AUTO",
-            }
-        },
-        "sort": ["_score"],
-    }
-
-
 def run_search(client: Any, index_name: str, query: str, strategy: str, size: int) -> list[str]:
-    if strategy == "baseline_bm25":
-        body = baseline_lexical_query(query, size)
-    elif strategy == "boosted_bm25":
-        body = boosted_bm25_evaluation_query(query, size)
-    elif strategy == "enriched_profile":
-        body = enriched_profile_query(query, size)
-    else:
-        raise ValueError(f"Unsupported executable strategy: {strategy}")
-    return extract_ids(client.search(index=index_name, **body))
+    return extract_ids(client.search(index=index_name, **build_strategy_query(strategy, query, size)))
 
 
 def parse_args() -> argparse.Namespace:

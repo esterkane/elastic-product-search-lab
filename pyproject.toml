@@ -12,6 +12,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+mcp = [
+  "mcp>=1.2.0"
+]
 esci = [
   "pandas",
   "pyarrow"

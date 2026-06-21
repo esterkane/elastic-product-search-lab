@@ -16,15 +16,15 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from scripts.create_index import build_client, ensure_reachable  # noqa: E402
-from scripts.evaluate_relevance import boosted_bm25_evaluation_query, enriched_profile_query  # noqa: E402
 from src.evaluation.relevance_report import load_product_search_judgments  # noqa: E402
-from src.search.hybrid_search import baseline_lexical_query, extract_ids  # noqa: E402
+from src.search.hybrid_search import extract_ids  # noqa: E402
+from src.search.strategies import STRATEGY_NAMES, build_strategy_query  # noqa: E402
 
 DEFAULT_INDEX = "products-v1"
 DEFAULT_JUDGMENTS_PATH = PROJECT_ROOT / "data" / "judgments" / "product_search_judgments.json"
 DEFAULT_OUTPUT_JSON = PROJECT_ROOT / "reports" / "latency-report.json"
 DEFAULT_OUTPUT_MD = PROJECT_ROOT / "reports" / "latency-report.md"
-STRATEGIES = ("baseline_bm25", "boosted_bm25", "enriched_profile")
+STRATEGIES = STRATEGY_NAMES
 
 
 @dataclass(frozen=True)
@@ -120,16 +120,6 @@ def run_timed_query(strategy: str, query: str, search_fn: Any) -> BenchmarkAttem
             timed_out=is_timeout_error(exc),
             error=exc.__class__.__name__,
         )
-
-
-def build_strategy_query(strategy: str, query: str, size: int) -> dict[str, Any]:
-    if strategy == "baseline_bm25":
-        return baseline_lexical_query(query, size)
-    if strategy == "boosted_bm25":
-        return boosted_bm25_evaluation_query(query, size)
-    if strategy == "enriched_profile":
-        return enriched_profile_query(query, size)
-    raise ValueError(f"Unsupported benchmark strategy: {strategy}")
 
 
 def direct_strategy_search(client: Any, index_name: str, query: str, strategy: str, size: int, timeout_seconds: float) -> list[str]:
