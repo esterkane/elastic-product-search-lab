@@ -14,3 +14,7 @@ pytest-cache-files-*/
 !data/generated/.gitkeep
 !data/generated/relevance_report.json
 apps/api/*.log
+
+# Learning loop runtime experiment log (committed dir kept via .gitkeep)
+experiments/*.jsonl
+!experiments/.gitkeep
