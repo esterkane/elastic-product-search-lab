@@ -1,0 +1,6 @@
+{
+  "enriched_profile": {
+    "precision@5": 0.6,
+    "mrr@10": 0.75
+  }
+}
