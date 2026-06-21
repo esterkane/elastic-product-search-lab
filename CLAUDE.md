@@ -31,6 +31,7 @@ npm run lint    # eslint .
 .\.venv\Scripts\python.exe -m pip install -e .          # core
 .\.venv\Scripts\python.exe -m pip install -e ".[esci]"  # optional ESCI dataset prep (pandas, pyarrow)
 .\.venv\Scripts\python.exe -m pip install -e ".[vector]" # optional vector/rerank (sentence-transformers, scikit-learn, rank-bm25)
+.\.venv\Scripts\python.exe -m pip install -e ".[eval]"   # optional shared relevance-eval skill (git dependency)
 cd apps/api && npm install
 ```
 
@@ -46,7 +47,21 @@ npm run evaluate:relevance
 npm run benchmark:search
 npm run gate:search-quality
 # ESCI variants: npm run evaluate:relevance:esci / benchmark:search:esci / gate:search-quality:esci
+
+# Relevance via the shared relevance-eval skill (additive; needs the [eval] extra + live ES):
+.\.venv\Scripts\python.exe scripts\eval_with_skill.py
 ```
+
+### Evaluation via the shared `relevance-eval` skill
+The Precision@k / MRR@k / nDCG@k math can come from the reusable, backend-agnostic
+[`relevance_eval`](https://github.com/esterkane/elastic-ai-search-decision-lab/tree/main/skills/relevance-eval)
+skill (installed via the `eval` optional dependency, a git URL) **instead of** this
+repo's bespoke metric code. This is **additive** — the original
+`scripts/evaluate_relevance.py` + `gate_search_quality.py` + `config/relevance-gate.json`
+flow stays intact and is still what `npm run evaluate:relevance` / `gate:search-quality` use.
+- `src/eval/skill_adapter.py` — thin adapter: `make_search_fn(client) -> (query, strategy) -> [product_id]`, calling the shared `search_products`. No business logic, no metric math.
+- `scripts/eval_with_skill.py` — runner: loads `data/judgments/product_search_judgments.json` + `config/eval_thresholds.json` (the skill's `"<metric>@<k>"` form), calls `relevance_eval.run_evaluation` over the three strategies, writes `reports/relevance.{json,md}`, and exits non-zero when `evaluate_thresholds(...)` fails. Needs a live cluster (integration; run locally).
+- `tests/python/test_eval_skill_integration.py` — offline unit tests (fake search, monkeypatched `search_products`); run under `pytest -m "not integration"` once `.[eval]` is installed.
 
 There is **no Python lint or type-check** configured (no ruff/mypy/flake8). Do
 not invent one. TypeScript is type-checked via `npm run build` (tsc) and linted

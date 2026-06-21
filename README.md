@@ -136,6 +136,37 @@ Reports:
 - `reports/esci-relevance-report.json`
 - `reports/esci-latency-report.json`
 
+## Evaluation (shared skill)
+
+The relevance metrics (Precision@k / MRR@k / nDCG@k) can also be produced by the
+reusable [`relevance-eval`](https://github.com/esterkane/elastic-ai-search-decision-lab/tree/main/skills/relevance-eval)
+skill instead of this repo's bespoke metric code. The skill is a backend-agnostic
+evaluation harness: it takes an injected `search_fn(query, strategy) -> [doc_id]`,
+so the only glue is a thin adapter (`src/eval/skill_adapter.py`) over the shared
+`search_products` strategies.
+
+This path is **additive** — the original `npm run evaluate:relevance` +
+`npm run gate:search-quality` flow is unchanged.
+
+```powershell
+# Install the skill (pulled from git as an optional dependency):
+.\.venv\Scripts\python.exe -m pip install -e ".[eval]"
+
+# Run the shared-skill evaluation (requires a live Elasticsearch + products index):
+.\.venv\Scripts\python.exe scripts\eval_with_skill.py
+```
+
+It reuses the checked-in judgments (`data/judgments/product_search_judgments.json`)
+and a thresholds file in the skill's `"<metric>@<k>"` form
+(`config/eval_thresholds.json`, e.g. `"precision@5": 0.6`, `"mrr@10": 0.75` —
+mirroring `config/relevance-gate.json`). It writes `reports/relevance.{json,md}`,
+prints the Markdown, and exits non-zero if the threshold gate fails.
+
+The full run needs a live cluster, so it is local-only (integration). The
+adapter and harness wiring are covered offline (no Elasticsearch, no network)
+with a fake search in `tests/python/test_eval_skill_integration.py`, which runs
+under `pytest -m "not integration"` once the `eval` extra is installed.
+
 ## Search Profile Enrichment
 
 `search_profile` is deterministic plain text built during ingestion from product title, brand, category, description, attributes, material/color, inferred use cases, and tags.
